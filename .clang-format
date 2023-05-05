@@ -1,0 +1,22 @@
+# https://stackoverflow.com/questions/70135737/visual-studio-cant-apply-clang-format-13
+# https://releases.llvm.org/13.0.0/tools/clang/docs/ClangFormatStyleOptions.html#aligntrailingcomments
+
+ColumnLimit: 0
+IndentWidth: 2
+
+TabWidth: 2
+UseTab: Never
+
+MaxEmptyLinesToKeep: 1
+
+BreakBeforeBraces: Allman
+
+AccessModifierOffset: -2
+AllowShortIfStatementsOnASingleLine: OnlyFirstIf
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortEnumsOnASingleLine: true
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations : true
+AlignTrailingComments: true
+FixNamespaceComments: true
+PointerAlignment: Left

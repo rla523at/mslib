@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="TEST">
+      <UniqueIdentifier>{9b11a87d-fe63-4f1b-b729-0c8b12e3cb45}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="API_BLAS.h">
+      <Filter>TEST</Filter>
+    </ClInclude>
+    <ClInclude Include="API_Matrix.h">
+      <Filter>TEST</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Matrix.cpp">
+      <Filter>TEST</Filter>
+    </ClCompile>
+    <ClCompile Include="Matrix_Wrapper.cpp">
+      <Filter>TEST</Filter>
+    </ClCompile>
+    <ClCompile Include="BLAS.cpp">
+      <Filter>TEST</Filter>
+    </ClCompile>
+    <ClCompile Include="BLAS_Manual.cpp">
+      <Filter>TEST</Filter>
+    </ClCompile>
+    <ClCompile Include="BLAS_MKL.cpp">
+      <Filter>TEST</Filter>
+    </ClCompile>
+    <ClCompile Include="Vector.cpp">
+      <Filter>TEST</Filter>
+    </ClCompile>
+    <ClCompile Include="Vector_Wrapper.cpp">
+      <Filter>TEST</Filter>
+    </ClCompile>
+    <ClCompile Include="Vector_Const_Wrapper.cpp">
+      <Filter>TEST</Filter>
+    </ClCompile>
+    <ClCompile Include="Matrix_Const_Wrapper.cpp">
+      <Filter>TEST</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\.clang-format" />
+    <None Include="packages.config" />
+  </ItemGroup>
+</Project>

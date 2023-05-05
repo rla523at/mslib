@@ -1,0 +1,33 @@
+// Comment
+
+Problem_Option
+{
+	space_dimension			: 2
+	governing_equation	: "Euler"
+	Initial_condition		: "Supersonic_Expansion"
+
+	Linear_Advection_Option
+	{
+		x_advection_speed		: 1.0
+		y_advection_speed		: 0.5
+		z_advection_speed		: 1.0
+	}
+
+	Sine_Wave_Option
+	{
+		x_wave_length			: 1.0
+		y_wave_length			: 1.0
+		z_wave_length			: 1.0
+	}
+}
+
+Grid_Option
+{
+	grid_file_paths		: "RSC/Grid/2D/ShockTube_RQ100x4.msh"
+	grid_file_type		: "Gmsh"
+}
+
+LOG_ON		: FALSE
+IS_Config	: True
+
+// Comment
