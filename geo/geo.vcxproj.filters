@@ -13,44 +13,41 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="소스 파일\Reader">
-      <UniqueIdentifier>{2959836e-9e83-4aab-9810-c0c813883ab5}</UniqueIdentifier>
+    <Filter Include="소스 파일\Reference Geometry">
+      <UniqueIdentifier>{df4eec0c-06b6-4226-a801-622315c5da52}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\_src\msgrid\Gmsh_Reader.cpp">
-      <Filter>소스 파일\Reader</Filter>
-    </ClCompile>
-    <ClCompile Include="..\_src\msgrid\Grid_Reader_Factory.cpp">
-      <Filter>소스 파일\Reader</Filter>
-    </ClCompile>
-    <ClCompile Include="..\_src\msgrid\Data.cpp">
+    <ClCompile Include="..\_src\msgeo\Node.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="..\_src\msgrid\Element.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="..\_src\msgeo\Reference_Geometry_Container.cpp">
+      <Filter>소스 파일\Reference Geometry</Filter>
     </ClCompile>
-    <ClCompile Include="..\_src\msgrid\Grid.cpp">
+    <ClCompile Include="..\_src\msgeo\Reference_Geometry_Impl.cpp">
+      <Filter>소스 파일\Reference Geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\_src\msgeo\Geometry.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\_src\msgrid\Gmsh_Reader.h">
-      <Filter>소스 파일\Reader</Filter>
-    </ClInclude>
-    <ClInclude Include="..\_src\msgrid\Grid_Reader_Factory.h">
-      <Filter>소스 파일\Reader</Filter>
-    </ClInclude>
-    <ClInclude Include="..\_src\msgrid\Reader.h">
-      <Filter>소스 파일\Reader</Filter>
-    </ClInclude>
-    <ClInclude Include="..\_src\msgrid\Data.h">
+    <ClInclude Include="..\_src\msgeo\Node.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
-    <ClInclude Include="..\_src\msgrid\Element.h">
+    <ClInclude Include="..\_src\msgeo\Reference_Geometry.h">
+      <Filter>소스 파일\Reference Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\_src\msgeo\Reference_Geometry_Container.h">
+      <Filter>소스 파일\Reference Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\_src\msgeo\Reference_Geometry_Impl.h">
+      <Filter>소스 파일\Reference Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\_src\msgeo\Geometry.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
-    <ClInclude Include="..\_src\msgrid\Grid.h">
+    <ClInclude Include="..\_src\msgeo\Figure.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
   </ItemGroup>

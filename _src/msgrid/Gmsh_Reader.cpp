@@ -185,13 +185,13 @@ Data Gmsh_Reader::read(const std::string_view file_path) const
   std::ifstream file(file_path.data());
   REQUIRE(file.is_open(), "grid file should be open");
 
-  auto node_data    = this->extract_block_type_node_data(file);
-  auto element_data = this->extract_element_datas(file);
-
-  return {node_data, element_data};
+  Data data;
+  this->extract_block_type_node_data(file, data);
+  this->extract_element_datas(file, data);
+  return data;
 }
 
-Nodes_Data Gmsh_Reader::extract_block_type_node_data(std::ifstream& file) const
+void Gmsh_Reader::extract_block_type_node_data(std::ifstream& file, Data& data) const
 {
   constexpr auto delimiter = ' ';
 
@@ -223,18 +223,17 @@ Nodes_Data Gmsh_Reader::extract_block_type_node_data(std::ifstream& file) const
     }
   }
 
-  Nodes_Data node_data;
-  node_data.type        = Coordinate_Type::BLOCK;
-  node_data.dimension   = this->_dimension;
-  node_data.num_nodes   = num_nodes;
-  node_data.coordinates = std::move(coordinates);
-
-  return node_data;
+  auto& nodes_data       = data.nodes_data;
+  nodes_data.type        = Coordinate_Type::BLOCK;
+  nodes_data.dimension   = this->_dimension;
+  nodes_data.num_nodes   = num_nodes;
+  nodes_data.coordinates = std::move(coordinates);
 }
 
-std::vector<Element_Data> Gmsh_Reader::extract_element_datas(std::ifstream& file) const
+void Gmsh_Reader::extract_element_datas(std::ifstream& file, Data& data) const
 {
-  constexpr auto delimiter        = ' ';
+  constexpr auto space            = ' ';
+  constexpr auto comma            = ',';
   constexpr auto num_type_indexes = 5;
 
   std::string str;
@@ -255,7 +254,7 @@ std::vector<Element_Data> Gmsh_Reader::extract_element_datas(std::ifstream& file
   {
     std::getline(file, str);
 
-    const auto parsed_strs = ms::string::parse_by(str, delimiter);
+    const auto parsed_strs = ms::string::parse_by(str, space);
     // parsed_strs[0]  : element index
     // parsed_strs[1]  : figure type index
     // parsed_strs[2]  : tag index
@@ -277,24 +276,51 @@ std::vector<Element_Data> Gmsh_Reader::extract_element_datas(std::ifstream& file
     }
   }
 
-  const auto physical_group_index_to_element_type = this->extract_physical_group_index_to_element_type(file);
+  const auto physical_group_index_to_name = this->extract_physical_group_index_to_name(file);
 
-  std::vector<Element_Data> element_datas(num_elements);
+  auto& element_datas  = data.element_datas;
+  auto& periodic_datas = data.periodic_datas;
+  element_datas.reserve(num_elements);
+  periodic_datas.reserve(num_elements);
 
   for (int i = 0; i < num_elements; ++i)
   {
-    auto& data = element_datas[i];
+    const auto  physical_group_index = physical_group_indexes[i];
+    const auto& name                 = physical_group_index_to_name.at(physical_group_index);
 
-    data.element_type = physical_group_index_to_element_type.at(physical_group_indexes[i]);
-    data.figure       = ms::grid::index_to_figure_type(figure_type_indexes[i]);
-    data.figure_order = ms::grid::index_to_figure_order(figure_type_indexes[i]);
-    data.node_indexes = std::move(consisting_node_indexess[i]);
+    const auto element_type = str_to_element_type(name);
+
+    Element_Data elem_data;
+    elem_data.element_type = element_type;
+    elem_data.figure       = ms::grid::index_to_figure_type(figure_type_indexes[i]);
+    elem_data.figure_order = ms::grid::index_to_figure_order(figure_type_indexes[i]);
+    elem_data.node_indexes = std::move(consisting_node_indexess[i]);
+
+    if (element_type == Element_Type::PERIODIC)
+    {
+      const auto parsed_strs = ms::string::parse_by(name, comma);
+
+      const auto          num_periodic_direction_components = parsed_strs.size() - 1;
+      std::vector<double> periodic_direction(num_periodic_direction_components);
+
+      for (auto j = 0; j < num_periodic_direction_components; ++j)
+      {
+        periodic_direction[j] = ms::string::str_to_value<double>(parsed_strs[j]);
+      }
+
+      periodic_datas.push_back({std::move(elem_data), std::move(periodic_direction)});
+    }
+    else
+    {
+      element_datas.push_back(std::move(elem_data));
+    }
   }
 
-  return element_datas;
+  element_datas.shrink_to_fit();
+  periodic_datas.shrink_to_fit();
 }
 
-std::map<int, Element_Type> Gmsh_Reader::extract_physical_group_index_to_element_type(std::ifstream& file) const
+std::map<int, std::string> Gmsh_Reader::extract_physical_group_index_to_name(std::ifstream& file) const
 {
   constexpr auto delimiter = ' ';
 
@@ -308,7 +334,7 @@ std::map<int, Element_Type> Gmsh_Reader::extract_physical_group_index_to_element
   std::getline(file, str);
   const auto num_physical_groups = ms::string::str_to_value<int>(str);
 
-  std::map<int, Element_Type> physical_group_index_to_element_type;
+  std::map<int, std::string> physical_group_index_to_name;
 
   for (int i = 0; i < num_physical_groups; ++i)
   {
@@ -322,11 +348,10 @@ std::map<int, Element_Type> Gmsh_Reader::extract_physical_group_index_to_element
     const auto physical_group_index = ms::string::str_to_value<int>(parsed_strs[1]);
     const auto name                 = ms::string::remove(parsed_strs[2], '"');
 
-    const auto element_type = ms::grid::str_to_element_type(name);
-    physical_group_index_to_element_type.emplace(physical_group_index, element_type);
+    physical_group_index_to_name.emplace(physical_group_index, name);
   }
 
-  return physical_group_index_to_element_type;
+  return physical_group_index_to_name;
 }
 
-} // namespace ms::grid::reader
+} // namespace ms::grid

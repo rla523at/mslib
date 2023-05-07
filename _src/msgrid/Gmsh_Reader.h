@@ -5,14 +5,6 @@
 #include <map>
 #include <vector>
 
-// forward declaration
-namespace ms::grid
-{
-struct Nodes_Data;
-struct Element_Data;
-enum class Element_Type;
-} // namespace ms::grid::reader
-
 // class declaration
 namespace ms::grid
 {
@@ -26,12 +18,12 @@ public:
   Data read(const std::string_view file_path) const override;
 
 private:
-  Nodes_Data                  extract_block_type_node_data(std::ifstream& file) const;
-  std::vector<Element_Data>   extract_element_datas(std::ifstream& file) const;
-  std::map<int, Element_Type> extract_physical_group_index_to_element_type(std::ifstream& file) const;
+  void                       extract_block_type_node_data(std::ifstream& file, Data& data) const;
+  void                       extract_element_datas(std::ifstream& file, Data& data) const;
+  std::map<int, std::string> extract_physical_group_index_to_name(std::ifstream& file) const;
 
 private:
   int _dimension;
 };
 
-} // namespace ms::grid::reader
+} // namespace ms::grid

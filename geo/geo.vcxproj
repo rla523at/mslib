@@ -18,26 +18,11 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\_src\msgrid\Data.cpp" />
-    <ClCompile Include="..\_src\msgrid\Element.cpp" />
-    <ClCompile Include="..\_src\msgrid\Gmsh_Reader.cpp" />
-    <ClCompile Include="..\_src\msgrid\Grid.cpp" />
-    <ClCompile Include="..\_src\msgrid\Grid_Reader_Factory.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\_src\msgrid\Data.h" />
-    <ClInclude Include="..\_src\msgrid\Element.h" />
-    <ClInclude Include="..\_src\msgrid\Gmsh_Reader.h" />
-    <ClInclude Include="..\_src\msgrid\Grid.h" />
-    <ClInclude Include="..\_src\msgrid\Grid_Reader_Factory.h" />
-    <ClInclude Include="..\_src\msgrid\Reader.h" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{0c8bdc95-56bf-4184-9f62-3c0bfedd6d9b}</ProjectGuid>
-    <RootNamespace>grid</RootNamespace>
+    <ProjectGuid>{09adad60-d5bc-41cb-befd-70df556b7ce1}</ProjectGuid>
+    <RootNamespace>geo</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -55,13 +40,13 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -121,7 +106,6 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -144,6 +128,20 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\_src\msgeo\Geometry.cpp" />
+    <ClCompile Include="..\_src\msgeo\Node.cpp" />
+    <ClCompile Include="..\_src\msgeo\Reference_Geometry_Container.cpp" />
+    <ClCompile Include="..\_src\msgeo\Reference_Geometry_Impl.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\_src\msgeo\Figure.h" />
+    <ClInclude Include="..\_src\msgeo\Geometry.h" />
+    <ClInclude Include="..\_src\msgeo\Node.h" />
+    <ClInclude Include="..\_src\msgeo\Reference_Geometry.h" />
+    <ClInclude Include="..\_src\msgeo\Reference_Geometry_Container.h" />
+    <ClInclude Include="..\_src\msgeo\Reference_Geometry_Impl.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

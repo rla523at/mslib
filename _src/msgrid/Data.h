@@ -57,9 +57,17 @@ struct Element_Data
   std::vector<int> node_indexes;
 };
 
+struct Peridoic_Data
+{
+  Element_Data        element_data;
+  std::vector<double> periodic_direction;
+};
+
 struct Data
 {
-  Nodes_Data                nodes_data;
-  std::vector<Element_Data> element_datas;
+  Nodes_Data                 nodes_data;
+  std::vector<Element_Data>  element_datas;
+  std::vector<Peridoic_Data> periodic_datas;
 };
-} // namespace ms
+
+} // namespace ms::grid

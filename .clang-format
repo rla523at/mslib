@@ -12,11 +12,13 @@ MaxEmptyLinesToKeep: 1
 BreakBeforeBraces: Allman
 
 AccessModifierOffset: -2
+AllowAllConstructorInitializersOnNextLine : false
 AllowShortIfStatementsOnASingleLine: OnlyFirstIf
 AllowShortCaseLabelsOnASingleLine: true
 AllowShortEnumsOnASingleLine: true
 AlignConsecutiveAssignments: true
 AlignConsecutiveDeclarations : true
 AlignTrailingComments: true
+ConstructorInitializerAllOnOneLineOrOnePerLine : true
 FixNamespaceComments: true
 PointerAlignment: Left

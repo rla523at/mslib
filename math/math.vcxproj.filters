@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\.clang-format" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="..\_src\msmath\BLAS.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>

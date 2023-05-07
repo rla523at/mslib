@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\.clang-format" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="..\_src\msstring\string.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
