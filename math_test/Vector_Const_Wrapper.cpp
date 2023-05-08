@@ -1,5 +1,5 @@
-#include "msmath/Vector.h"
 #include "gtest\gtest.h"
+#include "msmath/Vector.h"
 
 namespace ms::math
 {
@@ -190,6 +190,30 @@ TEST(Vector_Const_Wrapper, operator_equal_1)
 
   EXPECT_TRUE(cvw1 == cvw2);
 }
+TEST(Vector_Const_Wrapper, cosine_1)
+{
+  std::vector<double> values1 = {1, 2};
+  std::vector<double> values2 = {-1, -2};
+
+  Vector_Const_Wrapper cvw1   = values1;
+  Vector_Const_Wrapper cvw2   = values2;
+  const auto           result = cvw1.cosine(cvw2);
+
+  const auto ref = -1.0;
+  EXPECT_DOUBLE_EQ(ref, result);
+}
+TEST(Vector_Const_Wrapper, cosine_2)
+{
+  std::vector<double> values1 = {1.123123, 2.92378479823};
+  std::vector<double> values2 = {-1.123123, -2.92378479823};
+
+  Vector_Const_Wrapper cvw1   = values1;
+  Vector_Const_Wrapper cvw2   = values2;
+  const auto           result = cvw1.cosine(cvw2);
+
+  const auto ref = -1.0;
+  EXPECT_DOUBLE_EQ(ref, result);
+}
 TEST(Vector_Const_Wrapper, cross_product_1)
 {
   std::vector<double> values = {1, 2};
@@ -264,6 +288,32 @@ TEST(Vector_Const_Wrapper, inner_product_2)
 
   const auto ref = 25;
   EXPECT_EQ(result, ref);
+}
+TEST(Vector_Const_Wrapper, is_parallel_1)
+{
+  std::vector<double> values1 = {1, 2};
+  std::vector<double> values2 = {-1, -2};
+
+  Vector_Const_Wrapper cvw1 = values1;
+  Vector_Const_Wrapper cvw2 = values2;
+  EXPECT_TRUE(cvw1.is_parallel(cvw2));
+}
+TEST(Vector_Const_Wrapper, is_parallel_2)
+{
+  std::vector<double> values1 = {1.123123, 2.92378479823};
+  std::vector<double> values2 = {-1.123123, -2.92378479823};
+
+  Vector_Const_Wrapper cvw1 = values1;
+  Vector_Const_Wrapper cvw2 = values2;
+  EXPECT_TRUE(cvw1.is_parallel(cvw2));
+}
+TEST(Vector_Const_Wrapper, is_parallel_3)
+{
+  std::vector<double> values1 = {1.123123, 2.92378479823};
+
+  Vector_Const_Wrapper cvw1 = values1;
+  auto                 cvw2 = cvw1 * 2.1421323;
+  EXPECT_TRUE(cvw1.is_parallel(cvw2));
 }
 TEST(Vector_Const_Wrapper, L1_norm_1)
 {

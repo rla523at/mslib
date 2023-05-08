@@ -1,13 +1,13 @@
 #pragma once
 #include "mssym/Polynomial.h"
+#include "Node.h"
+#include "Reference_Geometry.h"
 #include <vector>
 
 // forward declaration
 namespace ms::geo
 {
 enum class Figure;
-class Node_Const_Wrapper;
-class Reference_Geometry;
 } // namespace ms::geo
 
 /*

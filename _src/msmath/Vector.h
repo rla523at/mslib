@@ -17,12 +17,28 @@ template <typename... Args>
 using if_is_more_than_two = std::enable_if_t<2 <= sizeof...(Args), bool>;
 } // namespace ms::math
 
+/*
+
+
+
+
+
+*/
+
 // forward declaration
 namespace ms::math
 {
 template <int dim>
 class Vector;
 }
+
+/*
+
+
+
+
+
+*/
 
 // class declaration
 namespace ms::math
@@ -46,11 +62,13 @@ public:
 public:
   double               at(const size_t position) const;
   const double*        begin(void) const;
+  double               cosine(const Vector_Const_Wrapper& other) const;
   const double*        data(void) const;
   size_t               dimension(void) const;
   const double*        end(void) const;
   double               inner_product(const Vector_Const_Wrapper& other) const;
   int                  inc(void) const { return this->inc_; };
+  bool                 is_parallel(const Vector_Const_Wrapper& other) const;
   double               L1_norm(void) const;
   double               L2_norm(void) const;
   double               Linf_norm(void) const;

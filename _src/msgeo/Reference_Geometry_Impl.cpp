@@ -10,6 +10,39 @@
 namespace ms::geo
 {
 
+Polynomials Reference_Point::cal_normal_functions(const Polynomials& parametric_functions) const
+{
+  return {1.0};
+}
+
+Polynomials Reference_Point::cal_parametric_functions(const std::vector<Node_Const_Wrapper>& consisting_nodes) const
+{
+  REQUIRE(consisting_nodes.size() == 1, "Point must consist of only one single point.");
+
+  const auto& node      = consisting_nodes.front();
+  const auto  dimension = node.dimension();
+
+  Polynomials result(dimension);
+  for (int i = 0; i < dimension; ++i)
+  {
+    result[i] = node[i];
+  }
+
+  return result;
+}
+
+Node_Const_Wrapper Reference_Point::center_point(void) const
+{
+  return {1, this->_center_coords.data()};
+}
+
+Nodes_Const_Wrapper Reference_Point::quadrature_points(const int integrand_degree) const
+{
+  EXCEPTION("Integration is not possible over a point.");
+  return {Coordinates_Type::NOT_SUPPROTED, -1, -1, nullptr};
+}
+
+
 std::vector<Polynomial> Reference_Geometry_Common::cal_parametric_functions(const std::vector<Node_Const_Wrapper>& consisting_nodes) const
 {
   const auto  num_nodes       = consisting_nodes.size();

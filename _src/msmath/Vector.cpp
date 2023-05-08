@@ -7,6 +7,17 @@
 #include <iomanip>
 #include <sstream>
 
+namespace
+{
+bool compare_double(const double d1, const double d2, const int ULP_precision = 4)
+{
+  const auto lower_ULP = d1 - std::nextafter(d1, std::numeric_limits<double>::lowest());
+  const auto upper_ULP = std::nextafter(d1, std::numeric_limits<double>::max()) - d1;
+
+  return d1 - ULP_precision * lower_ULP <= d2 && d2 <= d1 + ULP_precision * upper_ULP;
+}
+} // namespace
+
 namespace ms::math
 {
 
@@ -99,6 +110,13 @@ const double* Vector_Const_Wrapper::begin(void) const
   return this->coordinate_const_ptr_;
 }
 
+double Vector_Const_Wrapper::cosine(const Vector_Const_Wrapper& other) const
+{
+  REQUIRE(this->dimension_ == other.dimension_, "two vector should be same size");
+
+  return this->inner_product(other) / (this->L2_norm() * other.L2_norm());
+}
+
 const double* Vector_Const_Wrapper::data(void) const
 {
   return this->coordinate_const_ptr_;
@@ -108,6 +126,12 @@ const double* Vector_Const_Wrapper::end(void) const
 {
   const auto end_index = this->inc_ * (this->dimension_ - 1) + 1;
   return this->coordinate_const_ptr_ + end_index;
+}
+
+bool Vector_Const_Wrapper::is_parallel(const Vector_Const_Wrapper& other) const
+{
+  const auto abs_cosine = std::abs(this->cosine(other));
+  return compare_double(abs_cosine, 1.0);
 }
 
 double Vector_Const_Wrapper::L1_norm(void) const

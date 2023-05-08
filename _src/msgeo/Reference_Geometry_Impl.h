@@ -11,9 +11,36 @@ namespace ms::geo
 class Reference_Geometry_Container;
 }
 
+/*
+
+
+
+
+
+*/
+
 // class declaration
 namespace ms::geo
 {
+
+class Reference_Point : public Reference_Geometry
+{
+private:
+  Reference_Point(void) = default;
+
+  // overriding methods from Reference_Geometry
+public:
+  Polynomials         cal_normal_functions(const Polynomials& parametric_functions) const override;
+  Polynomials         cal_parametric_functions(const std::vector<Node_Const_Wrapper>& consisting_nodes) const override;
+  Node_Const_Wrapper  center_point(void) const override;
+  Nodes_Const_Wrapper quadrature_points(const int integrand_degree) const override;
+
+private:
+  static constexpr std::array<double, 1> _center_coords = {0.0};
+
+private:
+  friend Reference_Geometry_Container;
+};
 
 class Reference_Geometry_Common : public Reference_Geometry
 {
