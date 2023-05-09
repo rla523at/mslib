@@ -7,16 +7,17 @@
 namespace ms::geo
 {
 
-const Reference_Geometry& RGeo_Container::get(const Figure fig)
+const Reference_Geometry& Reference_Geometry_Container::get(const Figure fig)
 {
   switch (fig)
   {
+  case Figure::POINT:
+    return _ref_point;
   case Figure::LINE:
-    return ref_line_;
-
+    return _ref_line;
   default:
     EXCEPTION("unsupported figure");
-    return ref_line_;
+    return _ref_point;
   }
 }
 

@@ -12,17 +12,17 @@ namespace ms::geo
 // static class
 class Reference_Geometry_Container
 {
-private:
-  Reference_Geometry_Container(void) = delete;
-
 public:
   static const Reference_Geometry& get(const Figure fig);
 
 private:
-  inline static Reference_Line ref_line_;
+  inline static Reference_Point _ref_point;
+  inline static Reference_Line  _ref_line;
+
+private:
+  //Static class doesn't need to create object.
+  //Thus, access to the constructor is restricted to prevent unnecessary creation.
+  Reference_Geometry_Container(void) = delete;
 };
 
-using RGeo_Container = Reference_Geometry_Container;
-
-}
-
+} // namespace ms::geo

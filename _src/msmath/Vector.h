@@ -5,6 +5,7 @@
 
 #define COMPILE_TIME_REQUIREMENT static_assert
 
+// miscellaneous definitions
 namespace ms::math
 {
 template <typename... Args>
@@ -47,7 +48,6 @@ namespace ms::math
 class Vector_Const_Wrapper
 {
 public:
-  Vector_Const_Wrapper(void) = default;
   Vector_Const_Wrapper(const double* coordinate_ptr, const int dimension, const int incx = 1);
   Vector_Const_Wrapper(const std::vector<double>& coordinates, const int incx = 1);
 
@@ -83,6 +83,11 @@ public:
   Vector<3> cross_product(const Vector_Const_Wrapper& other) const;
 
 protected:
+  // Acess to the default constructor has been blocked, because it creates objects that do not function properly.
+  // The reason why it was not deleted is that the constructor of the Vector<0> class uses the default constructor.
+  Vector_Const_Wrapper(void) = default;
+
+protected:
   int           _dimension            = 0;
   const double* _coordinate_const_ptr = nullptr;
   int           _inc                  = 0;
@@ -91,11 +96,12 @@ protected:
 class Vector_Wrapper : public Vector_Const_Wrapper
 {
 public:
-  Vector_Wrapper(void) = default;
   Vector_Wrapper(double* coordinate_ptr, const int dimension, const int incx = 1)
-      : Vector_Const_Wrapper(coordinate_ptr, dimension, incx), _coordinate_ptr(coordinate_ptr){};
+      : Vector_Const_Wrapper(coordinate_ptr, dimension, incx),
+        _coordinate_ptr(coordinate_ptr){};
   Vector_Wrapper(std::vector<double>& coordinates, const int incx = 1)
-      : Vector_Const_Wrapper(coordinates, incx), _coordinate_ptr(coordinates.data()){};
+      : Vector_Const_Wrapper(coordinates, incx),
+        _coordinate_ptr(coordinates.data()){};
 
 public:
   void    operator*=(const double constant);
@@ -120,6 +126,11 @@ public:
   using Vector_Const_Wrapper::data;
 
 protected:
+  // The default constructor, which creates objects that do not function properly, has been blocked from access.
+  // The reason why it was not deleted is that the constructor of the Vector<0> class uses the default constructor.
+  Vector_Wrapper(void) = default;
+
+protected:
   double* _coordinate_ptr = nullptr;
 };
 
@@ -132,11 +143,13 @@ public:
   Vector(void)
       : Vector_Wrapper(this->coordinates_.data(), Dim){};
   Vector(const Vector& other)
-      : Vector_Wrapper(this->coordinates_.data(), Dim), coordinates_{other.coordinates_} {};
+      : Vector_Wrapper(this->coordinates_.data(), Dim),
+        coordinates_{other.coordinates_} {};
 
   template <typename... Args>
   Vector(const Args&... args)
-      : Vector_Wrapper(this->coordinates_.data(), Dim), coordinates_{static_cast<double>(args)...}
+      : Vector_Wrapper(this->coordinates_.data(), Dim),
+        coordinates_{static_cast<double>(args)...}
   {
     COMPILE_TIME_REQUIREMENT(sizeof...(Args) <= Dim, "Number of arguments can not exceed dimension");
     COMPILE_TIME_REQUIREMENT(ms::math::are_arithmetics<Args...>, "Every arguments should be arithmetics");
@@ -152,18 +165,17 @@ private:
   std::array<double, Dim> coordinates_ = {0};
 };
 
-// user-defined deduction guides
-template <typename Iter, ms::math::if_is_iterator<Iter> = true>
-Vector(Iter iter1, Iter iter2) -> Vector<0>;
-
-template <typename... Args, ms::math::if_is_more_than_two<Args...> = true>
-Vector(Args... args) -> Vector<sizeof...(Args)>;
-
 template <>
 class Vector<0> : public Vector_Wrapper
 {
+  // The reason for using the default constructor of the Wrapper class is as follows:
+  // The parent class, Wrapper class's constructor must be called before the coordinate is initialized.
+  // If the coordinate is used as is, it will trigger the nullptr checking code in the Wrapper class constructor.
+  // Therefore, instead of removing the nullptr checking code in the Wrapper class constructor,
+  // we chose to use the inaccessible default constructor to solve the problem."
+
 public:
-  Vector(void) = default;
+  Vector(void) = delete;
   explicit Vector(const int dimension);
   Vector(const std::initializer_list<double> list);
   Vector(const std::vector<double>& values);
@@ -171,13 +183,14 @@ public:
   Vector(const Vector& other);
   Vector(Vector&& other) noexcept;
 
+public:
   template <typename Iter, ms::math::if_is_iterator<Iter> = true>
   Vector(Iter first, Iter last)
-      : coordinates_(first, last)
+      : _coordinates(first, last)
   {
-    this->_dimension            = static_cast<int>(this->coordinates_.size());
-    this->_coordinate_const_ptr = this->coordinates_.data();
-    this->_coordinate_ptr       = this->coordinates_.data();
+    this->_dimension            = static_cast<int>(this->_coordinates.size());
+    this->_coordinate_const_ptr = this->_coordinates.data();
+    this->_coordinate_ptr       = this->_coordinates.data();
     this->_inc                  = 1;
   };
 
@@ -186,8 +199,39 @@ public:
   void operator=(Vector&& other) noexcept;
 
 private:
-  std::vector<double> coordinates_;
+  std::vector<double> _coordinates;
 };
 
-Vector<0> operator*(const double constant, const Vector_Const_Wrapper& x);
 } // namespace ms::math
+
+/*
+
+
+
+
+
+*/
+
+// user-defined deduction guides
+namespace ms::math
+{
+template <typename Iter, ms::math::if_is_iterator<Iter> = true>
+Vector(Iter iter1, Iter iter2) -> Vector<0>;
+
+template <typename... Args, ms::math::if_is_more_than_two<Args...> = true>
+Vector(Args... args) -> Vector<sizeof...(Args)>;
+} // namespace ms::math
+
+/*
+
+
+
+
+
+*/
+
+// free function decalarations
+namespace ms::math
+{
+Vector<0> operator*(const double constant, const Vector_Const_Wrapper& x);
+}

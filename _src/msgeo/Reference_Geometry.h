@@ -33,20 +33,27 @@ namespace ms::geo
 
 class Reference_Geometry
 {
-protected:
-  Reference_Geometry(void)          = default;
-  virtual ~Reference_Geometry(void) = default;
-
 public:
-  virtual Polynomials         cal_normal_functions(const Polynomials& parametric_functions) const                    = 0;
+  virtual Polynomials         cal_normal_functions(const Polynomials& parametric_functions) const                     = 0;
   virtual Polynomials         cal_parametric_functions(const std::vector<Node_Const_Wrapper>& consisting_nodes) const = 0;
-  virtual Node_Const_Wrapper  center_point(void) const                                                               = 0;
+  virtual Node_Const_Wrapper  center_point(void) const                                                                = 0;
   virtual Nodes_Const_Wrapper quadrature_points(const int integrand_degree) const                                     = 0;
+
+protected:
+  virtual ~Reference_Geometry(void) = default;
 };
 
 } // namespace ms::geo
 
-// free functions
+/*
+
+
+
+
+
+*/
+
+// free function declarations
 namespace ms::geo
 {
 

@@ -25,9 +25,6 @@ namespace ms::geo
 
 class Reference_Point : public Reference_Geometry
 {
-private:
-  Reference_Point(void) = default;
-
   // overriding methods from Reference_Geometry
 public:
   Polynomials         cal_normal_functions(const Polynomials& parametric_functions) const override;
@@ -40,14 +37,15 @@ private:
 
 private:
   friend Reference_Geometry_Container;
+
+private:
+  // All Reference Geometry objects are created only once in the Container class.
+  // To prevent unnecessary creation, acess to the constructor has been blocked
+  Reference_Point(void) = default;
 };
 
 class Reference_Geometry_Common : public Reference_Geometry
 {
-protected:
-  Reference_Geometry_Common(void)          = default;
-  virtual ~Reference_Geometry_Common(void) = default;
-
   // overriding methods from Reference_Geometry
 public:
   Polynomials         cal_parametric_functions(const std::vector<Node_Const_Wrapper>& consisting_nodes) const override;
@@ -72,13 +70,13 @@ protected:
   mutable std::map<int, std::vector<double>> _tag_to_quadrature_points_coords;
   mutable std::map<int, std::vector<double>> _tag_to_quadrature_weights;
   mutable std::map<int, Polynomials>         _parameter_order_to_shape_functions;
+
+protected:
+  virtual ~Reference_Geometry_Common(void) = default;
 };
 
 class Reference_Line : public Reference_Geometry_Common
 {
-private:
-  Reference_Line(void) = default;
-
   // overriding methods from Reference_Geometry
 public:
   Node_Const_Wrapper center_point(void) const override;
@@ -100,6 +98,11 @@ private:
 
 private:
   friend Reference_Geometry_Container;
+
+private:
+  // All Reference Geometry objects are created only once in the Container class.
+  // To prevent unnecessary creation, acess to the constructor has been blocked
+  Reference_Line(void) = default;
 };
 
 } // namespace ms::geo

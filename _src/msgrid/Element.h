@@ -4,20 +4,6 @@
 #include "msgeo/Node.h"
 #include <vector>
 
-namespace ms::math
-{
-class Vector_Const_Wrapper;
-}
-
-
-/*
-
-
-
-
-
-*/
-
 // data definition
 namespace ms::grid
 {
@@ -29,6 +15,20 @@ struct Indexed_Node
 };
 
 } // namespace ms::grid
+
+/*
+
+
+
+
+
+*/
+
+// forward declaration
+namespace ms::math
+{
+class Vector_Const_Wrapper;
+}
 
 /*
 
