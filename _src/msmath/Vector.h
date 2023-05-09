@@ -60,6 +60,9 @@ public:
   bool      operator!=(const Vector_Const_Wrapper& other) const;
 
 public:
+  operator const double*(void) const;
+
+public:
   double               at(const size_t position) const;
   const double*        begin(void) const;
   double               cosine(const Vector_Const_Wrapper& other) const;
@@ -67,7 +70,7 @@ public:
   size_t               dimension(void) const;
   const double*        end(void) const;
   double               inner_product(const Vector_Const_Wrapper& other) const;
-  int                  inc(void) const { return this->inc_; };
+  int                  inc(void) const { return this->_inc; };
   bool                 is_parallel(const Vector_Const_Wrapper& other) const;
   double               L1_norm(void) const;
   double               L2_norm(void) const;
@@ -80,9 +83,9 @@ public:
   Vector<3> cross_product(const Vector_Const_Wrapper& other) const;
 
 protected:
-  int           dimension_            = 0;
-  const double* coordinate_const_ptr_ = nullptr;
-  int           inc_                  = 0;
+  int           _dimension            = 0;
+  const double* _coordinate_const_ptr = nullptr;
+  int           _inc                  = 0;
 };
 
 class Vector_Wrapper : public Vector_Const_Wrapper
@@ -90,15 +93,18 @@ class Vector_Wrapper : public Vector_Const_Wrapper
 public:
   Vector_Wrapper(void) = default;
   Vector_Wrapper(double* coordinate_ptr, const int dimension, const int incx = 1)
-      : Vector_Const_Wrapper(coordinate_ptr, dimension, incx), coordinate_ptr_(coordinate_ptr){};
+      : Vector_Const_Wrapper(coordinate_ptr, dimension, incx), _coordinate_ptr(coordinate_ptr){};
   Vector_Wrapper(std::vector<double>& coordinates, const int incx = 1)
-      : Vector_Const_Wrapper(coordinates, incx), coordinate_ptr_(coordinates.data()){};
+      : Vector_Const_Wrapper(coordinates, incx), _coordinate_ptr(coordinates.data()){};
 
 public:
   void    operator*=(const double constant);
   void    operator+=(const Vector_Const_Wrapper& other);
   void    operator-=(const Vector_Const_Wrapper& other);
   double& operator[](const size_t position);
+
+public:
+  operator double*(void);
 
 public:
   double& at(const size_t position);
@@ -114,7 +120,7 @@ public:
   using Vector_Const_Wrapper::data;
 
 protected:
-  double* coordinate_ptr_ = nullptr;
+  double* _coordinate_ptr = nullptr;
 };
 
 template <int Dim = 0>
@@ -169,10 +175,10 @@ public:
   Vector(Iter first, Iter last)
       : coordinates_(first, last)
   {
-    this->dimension_            = static_cast<int>(this->coordinates_.size());
-    this->coordinate_const_ptr_ = this->coordinates_.data();
-    this->coordinate_ptr_       = this->coordinates_.data();
-    this->inc_                  = 1;
+    this->_dimension            = static_cast<int>(this->coordinates_.size());
+    this->_coordinate_const_ptr = this->coordinates_.data();
+    this->_coordinate_ptr       = this->coordinates_.data();
+    this->_inc                  = 1;
   };
 
 public:

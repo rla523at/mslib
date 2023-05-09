@@ -5,6 +5,7 @@
 
 # User define
 math_test/lib/
+_lib/
 
 # User-specific files
 *.rsuser

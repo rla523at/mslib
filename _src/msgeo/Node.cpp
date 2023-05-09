@@ -43,6 +43,15 @@ int Node_Const_Wrapper::dimension(void) const
   return this->_dimension;
 }
 
+void Node_Const_Wrapper::other_to_this_vector(const Node_Const_Wrapper& other, double* vector_components) const
+{
+  for (int i = 0; i < this->_dimension; ++i)
+  {
+    vector_components[i] = (*this)[i] - other[i];
+  }
+}
+
+
 int Node_Const_Wrapper::size(void) const
 {
   return this->_dimension;
@@ -120,6 +129,21 @@ std::vector<Node_Const_Wrapper> Nodes_Const_Wrapper::nodes_at_indexes(const std:
 
   return result;
 }
+
+void Nodes_Const_Wrapper::nodes_at_indexes(std::vector<Node_Const_Wrapper>& result, const std::vector<int>& indexes) const
+{
+  const auto num_nodes = indexes.size();
+  REQUIRE(num_nodes < this->_num_nodes, "number of indexes can not excced number of nodes");
+
+  result.clear();
+  result.reserve(num_nodes);
+
+  for (const auto index : indexes)
+  {
+    result.push_back((*this)[index]);
+  }
+}
+
 
 
 const double* Nodes_Const_Wrapper::coordinate_ptr(const int index) const

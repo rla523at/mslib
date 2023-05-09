@@ -131,53 +131,6 @@ Figure index_to_figure_type(const int figure_type_index)
   }
 }
 
-short index_to_figure_order(const int figure_type_index)
-{
-  switch (static_cast<Gmsh_Figure_Type>(figure_type_index))
-  {
-  case Gmsh_Figure_Type::POINT: return 0;
-  case Gmsh_Figure_Type::LINE_P1:
-  case Gmsh_Figure_Type::TRIS_P1:
-  case Gmsh_Figure_Type::QUAD_P1:
-  case Gmsh_Figure_Type::TETS_P1:
-  case Gmsh_Figure_Type::HEXA_P1:
-  case Gmsh_Figure_Type::PRIS_P1:
-  case Gmsh_Figure_Type::PYRA_P1: return 1;
-  case Gmsh_Figure_Type::LINE_P2:
-  case Gmsh_Figure_Type::TRIS_P2:
-  case Gmsh_Figure_Type::QUAD_P2:
-  case Gmsh_Figure_Type::TETS_P2:
-  case Gmsh_Figure_Type::HEXA_P2:
-  case Gmsh_Figure_Type::PRIS_P2:
-  case Gmsh_Figure_Type::PYRA_P2: return 2;
-  case Gmsh_Figure_Type::LINE_P3:
-  case Gmsh_Figure_Type::TRIS_P3:
-  case Gmsh_Figure_Type::QUAD_P3:
-  case Gmsh_Figure_Type::TETS_P3:
-  case Gmsh_Figure_Type::HEXA_P3:
-  case Gmsh_Figure_Type::PRIS_P3:
-  case Gmsh_Figure_Type::PYRA_P3: return 3;
-  case Gmsh_Figure_Type::LINE_P4:
-  case Gmsh_Figure_Type::TRIS_P4:
-  case Gmsh_Figure_Type::QUAD_P4:
-  case Gmsh_Figure_Type::TETS_P4:
-  case Gmsh_Figure_Type::HEXA_P4:
-  case Gmsh_Figure_Type::PRIS_P4:
-  case Gmsh_Figure_Type::PYRA_P4: return 4;
-  case Gmsh_Figure_Type::LINE_P5:
-  case Gmsh_Figure_Type::TRIS_P5:
-  case Gmsh_Figure_Type::QUAD_P5:
-  case Gmsh_Figure_Type::TETS_P5:
-  case Gmsh_Figure_Type::HEXA_P5:
-  case Gmsh_Figure_Type::PRIS_P5: return 5;
-  case Gmsh_Figure_Type::LINE_P6:
-  case Gmsh_Figure_Type::QUAD_P6: return 6;
-  default:
-    EXCEPTION("invalid element type index");
-    return -1;
-  }
-}
-
 Data Gmsh_Reader::read(const std::string_view file_path) const
 {
   REQUIRE(path::is_exist_file(file_path), "grid file should be exist");
@@ -293,7 +246,6 @@ void Gmsh_Reader::extract_element_datas(std::ifstream& file, Data& data) const
     Element_Data elem_data;
     elem_data.element_type = element_type;
     elem_data.figure       = ms::grid::index_to_figure_type(figure_type_indexes[i]);
-    elem_data.figure_order = ms::grid::index_to_figure_order(figure_type_indexes[i]);
     elem_data.node_indexes = std::move(consisting_node_indexess[i]);
 
     if (element_type == Element_Type::PERIODIC)

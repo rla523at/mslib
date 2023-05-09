@@ -57,13 +57,38 @@ namespace ms::grid
 Grid::Grid(Data&& data)
     : _nodes(convert(data.nodes_data.type), data.nodes_data.num_nodes, data.nodes_data.dimension, std::move(data.nodes_data.coordinates))
 {
+}
 
-  for (auto& [element_type, figure, figure_order, node_indexes] : data.element_datas)
+void Grid::make_cell_and_boundary_elements(std::vector<Element_Data>&& element_datas)
+{
+  const auto num_element_datas = element_datas.size();
+  this->_cell_elements.reserve(num_element_datas);
+  this->_boundary_elements.reserve(num_element_datas);
+
+  std::vector<Indexed_Node>                consisting_indexed_nodes;
+  std::vector<ms::geo::Node_Const_Wrapper> consisting_nodes;
+
+  for (auto& [element_type, figure, node_indexes] : element_datas)
   {
-    const auto geo_figure       = convert(figure);
-    auto       consisting_nodes = this->_nodes.nodes_at_indexes(node_indexes);
-    auto       geometry         = ms::geo::Geometry(geo_figure, std::move(consisting_nodes));
-    auto       element          = Element(element_type, std::move(node_indexes), std::move(geometry));
+    consisting_nodes.clear();
+    consisting_indexed_nodes.clear();
+
+    const auto num_consisting_nodes = node_indexes.size();
+    consisting_nodes.reserve(num_consisting_nodes);
+    consisting_indexed_nodes.reserve(num_consisting_nodes);
+
+    for (auto i = 0; i < num_consisting_nodes; ++i)
+    {
+      const auto index = node_indexes[i];
+      const auto node  = this->_nodes[index];
+      consisting_nodes.push_back(node);
+      consisting_indexed_nodes.push_back({index, node});
+    }
+
+    const auto geo_figure = convert(figure);
+    auto       geometry   = ms::geo::Geometry(geo_figure, std::move(consisting_nodes));
+
+    auto element = Element(element_type, std::move(consisting_indexed_nodes), std::move(geometry));
 
     if (element_type == Element_Type::CELL)
     {
@@ -75,21 +100,48 @@ Grid::Grid(Data&& data)
     }
   }
 
-  const auto num_peridoic_datas         = data.periodic_datas.size();
+  this->_cell_elements.shrink_to_fit();
+  this->_boundary_elements.shrink_to_fit();
+}
+
+void Grid::make_periodic_boundary_elements(std::vector<Peridoic_Data>&& periodic_datas)
+{
+  const auto num_peridoic_datas         = periodic_datas.size();
   const auto num_periodic_element_pairs = num_peridoic_datas / 2;
   this->_periodic_boundary_element_pairs.reserve(num_periodic_element_pairs);
 
-  // sorting
+  // sort by direction
   std::map<std::vector<double>, std::vector<Element>> direction_to_periodic_elements;
-  for (auto& [element_data, periodic_direction] : data.periodic_datas)
+
+  std::vector<Indexed_Node>                consisting_indexed_nodes;
+  std::vector<ms::geo::Node_Const_Wrapper> consisting_nodes;
+
+  for (auto& [element_data, periodic_direction] : periodic_datas)
   {
-    auto& [element_type, figure, figure_order, node_indexes] = element_data;
+    // make element from element data
+    auto& [element_type, figure, node_indexes] = element_data;
 
-    const auto geo_figure       = convert(figure);
-    auto       consisting_nodes = this->_nodes.nodes_at_indexes(node_indexes);
-    auto       geometry         = ms::geo::Geometry(geo_figure, std::move(consisting_nodes));
-    auto       element          = Element(element_type, std::move(node_indexes), std::move(geometry));
+    consisting_nodes.clear();
+    consisting_indexed_nodes.clear();
 
+    const auto num_consisting_nodes = node_indexes.size();
+    consisting_nodes.reserve(num_consisting_nodes);
+    consisting_indexed_nodes.reserve(num_consisting_nodes);
+
+    for (auto i = 0; i < num_consisting_nodes; ++i)
+    {
+      const auto index = node_indexes[i];
+      const auto node  = this->_nodes[index];
+      consisting_nodes.push_back(node);
+      consisting_indexed_nodes.push_back({index, node});
+    }
+
+    const auto geo_figure = convert(figure);
+    auto       geometry   = ms::geo::Geometry(geo_figure, std::move(consisting_nodes));
+
+    auto element = Element(element_type, std::move(consisting_indexed_nodes), std::move(geometry));
+
+    // sorting
     bool       is_new_direction  = true;
     const auto direction_vector1 = ms::math::Vector_Const_Wrapper(periodic_direction);
 
@@ -112,6 +164,7 @@ Grid::Grid(Data&& data)
     }
   }
 
+  // make pair of periodic elements
   for (auto& [direction, periodic_elements] : direction_to_periodic_elements)
   {
     const auto num_periodic_elements = periodic_elements.size();
@@ -121,29 +174,24 @@ Grid::Grid(Data&& data)
 
     for (int i = 0; i < num_periodic_elements; ++i)
     {
-      if (matched_index_set.contains(i))
-      {
-        continue;
-      }
+      if (matched_index_set.contains(i)) continue;
 
       auto& i_element = periodic_elements[i];
 
       for (int j = i + 1; j < num_periodic_elements; ++j)
       {
-        if (matched_index_set.contains(j))
+        if (matched_index_set.contains(j)) continue;
+
+        auto& j_element            = periodic_elements[j];
+        auto  matched_node_indexes = j_element.find_periodic_matched_node_indexes(direction, j_element);
+
+        if (!matched_node_indexes.empty())
         {
-          continue;
-        }
+          // reordering 하지 않으면 quadrature points 순서가 두 pair element에서 달라진다.
+          // 즉, i element에서 0번째 quadrature point가 j element에서 0번째 quadrature point와 붙어 있지 않게 된다.
+          j_element.rearrange_node_indexes(std::move(matched_node_indexes));
 
-        auto& j_element = periodic_elements[j];
-
-        auto periodic_matched_node_indexes = j_element.find_periodic_matched_node_indexes(i_element);
-
-        if (!periodic_matched_node_indexes.empty())
-        {
-          j_element.rearrange_node_indexes(std::move(periodic_matched_node_indexes));
-
-          matched_periodic_element_pairs.push_back(std::make_pair(std::move(i_element), std::move(j_element)));
+          this->_periodic_boundary_element_pairs.push_back(std::make_pair(std::move(i_element), std::move(j_element)));
           matched_index_set.insert(i);
           matched_index_set.insert(j);
           break;

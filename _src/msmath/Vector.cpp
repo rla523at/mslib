@@ -25,9 +25,9 @@ Vector_Const_Wrapper::Vector_Const_Wrapper(const double* coordinate_const_ptr, c
 {
   REQUIRE(0 < dimension, "dimension should greater than 0");
   REQUIRE(coordinate_const_ptr != nullptr, "data ptr should not be nullptr");
-  this->dimension_            = dimension;
-  this->coordinate_const_ptr_ = coordinate_const_ptr;
-  this->inc_                  = incx;
+  this->_dimension            = dimension;
+  this->_coordinate_const_ptr = coordinate_const_ptr;
+  this->_inc                  = incx;
 }
 
 Vector_Const_Wrapper::Vector_Const_Wrapper(const std::vector<double>& coordinates, const int incx)
@@ -35,59 +35,59 @@ Vector_Const_Wrapper::Vector_Const_Wrapper(const std::vector<double>& coordinate
   const auto dimension = static_cast<int>(std::ceil(coordinates.size() / static_cast<double>(incx)));
 
   REQUIRE(0 < dimension, "dimension should greater than 0");
-  this->dimension_            = dimension;
-  this->coordinate_const_ptr_ = coordinates.data();
-  this->inc_                  = incx;
+  this->_dimension            = dimension;
+  this->_coordinate_const_ptr = coordinates.data();
+  this->_inc                  = incx;
 }
 
 Vector<0> Vector_Const_Wrapper::operator*(const double scalar) const
 {
-  Vector         result(this->dimension_);
+  Vector         result(this->_dimension);
   constexpr auto incr = 1;
 
-  ms::math::blas::cx(result.data(), scalar, this->coordinate_const_ptr_, this->dimension_, incr, this->inc_);
+  ms::math::blas::cx(result.data(), scalar, this->_coordinate_const_ptr, this->_dimension, incr, this->_inc);
 
   return result;
 }
 
 Vector<0> Vector_Const_Wrapper::operator+(const Vector_Const_Wrapper& other) const
 {
-  REQUIRE(this->dimension_ == other.dimension_, "other vector should be same size");
+  REQUIRE(this->_dimension == other._dimension, "other vector should be same size");
 
-  Vector         result(this->dimension_);
+  Vector         result(this->_dimension);
   constexpr auto incr = 1;
 
-  ms::math::blas::x_plus_y(result.data(), this->coordinate_const_ptr_, other.coordinate_const_ptr_, this->dimension_, incr, this->inc_, other.inc_);
+  ms::math::blas::x_plus_y(result.data(), this->_coordinate_const_ptr, other._coordinate_const_ptr, this->_dimension, incr, this->_inc, other._inc);
 
   return result;
 }
 
 Vector<0> Vector_Const_Wrapper::operator-(const Vector_Const_Wrapper& other) const
 {
-  REQUIRE(this->dimension_ == other.dimension_, "other vector should be same size");
+  REQUIRE(this->_dimension == other._dimension, "other vector should be same size");
 
-  Vector         result(this->dimension_);
+  Vector         result(this->_dimension);
   constexpr auto incr = 1;
 
-  ms::math::blas::x_minus_y(result.data(), this->coordinate_const_ptr_, other.coordinate_const_ptr_, this->dimension_, incr, this->inc_, other.inc_);
+  ms::math::blas::x_minus_y(result.data(), this->_coordinate_const_ptr, other._coordinate_const_ptr, this->_dimension, incr, this->_inc, other._inc);
 
   return result;
 }
 
 double Vector_Const_Wrapper::operator[](const size_t position) const
 {
-  REQUIRE(position < this->dimension_, "position should be less then size");
-  return this->coordinate_const_ptr_[position * this->inc_];
+  REQUIRE(position < this->_dimension, "position should be less then size");
+  return this->_coordinate_const_ptr[position * this->_inc];
 }
 
 bool Vector_Const_Wrapper::operator==(const Vector_Const_Wrapper& other) const
 {
-  if (this->dimension_ != other.dimension_)
+  if (this->_dimension != other._dimension)
     return false;
 
-  for (int i = 0; i < this->dimension_; ++i)
+  for (int i = 0; i < this->_dimension; ++i)
   {
-    if (this->coordinate_const_ptr_[i * this->inc_] != other.coordinate_const_ptr_[i * other.inc_])
+    if (this->_coordinate_const_ptr[i * this->_inc] != other._coordinate_const_ptr[i * other._inc])
       return false;
   }
 
@@ -99,33 +99,38 @@ bool Vector_Const_Wrapper::operator!=(const Vector_Const_Wrapper& other) const
   return !((*this) == other);
 }
 
+Vector_Const_Wrapper::operator const double*(void) const
+{
+  return this->_coordinate_const_ptr;
+}
+
 double Vector_Const_Wrapper::at(const size_t position) const
 {
-  REQUIRE(position < this->dimension_, "position can't exceed given range");
-  return this->coordinate_const_ptr_[position * this->inc_];
+  REQUIRE(position < this->_dimension, "position can't exceed given range");
+  return this->_coordinate_const_ptr[position * this->_inc];
 }
 
 const double* Vector_Const_Wrapper::begin(void) const
 {
-  return this->coordinate_const_ptr_;
+  return this->_coordinate_const_ptr;
 }
 
 double Vector_Const_Wrapper::cosine(const Vector_Const_Wrapper& other) const
 {
-  REQUIRE(this->dimension_ == other.dimension_, "two vector should be same size");
+  REQUIRE(this->_dimension == other._dimension, "two vector should be same size");
 
   return this->inner_product(other) / (this->L2_norm() * other.L2_norm());
 }
 
 const double* Vector_Const_Wrapper::data(void) const
 {
-  return this->coordinate_const_ptr_;
+  return this->_coordinate_const_ptr;
 }
 
 const double* Vector_Const_Wrapper::end(void) const
 {
-  const auto end_index = this->inc_ * (this->dimension_ - 1) + 1;
-  return this->coordinate_const_ptr_ + end_index;
+  const auto end_index = this->_inc * (this->_dimension - 1) + 1;
+  return this->_coordinate_const_ptr + end_index;
 }
 
 bool Vector_Const_Wrapper::is_parallel(const Vector_Const_Wrapper& other) const
@@ -136,7 +141,7 @@ bool Vector_Const_Wrapper::is_parallel(const Vector_Const_Wrapper& other) const
 
 double Vector_Const_Wrapper::L1_norm(void) const
 {
-  return ms::math::blas::abs_sum_x(this->coordinate_const_ptr_, this->dimension_, this->inc_);
+  return ms::math::blas::abs_sum_x(this->_coordinate_const_ptr, this->_dimension, this->_inc);
 }
 
 double Vector_Const_Wrapper::L2_norm(void) const
@@ -146,41 +151,41 @@ double Vector_Const_Wrapper::L2_norm(void) const
 
 double Vector_Const_Wrapper::Linf_norm(void) const
 {
-  const auto pos = ms::math::blas::find_maximum_element_pos(this->coordinate_const_ptr_, this->dimension_, this->inc_);
+  const auto pos = ms::math::blas::find_maximum_element_pos(this->_coordinate_const_ptr, this->_dimension, this->_inc);
   return this->at(pos);
 }
 
 double Vector_Const_Wrapper::inner_product(const Vector_Const_Wrapper& other) const
 {
-  REQUIRE(this->dimension_ == other.dimension_, "two vector should be same size");
+  REQUIRE(this->_dimension == other._dimension, "two vector should be same size");
 
-  return ms::math::blas::x_dot_y(this->coordinate_const_ptr_, other.coordinate_const_ptr_, this->dimension_);
+  return ms::math::blas::x_dot_y(this->_coordinate_const_ptr, other._coordinate_const_ptr, this->_dimension);
 }
 
 size_t Vector_Const_Wrapper::dimension(void) const
 {
-  return this->dimension_;
+  return this->_dimension;
 }
 
 Vector_Const_Wrapper Vector_Const_Wrapper::part(const int start_pos, const int end_pos) const
 {
   REQUIRE(start_pos < end_pos, "start position should be smaller than end position");
-  REQUIRE(end_pos <= this->dimension_, "end position should be smaller or equal to dimension");
+  REQUIRE(end_pos <= this->_dimension, "end position should be smaller or equal to dimension");
 
-  const auto start_index       = start_pos * this->inc_;
-  const auto start_ptr         = this->coordinate_const_ptr_ + start_index;
+  const auto start_index       = start_pos * this->_inc;
+  const auto start_ptr         = this->_coordinate_const_ptr + start_index;
   const auto dimension_of_part = end_pos - start_pos;
 
-  return {start_ptr, dimension_of_part, this->inc_};
+  return {start_ptr, dimension_of_part, this->_inc};
 }
 
 std::string Vector_Const_Wrapper::to_string(void) const
 {
   std::ostringstream oss;
   oss << std::setprecision(16) << std::showpoint << std::left;
-  for (int i = 0; i < this->dimension_; ++i)
+  for (int i = 0; i < this->_dimension; ++i)
   {
-    oss << std::setw(25) << this->coordinate_const_ptr_[i];
+    oss << std::setw(25) << this->_coordinate_const_ptr[i];
   }
   return oss.str();
 }
@@ -207,49 +212,54 @@ Vector<3> Vector_Const_Wrapper::cross_product<3>(const Vector_Const_Wrapper& oth
 
 void Vector_Wrapper::operator*=(const double constant)
 {
-  ms::math::blas::cx(constant, this->coordinate_ptr_, this->dimension_, this->inc_);
+  ms::math::blas::cx(constant, this->_coordinate_ptr, this->_dimension, this->_inc);
 }
 
 void Vector_Wrapper::operator+=(const Vector_Const_Wrapper& other)
 {
-  REQUIRE(this->dimension_ == other.dimension(), "other vector should be same size");
-  ms::math::blas::x_plus_assign_y(this->coordinate_ptr_, other.data(), this->dimension_, this->inc_, other.inc());
+  REQUIRE(this->_dimension == other.dimension(), "other vector should be same size");
+  ms::math::blas::x_plus_assign_y(this->_coordinate_ptr, other.data(), this->_dimension, this->_inc, other.inc());
 }
 
 void Vector_Wrapper::operator-=(const Vector_Const_Wrapper& other)
 {
-  REQUIRE(this->dimension_ == other.dimension(), "other vector should be same size");
-  ms::math::blas::x_minus_assign_y(this->coordinate_ptr_, other.data(), this->dimension_, this->inc_, other.inc());
+  REQUIRE(this->_dimension == other.dimension(), "other vector should be same size");
+  ms::math::blas::x_minus_assign_y(this->_coordinate_ptr, other.data(), this->_dimension, this->_inc, other.inc());
 }
 
 double& Vector_Wrapper::operator[](const size_t position)
 {
-  REQUIRE(position < this->dimension_, "position should be less then size");
-  return this->coordinate_ptr_[position];
+  REQUIRE(position < this->_dimension, "position should be less then size");
+  return this->_coordinate_ptr[position];
+}
+
+Vector_Wrapper::operator double*(void)
+{
+  return this->_coordinate_ptr;
 }
 
 double& Vector_Wrapper::at(const size_t position)
 {
-  REQUIRE(position < this->dimension_, "position should be less then size");
-  return this->coordinate_ptr_[position];
+  REQUIRE(position < this->_dimension, "position should be less then size");
+  return this->_coordinate_ptr[position];
 }
 
 void Vector_Wrapper::change_value(const Vector_Const_Wrapper& other)
 {
-  REQUIRE(this->dimension_ == other.dimension(), "other vector should be same size");
-  ms::math::blas::copy(this->coordinate_ptr_, other.data(), this->dimension_, this->inc_, other.inc());
+  REQUIRE(this->_dimension == other.dimension(), "other vector should be same size");
+  ms::math::blas::copy(this->_coordinate_ptr, other.data(), this->_dimension, this->_inc, other.inc());
 }
 
 double* Vector_Wrapper::data(void)
 {
-  return this->coordinate_ptr_;
+  return this->_coordinate_ptr;
 }
 
 void Vector_Wrapper::initalize(void)
 {
-  for (int i = 0; i < this->dimension_; ++i)
+  for (int i = 0; i < this->_dimension; ++i)
   {
-    this->coordinate_ptr_[i] = 0.0;
+    this->_coordinate_ptr[i] = 0.0;
   }
 }
 
@@ -261,77 +271,77 @@ void Vector_Wrapper::normalize(void)
 Vector<0>::Vector(const int dimension)
     : coordinates_(dimension)
 {
-  this->dimension_            = static_cast<int>(this->coordinates_.size());
-  this->coordinate_const_ptr_ = this->coordinates_.data();
-  this->coordinate_ptr_       = this->coordinates_.data();
-  this->inc_                  = 1;
+  this->_dimension            = static_cast<int>(this->coordinates_.size());
+  this->_coordinate_const_ptr = this->coordinates_.data();
+  this->_coordinate_ptr       = this->coordinates_.data();
+  this->_inc                  = 1;
 }
 
 Vector<0>::Vector(const std::initializer_list<double> list)
     : coordinates_(list)
 {
-  this->dimension_            = static_cast<int>(this->coordinates_.size());
-  this->coordinate_const_ptr_ = this->coordinates_.data();
-  this->coordinate_ptr_       = this->coordinates_.data();
-  this->inc_                  = 1;
+  this->_dimension            = static_cast<int>(this->coordinates_.size());
+  this->_coordinate_const_ptr = this->coordinates_.data();
+  this->_coordinate_ptr       = this->coordinates_.data();
+  this->_inc                  = 1;
 }
 
 Vector<0>::Vector(const std::vector<double>& values)
     : coordinates_(values)
 {
-  this->dimension_            = static_cast<int>(this->coordinates_.size());
-  this->coordinate_const_ptr_ = this->coordinates_.data();
-  this->coordinate_ptr_       = this->coordinates_.data();
-  this->inc_                  = 1;
+  this->_dimension            = static_cast<int>(this->coordinates_.size());
+  this->_coordinate_const_ptr = this->coordinates_.data();
+  this->_coordinate_ptr       = this->coordinates_.data();
+  this->_inc                  = 1;
 }
 
 Vector<0>::Vector(std::vector<double>&& values)
     : coordinates_(std::move(values))
 {
-  this->dimension_            = static_cast<int>(this->coordinates_.size());
-  this->coordinate_const_ptr_ = this->coordinates_.data();
-  this->coordinate_ptr_       = this->coordinates_.data();
-  this->inc_                  = 1;
+  this->_dimension            = static_cast<int>(this->coordinates_.size());
+  this->_coordinate_const_ptr = this->coordinates_.data();
+  this->_coordinate_ptr       = this->coordinates_.data();
+  this->_inc                  = 1;
 };
 
 Vector<0>::Vector(const Vector& other)
     : coordinates_(other.coordinates_)
 {
-  this->dimension_            = other.dimension_;
-  this->coordinate_const_ptr_ = this->coordinates_.data();
-  this->coordinate_ptr_       = this->coordinates_.data();
-  this->inc_                  = other.inc_;
+  this->_dimension            = other._dimension;
+  this->_coordinate_const_ptr = this->coordinates_.data();
+  this->_coordinate_ptr       = this->coordinates_.data();
+  this->_inc                  = other._inc;
 }
 
 Vector<0>::Vector(Vector&& other) noexcept
     : coordinates_(std::move(other.coordinates_))
 {
-  this->dimension_            = other.dimension_;
-  this->coordinate_const_ptr_ = this->coordinates_.data();
-  this->coordinate_ptr_       = this->coordinates_.data();
-  this->inc_                  = other.inc_;
+  this->_dimension            = other._dimension;
+  this->_coordinate_const_ptr = this->coordinates_.data();
+  this->_coordinate_ptr       = this->coordinates_.data();
+  this->_inc                  = other._inc;
 
-  other.dimension_            = 0;
-  other.coordinate_const_ptr_ = nullptr;
-  other.coordinate_ptr_       = nullptr;
+  other._dimension            = 0;
+  other._coordinate_const_ptr = nullptr;
+  other._coordinate_ptr       = nullptr;
 }
 
 void Vector<0>::operator=(const Vector& other)
 {
   this->coordinates_          = other.coordinates_;
-  this->dimension_            = other.dimension_;
-  this->coordinate_const_ptr_ = this->coordinates_.data();
-  this->coordinate_ptr_       = this->coordinates_.data();
-  this->inc_                  = other.inc_;
+  this->_dimension            = other._dimension;
+  this->_coordinate_const_ptr = this->coordinates_.data();
+  this->_coordinate_ptr       = this->coordinates_.data();
+  this->_inc                  = other._inc;
 }
 
 void Vector<0>::operator=(Vector&& other) noexcept
 {
   this->coordinates_          = std::move(other.coordinates_);
-  this->dimension_            = other.dimension_;
-  this->coordinate_const_ptr_ = this->coordinates_.data();
-  this->coordinate_ptr_       = this->coordinates_.data();
-  this->inc_                  = other.inc_;
+  this->_dimension            = other._dimension;
+  this->_coordinate_const_ptr = this->coordinates_.data();
+  this->_coordinate_ptr       = this->coordinates_.data();
+  this->_inc                  = other._inc;
 }
 
 Vector<0> operator*(const double constant, const Vector_Const_Wrapper& x)

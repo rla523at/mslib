@@ -53,7 +53,6 @@ struct Element_Data
 {
   Element_Type     element_type;
   Figure           figure;
-  int              figure_order;
   std::vector<int> node_indexes;
 };
 
