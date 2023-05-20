@@ -26,5 +26,8 @@
     <ClCompile Include="..\_src\msconfig\Reader.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="..\_src\msconfig\Data.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

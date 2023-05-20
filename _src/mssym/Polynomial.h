@@ -38,6 +38,7 @@ public:
   Simple_Poly_Term operator*(const double constant) const;
   Poly_Term        operator*(const Simple_Poly_Term& other) const;
   double           operator()(const double* input) const;
+  double           operator()(const std::pair<const double*, int>& input) const;
   bool             operator==(const Simple_Poly_Term& other) const;
   bool             operator!=(const Simple_Poly_Term& other) const;
   bool             operator<(const Simple_Poly_Term& other) const;
@@ -82,6 +83,7 @@ public:
 public:
   Poly_Term operator*(const double constant) const;
   double    operator()(const double* input) const;
+  double    operator()(const std::pair<const double*, int>& input) const;
   bool      operator==(const Powered_Poly_Term& other) const;
   bool      operator<(const Powered_Poly_Term& other) const; // for Poly_Term::has_same_form
 
@@ -123,6 +125,7 @@ public:
   Poly_Term operator*(const double constant) const;
   Poly_Term operator*(const Poly_Term& other) const;
   double    operator()(const double* input) const;
+  double    operator()(const std::pair<const double*, int>& input) const;
   bool      operator==(const Poly_Term& other) const;
   bool      operator!=(const Poly_Term& other) const;
 
@@ -166,6 +169,7 @@ public:
 
 public:
   double operator()(const double* input) const override;
+  double operator()(const std::pair<const double*, int>& input) const override;
 
 public:
   Sym_Base    copy(void) const override;

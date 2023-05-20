@@ -36,7 +36,7 @@ enum class Figure
   NOT_IN_LIST = -1
 };
 
-struct Nodes_Data
+struct Grid_Nodes_Data
 {
 public:
   const double* coordinates_ptr(const int node_index) const;
@@ -49,24 +49,25 @@ public:
   std::vector<double> coordinates;
 };
 
-struct Element_Data
+// 1.node numbers start with 0
+struct Grid_Element_Data
 {
   Element_Type     element_type;
   Figure           figure;
-  std::vector<int> node_indexes;
+  std::vector<int> node_numbers;
 };
 
-struct Peridoic_Data
+struct Grid_Peridoic_Data
 {
-  Element_Data        element_data;
+  Grid_Element_Data        element_data;
   std::vector<double> periodic_direction;
 };
 
-struct Data
+struct Grid_Data
 {
-  Nodes_Data                 nodes_data;
-  std::vector<Element_Data>  element_datas;
-  std::vector<Peridoic_Data> periodic_datas;
+  Grid_Nodes_Data                 nodes_data;
+  std::vector<Grid_Element_Data>  element_datas;
+  std::vector<Grid_Peridoic_Data> periodic_datas;
 };
 
 } // namespace ms::grid

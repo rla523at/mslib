@@ -36,6 +36,11 @@ double Powered_Term::operator()(const double* input) const
   return std::pow((*this->base_ptr_)(input), this->exponent_);
 }
 
+double Powered_Term::operator()(const std::pair<const double*, int>& input) const
+{
+  return std::pow((*this->base_ptr_)(input), this->exponent_);
+}
+
 Multiplied_Term Powered_Term::get_differentiate(const int var_index) const
 {
   if (this->is_constant())
@@ -186,6 +191,17 @@ double Multiplied_Term::operator()(const double* input) const
   return result;
 }
 
+double Multiplied_Term::operator()(const std::pair<const double*, int>& input) const
+{
+  double result = this->constant_;
+  for (auto& term : this->pterms_)
+  {
+    result *= term(input);
+  }
+
+  return result;
+}
+
 Symbol Multiplied_Term::get_differentiate(const int variable_index) const
 {
   if (this->is_constant())
@@ -292,6 +308,25 @@ Sym_Base Symbol::copy(void) const
 }
 
 double Symbol::operator()(const double* input) const
+{
+  auto result = this->constant_;
+
+  for (const auto& term : this->mterms_)
+  {
+    result += term(input);
+  }
+
+  if (this->is_absolute_)
+  {
+    return std::abs(result);
+  }
+  else
+  {
+    return result;
+  }
+}
+
+double Symbol::operator()(const std::pair<const double*, int>& input) const
 {
   auto result = this->constant_;
 

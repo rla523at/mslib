@@ -398,6 +398,16 @@ std::string_view remove_after(std::string_view str, std::string_view target)
   return str;
 }
 
+void remove_after_inplace(std::string& str, std::string_view target)
+{
+  constexpr auto n   = 1;
+  const auto     pos = ms::string::find_nth_position(str, target, n);
+
+  if (pos == ms::string::fail_to_find) return;
+
+  str.erase(pos);
+}
+
 void remove_inplace(std::string& str, const char target)
 {
   str = ms::string::remove(str, target);
@@ -548,10 +558,7 @@ bool is_integer(std::string_view str)
 bool is_real_number(std::string_view str)
 {
   // check empty
-  if (str.empty())
-  {
-    return false;
-  }
+  if (str.empty()) return false;
 
   // check and remove sign
   if (str[0] == '+' || str[0] == '-')
@@ -560,26 +567,23 @@ bool is_real_number(std::string_view str)
   }
 
   // check empty
-  if (str.empty())
-  {
-    return false;
-  }
+  if (str.empty()) return false;
 
   bool is_first_dot = true;
 
   for (const auto c : str)
   {
-    if (!std::isdigit(c))
+    if (std::isdigit(c)) continue;
+
+    if (c == '.' && is_first_dot)
     {
-      if (c == '.' && is_first_dot)
-      {
-        is_first_dot = false;
-      }
-      else
-      {
-        return false;
-      }
+      is_first_dot = false;
     }
+    else
+    {
+      return false;
+    }
+
   }
 
   return true;

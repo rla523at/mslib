@@ -44,7 +44,13 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <ItemGroup>
-    <ClCompile Include="Node.cpp" />
+    <ClCompile Include="Geometry.cpp" />
+    <ClCompile Include="Node.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Reference_Geometry.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\geo\geo.vcxproj">
@@ -52,6 +58,9 @@
     </ProjectReference>
     <ProjectReference Include="..\math\math.vcxproj">
       <Project>{03bedf8c-7f22-4244-a8cb-e7bf9ac7c821}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\sym\sym.vcxproj">
+      <Project>{eb3d5635-a62e-4846-ab9c-595352887bf2}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

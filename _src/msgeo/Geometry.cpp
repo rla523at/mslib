@@ -2,14 +2,212 @@
 
 #include "Reference_Geometry_Container.h"
 
+#include "msexception/Exception.h"
+
 namespace ms::geo
 {
+
+Geometry::Geometry(const Figure figure, const std::vector<Node_Const_Wrapper>& consisting_nodes)
+    : _reference_geometry(Reference_Geometry_Container::get(figure)),
+      _consisting_nodes(consisting_nodes)
+{
+  this->_parametric_functions = this->_reference_geometry.cal_parametric_functions(this->_consisting_nodes);
+  this->_scale_function       = this->_reference_geometry.cal_scale_function(this->_parametric_functions);
+  //
+}
+
 Geometry::Geometry(const Figure figure, std::vector<Node_Const_Wrapper>&& consisting_nodes)
     : _reference_geometry(Reference_Geometry_Container::get(figure)),
       _consisting_nodes(std::move(consisting_nodes))
 {
   this->_parametric_functions = this->_reference_geometry.cal_parametric_functions(this->_consisting_nodes);
-  this->_normal_functions     = this->_reference_geometry.cal_normal_functions(this->_parametric_functions);
+  this->_scale_function       = this->_reference_geometry.cal_scale_function(this->_parametric_functions);
+}
+
+void Geometry::change_nodes(std::vector<Node_Const_Wrapper>&& new_nodes)
+{
+  REQUIRE(this->_reference_geometry.is_valid_num_points(static_cast<int>(new_nodes.size())), "The number of nodes is not valid for the current reference geometry.");
+
+  this->_consisting_nodes     = std::move(new_nodes);
+  this->_parametric_functions = this->_reference_geometry.cal_parametric_functions(this->_consisting_nodes);
+  this->_scale_function       = this->_reference_geometry.cal_scale_function(this->_parametric_functions);
+}
+
+void Geometry::cal_projected_volumes(double* projected_volumes) const
+{
+  // calculating approximately
+
+  const auto ref_geo_dim = this->_reference_geometry.dimension();
+  if (ref_geo_dim <= 2)
+  {
+    const auto dimension = this->dimension();
+    const auto num_nodes = this->_consisting_nodes.size();
+
+    std::vector<double> coordinate_mins(dimension, std::numeric_limits<double>::max());
+    std::vector<double> coordinate_maxs(dimension, std::numeric_limits<double>::min());
+
+    for (int i = 0; i < num_nodes; ++i)
+    {
+      const auto& node = this->_consisting_nodes[i];
+      for (int j = 0; j < dimension; ++j)
+      {
+        const auto coordinate = node[j];
+
+        if (coordinate < coordinate_mins[j]) coordinate_mins[j] = coordinate;
+
+        if (coordinate_maxs[j] < coordinate) coordinate_maxs[j] = coordinate;
+      }
+    }
+
+    for (int i = 0; i < dimension; ++i)
+    {
+      cal_projected_volumes[i] = coordinate_maxs[i] - coordinate_mins[i];
+    }
+  }
+  else if (ref_geo_dim == 3)
+  {
+    EXCEPTION("not supproted space dimension");
+    // double yz_projected_volume = 0.0;
+    // double xz_projected_volume = 0.0;
+    // double xy_projected_volume = 0.0;
+
+    // const auto face_geometries = this->face_geometries();
+    // for (const auto& geometry : face_geometries)
+    //{
+    //   const auto normal_v = geometry.normalized_normal_vector(geometry.center_point());
+
+    //  Euclidean_Vector yz_plane_normalized_normal_vector = {1, 0, 0};
+    //  Euclidean_Vector xz_plane_normalized_normal_vector = {0, 1, 0};
+    //  Euclidean_Vector xy_plane_normalized_normal_vector = {0, 0, 1};
+
+    //  const auto volume = geometry.volume();
+
+    //  yz_projected_volume += volume * std::abs(normal_v.inner_product(yz_plane_normalized_normal_vector));
+    //  xz_projected_volume += volume * std::abs(normal_v.inner_product(xz_plane_normalized_normal_vector));
+    //  xy_projected_volume += volume * std::abs(normal_v.inner_product(xy_plane_normalized_normal_vector));
+    //}
+
+    // return {0.5 * yz_projected_volume, 0.5 * xz_projected_volume, 0.5 * xy_projected_volume};
+  }
+  else
+  {
+    EXCEPTION("not supproted space dimension");
+  }
+}
+
+double Geometry::cal_volume(const int expected_scale_function_order) const
+{
+  const auto& quadrature_rule = this->get_quadrature_rule(expected_scale_function_order);
+
+  auto volume = 0.0;
+  for (const auto weight : quadrature_rule.weights)
+  {
+    volume += weight;
+  }
+
+  return volume;
+}
+
+void Geometry::center(double* coordinates) const
+{
+  const auto ref_center = this->_reference_geometry.center_point();
+
+  const auto dimension = this->dimension();
+  for (int i = 0; i < dimension; ++i)
+  {
+    coordinates[i] = this->_parametric_functions[i](ref_center);
+  }
+}
+
+int Geometry::dimension(void) const
+{
+  return static_cast<int>(this->_parametric_functions.size());
+}
+
+Figure Geometry::face_figure(const int face_index) const
+{
+  return this->_reference_geometry.face_figure(face_index);
+}
+
+std::vector<std::vector<int>> Geometry::face_index_to_face_vnode_indexes(void) const
+{
+  return this->_reference_geometry.face_index_to_face_vnode_indexes();
+}
+
+std::vector<int> Geometry::face_node_indexes(const int face_index) const
+{
+  const auto num_nodes       = static_cast<int>(this->_consisting_nodes.size());
+  const auto parameter_order = this->_reference_geometry.cal_parameter_order(num_nodes);
+
+  const auto  face_figure  = this->_reference_geometry.face_figure(face_index);
+  const auto& face_ref_geo = Reference_Geometry_Container::get(face_figure);
+
+  return face_ref_geo.node_indexes(parameter_order);
+}
+
+const Quadrature_Rule& Geometry::get_quadrature_rule(const int integrand_degree) const
+{
+  REQUIRE(0 <= integrand_degree, "integrand degree should be positive");
+
+  if (!this->_degree_to_quadrature_rule.contains(integrand_degree))
+  {
+    this->create_and_store_quadrature_rule(integrand_degree);
+  }
+
+  return this->_degree_to_quadrature_rule.at(integrand_degree);
+}
+
+bool Geometry::is_point(void) const
+{
+  return this->_reference_geometry.is_point();
+}
+
+bool Geometry::is_line(void) const
+{
+  return this->_reference_geometry.is_line();
+}
+
+int Geometry::num_faces(void) const
+{
+  return this->_reference_geometry.num_faces();
+}
+
+int Geometry::num_vertices(void) const
+{
+  return this->_reference_geometry.num_vertices();
+}
+
+void Geometry::create_and_store_quadrature_rule(const int integrand_degree) const
+{
+  REQUIRE(0 <= integrand_degree, "integrand degree should be positive");
+
+  const auto  ref_quadrature_points  = this->_reference_geometry.quadrature_points(integrand_degree);
+  const auto& ref_quadrature_weights = this->_reference_geometry.get_quadrature_weights(integrand_degree);
+
+  const auto num_QP    = ref_quadrature_points.num_nodes();
+  const auto dimension = this->dimension();
+
+  std::vector<double> transformed_coordiantes(num_QP * dimension);
+  std::vector<double> transformed_QW(num_QP);
+
+  auto ptr = transformed_coordiantes.data();
+  for (int i = 0; i < num_QP; ++i)
+  {
+    const auto ref_QP     = ref_quadrature_points[i];
+    const auto ref_weight = ref_quadrature_weights[i];
+
+    for (int j = 0; j < dimension; ++j)
+    {
+      ptr[j] = this->_parametric_functions[j](ref_QP);
+    }
+    ptr += dimension;
+
+    transformed_QW[i] = this->_scale_function(ref_QP) * ref_weight; // operator for double 만들필요는 없지 이상하잖아
+  }
+
+  auto points          = Nodes(Coordinates_Type::NODAL, num_QP, dimension, std::move(transformed_coordiantes));
+  auto quadrature_rule = Quadrature_Rule(std::move(points), std::move(transformed_QW));
+  this->_degree_to_quadrature_rule.emplace(integrand_degree, std::move(quadrature_rule));
 }
 
 } // namespace ms::geo
@@ -445,34 +643,7 @@ Geometry::Geometry(const Figure figure, std::vector<Node_Const_Wrapper>&& consis
 //         return false;
 // }
 //
-// Quadrature_Rule Geometry::make_quadrature_rule(const ushort integrand_order)
-//     const
-//{
-//         const auto reference_integrand_order = integrand_order + this->reference_geometry_->scale_function_order();
-//         const auto&
-//             ref_quadrature_rule
-//             = this->reference_geometry_->get_quadrature_rule(reference_integrand_order);
-//
-//         const auto num_QP = ref_quadrature_rule.points.size();
-//         std::vector<Euclidean_Vector> transformed_QPs;
-//         transformed_QPs.reserve(num_QP);
-//
-//         for (const auto& ref_point_v : ref_quadrature_rule.points) {
-//             transformed_QPs.push_back(this->mapping_vf_(ref_point_v));
-//         }
-//
-//         std::vector<double> transformed_QW(num_QP);
-//
-//         for (size_t i = 0; i < num_QP; ++i) {
-//             const auto& point_v = ref_quadrature_rule.points[i];
-//             const auto& weight = ref_quadrature_rule.weights[i];
-//
-//             transformed_QW[i] = this->scale_f_(point_v) * weight;
-//         }
-//
-//         return { transformed_QPs, transformed_QW };
-// }
-//
+
 // namespace ms {
 //// double integrate(const Polynomial& integrand, const Quadrature_Rule&
 // quadrature_rule)

@@ -1,31 +1,9 @@
 #pragma once
+#include "Figure.h"
+#include "Node.h"
+#include "mssym/Polynomial.h"
+#include "mssym/Symbol.h"
 #include <vector>
-
-// forward declaration
-namespace ms::sym
-{
-class Polynomial;
-class Symbol;
-} // namespace ms::sym
-
-namespace ms::geo
-{
-class Node_Const_Wrapper;
-class Nodes_Const_Wrapper;
-using Polynomial  = ms::sym::Polynomial;
-using Symbol      = ms::sym::Symbol;
-using Polynomials = std::vector<ms::sym::Polynomial>;
-using Symbols     = std::vector<ms::sym::Symbol>;
-
-} // namespace ms::geo
-
-/*
-
-
-
-
-
-*/
 
 // class declaration
 namespace ms::geo
@@ -34,10 +12,22 @@ namespace ms::geo
 class Reference_Geometry
 {
 public:
-  virtual Polynomials         cal_normal_functions(const Polynomials& parametric_functions) const                     = 0;
-  virtual Polynomials         cal_parametric_functions(const std::vector<Node_Const_Wrapper>& consisting_nodes) const = 0;
-  virtual Node_Const_Wrapper  center_point(void) const                                                                = 0;
-  virtual Nodes_Const_Wrapper quadrature_points(const int integrand_degree) const                                     = 0;
+  virtual ms::sym::Polynomials          cal_normal_functions(const ms::sym::Polynomials& parametric_functions) const            = 0;
+  virtual ms::sym::Polynomials          cal_parametric_functions(const std::vector<Node_Const_Wrapper>& consisting_nodes) const = 0;
+  virtual int                           cal_parameter_order(const int num_nodes) const                                          = 0;
+  virtual ms::sym::Symbol               cal_scale_function(const ms::sym::Polynomials& parametric_functions) const              = 0;
+  virtual Node_Const_Wrapper            center_point(void) const                                                                = 0;
+  virtual int                           dimension(void) const                                                                   = 0;
+  virtual Figure                        face_figure(const int face_index) const                                                 = 0;
+  virtual std::vector<std::vector<int>> face_index_to_face_vnode_indexes(void) const                                            = 0;
+  virtual const std::vector<double>&    get_quadrature_weights(const int integrand_degree) const                                = 0;
+  virtual bool                          is_valid_num_points(const int num_points) const                                         = 0;
+  virtual bool                          is_point(void) const                                                                    = 0;
+  virtual bool                          is_line(void) const                                                                     = 0;
+  virtual std::vector<int>              node_indexes(const int parameter_order) const                                           = 0;
+  virtual int                           num_faces(void) const                                                                   = 0;
+  virtual int                           num_vertices(void) const                                                                = 0;
+  virtual Nodes_Const_Wrapper           quadrature_points(const int integrand_degree) const                                     = 0;
 
 protected:
   virtual ~Reference_Geometry(void) = default;
@@ -57,11 +47,19 @@ protected:
 namespace ms::geo
 {
 
-Symbol      cal_curvature(const Polynomials& curve);
-Symbols     cal_principal_normal(const Polynomials& curve);
-Polynomials cal_paramteric_curve_normal_functions(const Polynomials& curve);
+ms::sym::Symbol      cal_curvature(const ms::sym::Polynomials& curve);
+ms::sym::Symbols     cal_principal_normal(const ms::sym::Polynomials& curve);
+ms::sym::Polynomials cal_paramteric_curve_normal_functions(const ms::sym::Polynomials& curve);
 
 } // namespace ms::geo
+
+/*
+
+
+
+
+
+*/
 
 // const std::vector<Euclidean_Vector>& get_post_points(
 //     const int post_order) const;
@@ -75,7 +73,6 @@ Polynomials cal_paramteric_curve_normal_functions(const Polynomials& curve);
 // virtual Figure figure(void) const = 0;
 // virtual bool is_simplex(void) const = 0;
 // virtual bool is_line(void) const = 0;
-// virtual int num_vertices(void) const = 0;
 // virtual int num_post_nodes(const int post_order) const = 0;
 // virtual int num_post_elements(const int post_order) const = 0;
 // virtual Vector_Function<Polynomial> make_normal_vector_function(
@@ -89,9 +86,6 @@ Polynomials cal_paramteric_curve_normal_functions(const Polynomials& curve);
 // sub_simplex_reference_geometries(void) const = 0;
 // virtual std::vector<std::vector<int>>
 // set_of_sub_simplex_vertex_index_sequences(void) const = 0;
-// virtual Irrational_Function scale_function(
-//     const Vector_Function<Polynomial>& mapping_function) const = 0;
-// virtual int scale_function_order(void) const = 0;
 
 // Matrix make_inverse_mapping_monomial_matrix(void) const;
 // std::vector<std::vector<uint>> quadrilateral_connectivities(

@@ -60,7 +60,7 @@ public:
   bool      operator!=(const Vector_Const_Wrapper& other) const;
 
 public:
-  operator const double*(void) const;
+  operator std::pair<const double*,int>(void) const;
 
 public:
   double               at(const size_t position) const;

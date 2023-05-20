@@ -1,28 +1,27 @@
 #include "Reference_Geometry_Impl.h"
 
+#include "Figure.h"
 #include "Node.h"
 
 #include "msexception/Exception.h"
 #include "msmath/Matrix.h"
-#include "mssym/Polynomial.h"
-#include "mssym/Symbol.h"
 
 namespace ms::geo
 {
 
-Polynomials Reference_Point::cal_normal_functions(const Polynomials& parametric_functions) const
+ms::sym::Polynomials Reference_Point::cal_normal_functions(const ms::sym::Polynomials& parametric_functions) const
 {
   return {1.0};
 }
 
-Polynomials Reference_Point::cal_parametric_functions(const std::vector<Node_Const_Wrapper>& consisting_nodes) const
+ms::sym::Polynomials Reference_Point::cal_parametric_functions(const std::vector<Node_Const_Wrapper>& consisting_nodes) const
 {
   REQUIRE(consisting_nodes.size() == 1, "Point must consist of only one single point.");
 
   const auto& node      = consisting_nodes.front();
   const auto  dimension = node.dimension();
 
-  Polynomials result(dimension);
+  ms::sym::Polynomials result(dimension);
   for (int i = 0; i < dimension; ++i)
   {
     result[i] = node[i];
@@ -31,9 +30,69 @@ Polynomials Reference_Point::cal_parametric_functions(const std::vector<Node_Con
   return result;
 }
 
+int Reference_Point::cal_parameter_order(const int num_points) const
+{
+  return 0;
+}
+
+ms::sym::Symbol Reference_Point::cal_scale_function(const ms::sym::Polynomials& parametric_functions) const
+{
+  EXCEPTION("Point doesn't have scale function");
+  return {};
+}
+
 Node_Const_Wrapper Reference_Point::center_point(void) const
 {
   return {1, this->_center_coords.data()};
+}
+
+int Reference_Point::dimension(void) const
+{
+  return 0;
+}
+
+Figure Reference_Point::face_figure(const int face_index) const
+{
+  EXCEPTION("Point doesn't have any face");
+  return Figure::NOT_FIGURE;
+}
+
+std::vector<std::vector<int>> Reference_Point::face_index_to_face_vnode_indexes(void) const
+{
+  EXCEPTION("Point doesn't have any faces");
+  return {};
+}
+
+bool Reference_Point::is_valid_num_points(const int num_points) const
+{
+  return num_points == 1;
+}
+
+bool Reference_Point::is_point(void) const
+{
+  return true;
+}
+
+bool Reference_Point::is_line(void) const
+{
+  return false;
+}
+
+std::vector<int> Reference_Point::node_indexes(const int parameter_order) const
+{
+  return {0};
+}
+
+int Reference_Point::num_faces(void) const
+{
+  EXCEPTION("Point doesn't have any vertices");
+  return -1;
+}
+
+int Reference_Point::num_vertices(void) const
+{
+  EXCEPTION("Point doesn't have any vertices");
+  return -1;
 }
 
 Nodes_Const_Wrapper Reference_Point::quadrature_points(const int integrand_degree) const
@@ -42,15 +101,20 @@ Nodes_Const_Wrapper Reference_Point::quadrature_points(const int integrand_degre
   return {Coordinates_Type::NOT_SUPPROTED, -1, -1, nullptr};
 }
 
-
-std::vector<Polynomial> Reference_Geometry_Common::cal_parametric_functions(const std::vector<Node_Const_Wrapper>& consisting_nodes) const
+const std::vector<double>& Reference_Point::get_quadrature_weights(const int integrand_degree) const
 {
-  const auto  num_nodes       = consisting_nodes.size();
+  EXCEPTION("Integration is not possible over a point.");
+  return {};
+}
+
+ms::sym::Polynomials Reference_Geometry_Common::cal_parametric_functions(const std::vector<Node_Const_Wrapper>& consisting_nodes) const
+{
+  const auto  num_nodes       = static_cast<int>(consisting_nodes.size());
   const auto  param_order     = this->cal_parameter_order(num_nodes);
   const auto& shape_functions = this->get_shape_functions(param_order);
 
-  const auto              dim = consisting_nodes.front().dimension();
-  std::vector<Polynomial> parametric_functions(dim);
+  const auto           dim = consisting_nodes.front().dimension();
+  ms::sym::Polynomials parametric_functions(dim);
 
   for (int i = 0; i < dim; ++i)
   {
@@ -64,24 +128,38 @@ std::vector<Polynomial> Reference_Geometry_Common::cal_parametric_functions(cons
   return parametric_functions;
 }
 
+bool Reference_Geometry_Common::is_point(void) const
+{
+  return false;
+}
+
 Nodes_Const_Wrapper Reference_Geometry_Common::quadrature_points(const int integrand_degree) const
 {
-  constexpr auto coordinate_type = Coordinates_Type::NODAL;
+  REQUIRE(0 <= integrand_degree, "integrand degree should be positive");
 
   const auto tag = this->cal_quadrature_rule_tag(integrand_degree);
 
-  if (!this->_tag_to_quadrature_points_coords.contains(tag))
+  if (!this->_tag_to_quadrature_points.contains(tag))
   {
-    this->_tag_to_quadrature_points_coords.emplace(tag, this->make_quadrature_coords(tag));
+    this->create_and_store_quadrature_points(tag);
   }
 
-  const auto  num_QPs   = this->num_quadrature_points(tag);
-  const auto  dimension = this->dimension();
-  const auto& QP_coords = this->_tag_to_quadrature_points_coords[tag];
-  return Nodes_Const_Wrapper(coordinate_type, num_QPs, dimension, QP_coords.data());
+  return this->_tag_to_quadrature_points.at(tag);
 }
 
-const std::vector<Polynomial>& Reference_Geometry_Common::get_shape_functions(const int porder) const
+const std::vector<double>& Reference_Geometry_Common::get_quadrature_weights(const int integrand_degree) const
+{
+  const auto tag = this->cal_quadrature_rule_tag(integrand_degree);
+
+  if (!this->_tag_to_quadrature_weights.contains(tag))
+  {
+    this->create_and_store_quadrature_weights(tag);
+  }
+
+  return this->_tag_to_quadrature_weights.at(tag);
+}
+
+const ms::sym::Polynomials& Reference_Geometry_Common::get_shape_functions(const int porder) const
 {
   if (!this->_parameter_order_to_shape_functions.contains(porder))
   {
@@ -91,7 +169,7 @@ const std::vector<Polynomial>& Reference_Geometry_Common::get_shape_functions(co
   return this->_parameter_order_to_shape_functions[porder];
 }
 
-std::vector<Polynomial> Reference_Geometry_Common::make_shape_functions(const int parameter_order) const
+ms::sym::Polynomials Reference_Geometry_Common::make_shape_functions(const int parameter_order) const
 {
   constexpr auto coordinate_type = Coordinates_Type::NODAL;
 
@@ -121,7 +199,7 @@ std::vector<Polynomial> Reference_Geometry_Common::make_shape_functions(const in
 
   coefficients.inverse();
 
-  std::vector<Polynomial> shape_functions(n);
+  ms::sym::Polynomials shape_functions(n);
   for (int i = 0; i < n; ++i)
   {
     for (int j = 0; j < n; ++j)
@@ -131,6 +209,16 @@ std::vector<Polynomial> Reference_Geometry_Common::make_shape_functions(const in
   }
 
   return shape_functions;
+}
+
+Node_Const_Wrapper Reference_Line::center_point(void) const
+{
+  return Node_Const_Wrapper(this->dimension(), this->center_coords_.data());
+};
+
+ms::sym::Polynomials Reference_Line::cal_normal_functions(const ms::sym::Polynomials& curve) const
+{
+  return ms::geo::cal_paramteric_curve_normal_functions(curve);
 }
 
 int Reference_Line::cal_parameter_order(const int num_points) const
@@ -148,19 +236,72 @@ int Reference_Line::cal_parameter_order(const int num_points) const
   }
 }
 
-Node_Const_Wrapper Reference_Line::center_point(void) const
+Figure Reference_Line::face_figure(const int face_index) const
 {
-  return Node_Const_Wrapper(this->dimension(), this->center_coords_.data());
-};
+  REQUIRE(face_index < this->num_faces(), "face index can't exceed num face");
 
-Polynomials Reference_Line::cal_normal_functions(const Polynomials& curve) const
-{
-  return ms::geo::cal_paramteric_curve_normal_functions(curve);
+  return Figure::POINT;
 }
 
-int Reference_Line::cal_quadrature_rule_tag(const int integrand_degree) const
+std::vector<std::vector<int>> Reference_Line::face_index_to_face_vnode_indexes(void) const
 {
-  return integrand_degree / 2;
+  // 0 式式式式 1
+  constexpr auto num_faces = 2;
+
+  std::vector<std::vector<int>> result(num_faces);
+  result[0] = {0};
+  result[1] = {1};
+
+  return result;
+}
+
+bool Reference_Line::is_valid_num_points(const int num_points) const
+{
+  switch (num_points)
+  {
+  case 2:
+  case 3:
+    return true;
+  default:
+    return false;
+  }
+}
+
+bool Reference_Line::is_line(void) const
+{
+  return true;
+}
+
+std::vector<int> Reference_Line::node_indexes(const int parameter_order) const
+{
+  // 0 式式式 2 式式式 ﹞﹞﹞ 式式式 order+1 式式式 1
+
+  std::vector<int> node_indexes(parameter_order + 1);
+
+  for (auto i = 0; i < parameter_order + 1; ++i)
+  {
+    node_indexes[i] = i;
+  }
+
+  return node_indexes;
+}
+
+int Reference_Line::num_faces(void) const
+{
+  return 2;
+}
+
+int Reference_Line::num_vertices(void) const
+{
+  return 2;
+}
+
+ms::sym::Symbol Reference_Line::cal_scale_function(const ms::sym::Polynomials& parametric_functions) const
+{
+  constexpr int r = 0;
+
+  const auto df_dr = ms::sym::get_differentiate(parametric_functions, r);
+  return ms::sym::cal_L2_norm(df_dr);
 }
 
 int Reference_Line::dimension(void) const
@@ -178,111 +319,51 @@ int Reference_Line::num_parametric_function_reference_points(const int param_ord
   return param_order + 2;
 }
 
-std::vector<double> Reference_Line::make_quadrature_coords(const int tag) const
+int Reference_Line::cal_quadrature_rule_tag(const int integrand_degree) const
+{
+  return integrand_degree / 2;
+}
+
+void Reference_Line::create_and_store_quadrature_points(const int tag) const
 {
   REQUIRE(0 <= tag, "param_order can not be negative");
 
-  std::vector<double> QP_coords;
+  std::vector<double> coordinates;
 
   switch (tag)
   {
   case 0:
-    QP_coords = {0.000000000000000};
+    coordinates = {0.000000000000000};
     break;
   case 1:
-    QP_coords = {
-        -0.577350269189626,
-        0.577350269189626};
+    coordinates = {-0.577350269189626, 0.577350269189626};
     break;
   case 2:
-    QP_coords = {
-        -0.774596669241483,
-        0.000000000000000,
-        0.774596669241483};
+    coordinates = {-0.774596669241483, 0.000000000000000, 0.774596669241483};
     break;
   case 3:
-    QP_coords = {
-        -0.861136311594052,
-        -0.339981043584856,
-        0.339981043584856,
-        0.861136311594052};
+    coordinates = {-0.861136311594052, -0.339981043584856, 0.339981043584856, 0.861136311594052};
     break;
   case 4:
-    QP_coords = {
-        -0.906179845938664,
-        -0.538469310105683,
-        0.000000000000000,
-        0.538469310105683,
-        0.906179845938664};
+    coordinates = {-0.906179845938664, -0.538469310105683, 0.000000000000000, 0.538469310105683, 0.906179845938664};
     break;
   case 5:
-    QP_coords = {
-        -0.932469514203152,
-        -0.661209386466264,
-        -0.238619186083197,
-        0.238619186083197,
-        0.661209386466264,
-        0.932469514203152};
+    coordinates = {-0.932469514203152, -0.661209386466264, -0.238619186083197, 0.238619186083197, 0.661209386466264, 0.932469514203152};
     break;
   case 6:
-    QP_coords = {
-        -0.949107912342758,
-        -0.741531185599394,
-        -0.405845151377397,
-        0.000000000000000,
-        0.405845151377397,
-        0.741531185599394,
-        0.949107912342758};
+    coordinates = {-0.949107912342758, -0.741531185599394, -0.405845151377397, 0.000000000000000, 0.405845151377397, 0.741531185599394, 0.949107912342758};
     break;
   case 7:
-    QP_coords = {
-        -0.960289856497536,
-        -0.796666477413627,
-        -0.525532409916329,
-        -0.183434642495650,
-        0.183434642495650,
-        0.525532409916329,
-        0.796666477413627,
-        0.960289856497536};
+    coordinates = {-0.960289856497536, -0.796666477413627, -0.525532409916329, -0.183434642495650, 0.183434642495650, 0.525532409916329, 0.796666477413627, 0.960289856497536};
     break;
   case 8:
-    QP_coords = {
-        -0.968160239507626,
-        -0.836031107326636,
-        -0.613371432700590,
-        -0.324253423403809,
-        0.000000000000000,
-        0.324253423403809,
-        0.613371432700590,
-        0.836031107326636,
-        0.968160239507626};
+    coordinates = {-0.968160239507626, -0.836031107326636, -0.613371432700590, -0.324253423403809, 0.000000000000000, 0.324253423403809, 0.613371432700590, 0.836031107326636, 0.968160239507626};
     break;
   case 9:
-    QP_coords = {
-        -0.973906528517172,
-        -0.865063366688985,
-        -0.679409568299024,
-        -0.433395394129247,
-        -0.148874338981631,
-        0.148874338981631,
-        0.433395394129247,
-        0.679409568299024,
-        0.865063366688985,
-        0.973906528517172};
+    coordinates = {-0.973906528517172, -0.865063366688985, -0.679409568299024, -0.433395394129247, -0.148874338981631, 0.148874338981631, 0.433395394129247, 0.679409568299024, 0.865063366688985, 0.973906528517172};
     break;
   case 10:
-    QP_coords = {
-        -0.978228658146057,
-        -0.887062599768095,
-        -0.730152005574049,
-        -0.519096129206812,
-        -0.269543155952345,
-        0.000000000000000,
-        0.269543155952345,
-        0.519096129206812,
-        0.730152005574049,
-        0.887062599768095,
-        0.978228658146057};
+    coordinates = {-0.978228658146057, -0.887062599768095, -0.730152005574049, -0.519096129206812, -0.269543155952345, 0.000000000000000, 0.269543155952345, 0.519096129206812, 0.730152005574049, 0.887062599768095, 0.978228658146057};
     break;
 
   default:
@@ -290,7 +371,60 @@ std::vector<double> Reference_Line::make_quadrature_coords(const int tag) const
     break;
   }
 
-  return QP_coords;
+  constexpr auto type      = Coordinates_Type::NODAL;
+  const auto     num_nodes = tag + 1;
+  constexpr auto dimension = 1;
+
+  this->_tag_to_quadrature_points.emplace(tag, Nodes(type, num_nodes, dimension, std::move(coordinates)));
+}
+
+void Reference_Line::create_and_store_quadrature_weights(const int tag) const
+{
+  REQUIRE(0 <= tag, "param_order can not be negative");
+
+  std::vector<double> weights;
+
+  switch (tag)
+  {
+  case 0:
+    weights = {2.000000000000000};
+    break;
+  case 1:
+    weights = {1.000000000000000, 1.000000000000000};
+    break;
+  case 2:
+    weights = {0.555555555555554, 0.888888888888889, 0.555555555555554};
+    break;
+  case 3:
+    weights = {0.347854845137454, 0.652145154862546, 0.652145154862546, 0.347854845137454};
+    break;
+  case 4:
+    weights = {0.236926885056189, 0.478628670499366, 0.568888888888889, 0.478628670499366, 0.236926885056189};
+    break;
+  case 5:
+    weights = {0.171324492379171, 0.360761573048139, 0.467913934572691, 0.467913934572691, 0.360761573048139, 0.171324492379171};
+    break;
+  case 6:
+    weights = {0.129484966168870, 0.279705391489277, 0.381830050505119, 0.417959183673469, 0.381830050505119, 0.279705391489277, 0.129484966168870};
+    break;
+  case 7:
+    weights = {0.101228536290377, 0.222381034453374, 0.313706645877887, 0.362683783378362, 0.362683783378362, 0.313706645877887, 0.222381034453374, 0.101228536290377};
+    break;
+  case 8:
+    weights = {0.081274388361575, 0.180648160694857, 0.260610696402936, 0.312347077040003, 0.330239355001260, 0.312347077040003, 0.260610696402936, 0.180648160694857, 0.081274388361575};
+    break;
+  case 9:
+    weights = {0.066671344308688, 0.149451349150581, 0.219086362515982, 0.269266719309996, 0.295524224714753, 0.295524224714753, 0.269266719309996, 0.219086362515982, 0.149451349150581, 0.066671344308688};
+    break;
+  case 10:
+    weights = {0.055668567116174, 0.125580369464904, 0.186290210927734, 0.233193764591990, 0.262804544510247, 0.272925086777901, 0.262804544510247, 0.233193764591990, 0.186290210927734, 0.125580369464904, 0.055668567116174};
+    break;
+  default:
+    EXCEPTION("unsupported param_order");
+    break;
+  }
+
+  this->_tag_to_quadrature_weights.emplace(tag, std::move(weights));
 }
 
 std::vector<double> Reference_Line::make_parametric_functions_reference_coords(const int tag) const
@@ -320,14 +454,14 @@ std::vector<double> Reference_Line::make_parametric_functions_reference_coords(c
   return VCP_coords;
 }
 
-std::vector<Polynomial> Reference_Line::make_parametric_function_bases(const int tag) const
+ms::sym::Polynomials Reference_Line::make_parametric_function_bases(const int tag) const
 {
   REQUIRE(0 <= tag, "param_order can not be negative");
 
-  const auto              num_bases = tag + 2;
-  std::vector<Polynomial> VCF_bases(num_bases);
+  const auto           num_bases = tag + 2;
+  ms::sym::Polynomials VCF_bases(num_bases);
 
-  Polynomial r("x0");
+  ms::sym::Polynomial r("x0");
   for (int i = 0; i < num_bases; ++i)
   {
     VCF_bases[i] = (r ^ i);
@@ -341,7 +475,7 @@ std::vector<Polynomial> Reference_Line::make_parametric_function_bases(const int
 namespace ms::geo
 {
 
-Symbols cal_principal_normal(const Polynomials& curve)
+ms::sym::Symbols cal_principal_normal(const ms::sym::Polynomials& curve)
 {
   const auto var_index = 0;
 
@@ -351,7 +485,7 @@ Symbols cal_principal_normal(const Polynomials& curve)
   return ms::sym::get_differentiate(unit_tangent, var_index);
 }
 
-Symbol cal_curvature(const Polynomials& curve)
+ms::sym::Symbol cal_curvature(const ms::sym::Polynomials& curve)
 {
   const auto var_index = 0;
 
@@ -363,12 +497,12 @@ Symbol cal_curvature(const Polynomials& curve)
   return curvature;
 }
 
-Polynomials cal_paramteric_curve_normal_functions(const Polynomials& parameteric_curve)
+ms::sym::Polynomials cal_paramteric_curve_normal_functions(const ms::sym::Polynomials& parameteric_curve)
 {
   const auto range_dimension = parameteric_curve.size();
   REQUIRE(2 <= range_dimension, "1D can't have normal");
 
-  Polynomials normal_functions(range_dimension);
+  ms::sym::Polynomials normal_functions(range_dimension);
 
   const auto& x = parameteric_curve[0];
   const auto& y = parameteric_curve[1];
@@ -385,15 +519,15 @@ Polynomials cal_paramteric_curve_normal_functions(const Polynomials& parameteric
 
 } // namespace ms::geo
 
-// std::vector<Polynomial> Reference_Line::cal_normal_functions(
-//     const std::vector<Polynomial>& parameteric_curve) const {
+// ms::sym::Polynomials Reference_Line::cal_normal_functions(
+//     const ms::sym::Polynomials& parameteric_curve) const {
 //   return {};
 // }
 
-// std::vector<Polynomial> cal_paramteric_curve_normal_functions(
-//     const std::vector<Polynomial>& parameteric_curve) {
+// ms::sym::Polynomials cal_paramteric_curve_normal_functions(
+//     const ms::sym::Polynomials& parameteric_curve) {
 //   const auto codomain_dim = parameteric_curve.size();
-//   std::vector<Polynomial> tangent(codomain_dim);
+//   ms::sym::Polynomials tangent(codomain_dim);
 //
 //   // variable index
 //   constexpr auto r = 0;
@@ -556,7 +690,7 @@ Polynomials cal_paramteric_curve_normal_functions(const Polynomials& parameteric
 //  const auto T_r = mapping_function.get_differentiate(r);
 //
 //  constexpr auto dimension = 2;
-//  std::vector<Polynomial> normal_vector_function(2);
+//  ms::sym::Polynomials normal_vector_function(2);
 //  normal_vector_function[0] = -1 * T_r.at(1);
 //  normal_vector_function[1] = T_r.at(0);
 //
@@ -601,18 +735,7 @@ Polynomials cal_paramteric_curve_normal_functions(const Polynomials& parameteric
 //  return {};
 //}
 //
-// Irrational_Function Reference_Line::scale_function(
-//    const Vector_Function<Polynomial>& mapping_function) const {
-//  constexpr ushort r = 0;
-//  const auto mf_r = mapping_function.get_differentiate(r);
-//  return mf_r.L2_norm();
-//}
-//
-// ushort Reference_Line::scale_function_order(void) const {
-//  REQUIRE(this->order_ == 1, "high order mesh is not supported yet");
-//  return 0;
-//}
-//
+
 // std::vector<Euclidean_Vector> Reference_Line::make_mapping_points(void)
 // const
 // {
@@ -668,7 +791,7 @@ Polynomials cal_paramteric_curve_normal_functions(const Polynomials& parameteric
 // Vector_Function<Polynomial>
 // Reference_Line::make_mapping_monomial_vector_function(void) const {
 //  const auto num_monomial = this->order_ + 1;
-//  std::vector<Polynomial> mapping_monomial_vector(num_monomial);
+//  ms::sym::Polynomials mapping_monomial_vector(num_monomial);
 //
 //  Polynomial r("x0");
 //  for (ushort a = 0, index = 0; a <= this->order_; ++a)
@@ -1612,7 +1735,7 @@ Polynomials cal_paramteric_curve_normal_functions(const Polynomials& parameteric
 // Reference_Triangle::make_mapping_monomial_vector_function(void) const {
 //  const auto num_monomial =
 //      static_cast<size_t>((this->order_ + 2) * (this->order_ + 1) * 0.5);
-//  std::vector<Polynomial> mapping_monomial_vector(num_monomial);
+//  ms::sym::Polynomials mapping_monomial_vector(num_monomial);
 //
 //  Polynomial r("x0");
 //  Polynomial s("x1");
@@ -2609,7 +2732,7 @@ Polynomials cal_paramteric_curve_normal_functions(const Polynomials& parameteric
 //
 //  const auto n = this->order_;
 //  const auto num_monomial = (n + 1) * (n + 1);
-//  std::vector<Polynomial> mapping_monomial_vector(num_monomial);
+//  ms::sym::Polynomials mapping_monomial_vector(num_monomial);
 //
 //  for (ushort a = 0, index = 0; a <= n; ++a) {
 //    for (ushort b = 0; b <= a; ++b) {

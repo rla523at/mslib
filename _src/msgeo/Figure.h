@@ -4,6 +4,7 @@ namespace ms::geo
 {
 enum class Figure
 {
+  NOT_FIGURE   = -1,
   POINT         = 0,
   LINE          = 1,
   TRIANGLE      = 2,
@@ -13,6 +14,5 @@ enum class Figure
   PRISM         = 6,
   PYRAMID       = 7,
   NUM_FIGURES,
-  NOT_IN_LIST = -1
 };
 }

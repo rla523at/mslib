@@ -1000,7 +1000,23 @@ double Simple_Poly_Term::operator()(const double* input) const
   return result;
 }
 
+double Simple_Poly_Term::operator()(const std::pair<const double*, int>& input) const
+{
+  const auto [ptr, stride] = input;
+
+  auto result = this->constant_;
+  for (int i = 0; i < this->domain_dim_; ++i)
+    result += this->coefficient_ptr_[i] * ptr[i * stride];
+
+  return result;
+}
+
 double Powered_Poly_Term::operator()(const double* input) const
+{
+  return std::pow(this->base_(input), this->exponent_);
+}
+
+double Powered_Poly_Term::operator()(const std::pair<const double*, int>& input) const
 {
   return std::pow(this->base_(input), this->exponent_);
 }
@@ -1013,7 +1029,26 @@ double Poly_Term::operator()(const double* input) const
   return result;
 }
 
+double Poly_Term::operator()(const std::pair<const double*, int>& input) const
+{
+  auto result = this->constant_;
+  for (int i = 0; i < this->num_term_; ++i)
+    result *= this->term_ptr_[i](input);
+  return result;
+}
+
 double Polynomial::operator()(const double* input) const
+{
+  auto result = this->simple_poly_term_(input);
+  for (const auto& poly_term : this->poly_terms_)
+  {
+    result += poly_term(input);
+  }
+
+  return result;
+}
+
+double Polynomial::operator()(const std::pair<const double*, int>& input) const
 {
   auto result = this->simple_poly_term_(input);
   for (const auto& poly_term : this->poly_terms_)

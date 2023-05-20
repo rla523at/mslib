@@ -1,7 +1,6 @@
 #pragma once
 #include "Reference_Geometry.h"
 
-#include "mssym/Polynomial.h"
 #include <array>
 #include <map>
 
@@ -27,10 +26,22 @@ class Reference_Point : public Reference_Geometry
 {
   // overriding methods from Reference_Geometry
 public:
-  Polynomials         cal_normal_functions(const Polynomials& parametric_functions) const override;
-  Polynomials         cal_parametric_functions(const std::vector<Node_Const_Wrapper>& consisting_nodes) const override;
-  Node_Const_Wrapper  center_point(void) const override;
-  Nodes_Const_Wrapper quadrature_points(const int integrand_degree) const override;
+  ms::sym::Polynomials          cal_normal_functions(const ms::sym::Polynomials& parametric_functions) const override;
+  ms::sym::Polynomials          cal_parametric_functions(const std::vector<Node_Const_Wrapper>& consisting_nodes) const override;
+  int                           cal_parameter_order(const int num_points) const override;
+  ms::sym::Symbol               cal_scale_function(const ms::sym::Polynomials& parametric_functions) const override;
+  Node_Const_Wrapper            center_point(void) const override;
+  int                           dimension(void) const override;
+  Figure                        face_figure(const int face_index) const override;
+  std::vector<std::vector<int>> face_index_to_face_vnode_indexes(void) const override;
+  const std::vector<double>&    get_quadrature_weights(const int integrand_degree) const override;
+  bool                          is_valid_num_points(const int num_points) const override;
+  bool                          is_point(void) const override;
+  bool                          is_line(void) const override;
+  std::vector<int>              node_indexes(const int parameter_order) const override;
+  int                           num_faces(void) const override;
+  int                           num_vertices(void) const override;
+  Nodes_Const_Wrapper           quadrature_points(const int integrand_degree) const override;
 
 private:
   static constexpr std::array<double, 1> _center_coords = {0.0};
@@ -48,28 +59,29 @@ class Reference_Geometry_Common : public Reference_Geometry
 {
   // overriding methods from Reference_Geometry
 public:
-  Polynomials         cal_parametric_functions(const std::vector<Node_Const_Wrapper>& consisting_nodes) const override;
-  Nodes_Const_Wrapper quadrature_points(const int integrand_degree) const override;
+  ms::sym::Polynomials       cal_parametric_functions(const std::vector<Node_Const_Wrapper>& consisting_nodes) const override;
+  const std::vector<double>& get_quadrature_weights(const int integrand_degree) const override;
+  bool                       is_point(void) const override;
+  Nodes_Const_Wrapper        quadrature_points(const int integrand_degree) const override;
 
 protected:
-  virtual int                 cal_quadrature_rule_tag(const int integrand_degree) const       = 0;
-  virtual int                 cal_parameter_order(const int num_points) const                 = 0;
-  virtual int                 dimension(void) const                                           = 0;
-  virtual int                 num_quadrature_points(const int tag) const                      = 0;
-  virtual int                 num_parametric_function_reference_points(const int tag) const   = 0;
-  virtual std::vector<double> make_quadrature_coords(const int tag) const                     = 0;
-  virtual Polynomials         make_parametric_function_bases(const int tag) const             = 0;
-  virtual std::vector<double> make_parametric_functions_reference_coords(const int tag) const = 0;
+  virtual int                  cal_quadrature_rule_tag(const int integrand_degree) const       = 0;
+  virtual void                 create_and_store_quadrature_points(const int tag) const         = 0;
+  virtual void                 create_and_store_quadrature_weights(const int tag) const        = 0;
+  virtual int                  num_quadrature_points(const int tag) const                      = 0;
+  virtual int                  num_parametric_function_reference_points(const int tag) const   = 0;
+  virtual ms::sym::Polynomials make_parametric_function_bases(const int tag) const             = 0;
+  virtual std::vector<double>  make_parametric_functions_reference_coords(const int tag) const = 0;
 
 private:
-  const Polynomials& get_shape_functions(const int parameter_order) const;
-  Polynomials        make_shape_functions(const int parameter_order) const;
+  const ms::sym::Polynomials& get_shape_functions(const int parameter_order) const;
+  ms::sym::Polynomials        make_shape_functions(const int parameter_order) const;
 
 protected:
-  mutable std::map<int, std::vector<double>> _tag_to_equal_distance_points_coords;
-  mutable std::map<int, std::vector<double>> _tag_to_quadrature_points_coords;
-  mutable std::map<int, std::vector<double>> _tag_to_quadrature_weights;
-  mutable std::map<int, Polynomials>         _parameter_order_to_shape_functions;
+  mutable std::map<int, Nodes>                _tag_to_equal_distance_points;
+  mutable std::map<int, Nodes>                _tag_to_quadrature_points;
+  mutable std::map<int, std::vector<double>>  _tag_to_quadrature_weights;
+  mutable std::map<int, ms::sym::Polynomials> _parameter_order_to_shape_functions;
 
 protected:
   virtual ~Reference_Geometry_Common(void) = default;
@@ -79,19 +91,28 @@ class Reference_Line : public Reference_Geometry_Common
 {
   // overriding methods from Reference_Geometry
 public:
-  Node_Const_Wrapper center_point(void) const override;
-  Polynomials        cal_normal_functions(const Polynomials& curve) const override;
+  Node_Const_Wrapper            center_point(void) const override;
+  ms::sym::Polynomials          cal_normal_functions(const ms::sym::Polynomials& curve) const override;
+  int                           cal_parameter_order(const int num_points) const override;
+  ms::sym::Symbol               cal_scale_function(const ms::sym::Polynomials& parametric_functions) const override;
+  int                           dimension(void) const override;
+  Figure                        face_figure(const int face_index) const override;
+  std::vector<std::vector<int>> face_index_to_face_vnode_indexes(void) const override;
+  bool                          is_valid_num_points(const int num_points) const override;
+  bool                          is_line(void) const override;
+  std::vector<int>              node_indexes(const int parameter_order) const override;
+  int                           num_faces(void) const override;
+  int                           num_vertices(void) const override;
 
   // overriding methods from Reference_Geometry_Common
 protected:
-  int                 cal_quadrature_rule_tag(const int integrand_degree) const override;
-  int                 cal_parameter_order(const int num_points) const override;
-  int                 dimension(void) const override;
-  int                 num_quadrature_points(const int tag) const override;
-  int                 num_parametric_function_reference_points(const int param_order) const override;
-  std::vector<double> make_quadrature_coords(const int tag) const override;
-  Polynomials         make_parametric_function_bases(const int tag) const override;
-  std::vector<double> make_parametric_functions_reference_coords(const int tag) const override;
+  int                  cal_quadrature_rule_tag(const int integrand_degree) const override;
+  void                 create_and_store_quadrature_points(const int tag) const override;
+  void                 create_and_store_quadrature_weights(const int tag) const override;
+  int                  num_quadrature_points(const int tag) const override;
+  int                  num_parametric_function_reference_points(const int param_order) const override;
+  ms::sym::Polynomials make_parametric_function_bases(const int tag) const override;
+  std::vector<double>  make_parametric_functions_reference_coords(const int tag) const override;
 
 private:
   static constexpr std::array<double, 1> center_coords_ = {0.0};

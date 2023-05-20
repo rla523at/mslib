@@ -24,7 +24,7 @@ namespace ms::math
 Vector_Const_Wrapper::Vector_Const_Wrapper(const double* coordinate_const_ptr, const int dimension, const int incx)
 {
   REQUIRE(0 < dimension, "dimension should greater than 0");
-   REQUIRE(coordinate_const_ptr != nullptr, "data ptr should not be nullptr");
+  REQUIRE(coordinate_const_ptr != nullptr, "data ptr should not be nullptr");
   this->_dimension            = dimension;
   this->_coordinate_const_ptr = coordinate_const_ptr;
   this->_inc                  = incx;
@@ -99,9 +99,9 @@ bool Vector_Const_Wrapper::operator!=(const Vector_Const_Wrapper& other) const
   return !((*this) == other);
 }
 
-Vector_Const_Wrapper::operator const double*(void) const
+Vector_Const_Wrapper::operator std::pair<const double*, int>(void) const
 {
-  return this->_coordinate_const_ptr;
+  return {this->_coordinate_const_ptr, this->_inc};
 }
 
 double Vector_Const_Wrapper::at(const size_t position) const

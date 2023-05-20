@@ -200,7 +200,7 @@ bool Matrix_Const_Wrapper::operator==(const Matrix_Const_Wrapper& other) const
 
 double Matrix_Const_Wrapper::at(const int row_index, const int column_index) const
 {
-  REQUIRE(this->is_valid_row_index(row_index) && this->is_valid_column_index(column_index), "Given indexes should be valid");
+  REQUIRE(this->is_valid_row_index(row_index) && this->is_valid_column_index(column_index), "Given numbers should be valid");
 
   if (this->is_transposed_)
   {
@@ -548,7 +548,7 @@ void Matrix_Wrapper::operator-=(const Matrix_Const_Wrapper& other)
 
 double& Matrix_Wrapper::at(const int row_index, const int column_index)
 {
-  REQUIRE(this->is_valid_row_index(row_index) && this->is_valid_column_index(column_index), "Given indexes should be valid");
+  REQUIRE(this->is_valid_row_index(row_index) && this->is_valid_column_index(column_index), "Given numbers should be valid");
 
   if (this->is_transposed_)
   {

@@ -23,7 +23,8 @@ class Powered_Term
 public:
   Powered_Term(const std::unique_ptr<Base>& term_ptr, const double exponenet = 1.0);
   Powered_Term(std::unique_ptr<Base>&& term, const double exponent = 1.0)
-      : base_ptr_(std::move(term)), exponent_(exponent){};
+      : base_ptr_(std::move(term)),
+        exponent_(exponent){};
   Powered_Term(const Powered_Term& other);
 
 public:
@@ -34,6 +35,7 @@ public:
 
 public:
   double operator()(const double* input) const;
+  double operator()(const std::pair<const double*, int>& input) const;
 
 public:
   Multiplied_Term get_differentiate(const int variable_index) const;
@@ -66,6 +68,7 @@ public:
   Multiplied_Term operator*(const double constant) const;
   Multiplied_Term operator*(const Multiplied_Term& other) const;
   double          operator()(const double* input) const;
+  double          operator()(const std::pair<const double*, int>& input) const;
 
 public:
   Symbol      get_differentiate(const int variable_index) const;
@@ -90,6 +93,7 @@ public:
 
 public:
   double operator()(const double* input) const override;
+  double operator()(const std::pair<const double*, int>& input) const override;
 
 public:
   Sym_Base    copy(void) const override;

@@ -5,7 +5,7 @@
 namespace ms::grid
 {
 
-const double* Nodes_Data::coordinates_ptr(const int node_index) const
+const double* Grid_Nodes_Data::coordinates_ptr(const int node_index) const
 {  
   //Asuume that node index in Grid File start with 1
   REQUIRE(1 <= node_index, "node index should be greater than 1");
@@ -27,7 +27,7 @@ const double* Nodes_Data::coordinates_ptr(const int node_index) const
   }
 }
 
-int Nodes_Data::stride(void) const
+int Grid_Nodes_Data::stride(void) const
 {
   if (this->type == Coordinate_Type::BLOCK)
   {

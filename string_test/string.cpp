@@ -637,6 +637,25 @@ TEST(string, remove_after1)
   const auto ref = "qwer123";
   EXPECT_EQ(result, ref);
 }
+TEST(string, remove_after_inplace1)
+{
+  std::string str    = "qwer123//qwerasdfweqrtasjdklfjげじ巨た移だちしい悟っそ";
+  const auto  target = "//";
+  ms::string::remove_after_inplace(str, target);
+
+  const auto ref = "qwer123";
+  EXPECT_EQ(str, ref);
+}
+TEST(string, remove_after_inplace2)
+{
+  std::string str    = "qwer123//qwerasdfweqrtasjdklfjげじ巨た移だちしい悟っそ";
+  const auto  target = "w";
+  ms::string::remove_after_inplace(str, target);
+
+  const auto ref = "q";
+  EXPECT_EQ(str, ref);
+}
+
 
 #ifdef _DEBUG
 TEST(string_str_to_value, strange_input_for_boolean)

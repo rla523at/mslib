@@ -10,7 +10,7 @@ TEST(DataSet, extract)
   minseok.set<int>("age", 29);
   minseok.set<double>("height", 171.1);
 
-  const auto     data = minseok.extract_data<std::string>("name");
+  const auto     data = minseok.get_data<std::string>("name");
   constexpr auto ref  = "KimMinseok";
   EXPECT_EQ(data, ref);
 }

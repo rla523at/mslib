@@ -30,8 +30,6 @@ struct Configuration
 
 class Writer
 {
-  using THIS = Writer;
-
 public:
   static void set_configuration(Configuration&& configuration);
   static void write_grid_file(const Grid_Data& info);
@@ -73,6 +71,9 @@ private:
   inline static int           _num_elements                    = 0;
   inline static bool          _is_grid_data_saved              = false;
   inline static int           _strand_id                       = 0;
+
+private:
+  using THIS = Writer;
 };
 
 } // namespace ms::tecplot

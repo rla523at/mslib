@@ -4,7 +4,7 @@
 // forward declaration
 namespace ms::grid
 {
-struct Data;
+struct Grid_Data;
 }
 
 namespace ms::grid
@@ -12,7 +12,7 @@ namespace ms::grid
 class Reader
 {
 public:
-  virtual Data read(const std::string_view file_path) const = 0;
+  virtual Grid_Data read(const std::string_view file_path) const = 0;
 };
 
 } // namespace ms::grid

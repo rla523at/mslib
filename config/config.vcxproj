@@ -23,6 +23,7 @@
     <ClInclude Include="..\_src\msconfig\Reader.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\_src\msconfig\Data.cpp" />
     <ClCompile Include="..\_src\msconfig\Reader.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
