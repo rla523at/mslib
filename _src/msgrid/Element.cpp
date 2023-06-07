@@ -2,6 +2,8 @@
 
 #include "msexception/Exception.h"
 #include "msmath/Vector.h"
+#include <algorithm>
+#include <functional>
 #include <unordered_set>
 
 namespace ms::grid
@@ -27,6 +29,114 @@ void Element::reordering_nodes(const std::vector<int>& new_ordered_node_indexes)
     const auto new_pos = iter - begin;
     nodes[new_pos]     = original_node;
   }
+}
+
+void Element::accumulate_discrete_partition_data(ms::geo::Partition_Data& total_partition_data, const int partition_order) const
+{
+  REQUIRE(0 <= partition_order, "partition order should not be negative");
+
+  auto&      nodes_in_total_partition_data          = total_partition_data.nodes;
+  auto&      connectivities_of_total_connectivities = total_partition_data.connectivities;
+  const auto start_node_number                      = nodes_in_total_partition_data.num_nodes();
+  const auto num_connectivity                       = connectivities_of_total_connectivities.size();
+
+  auto       partition_data              = this->get_geometry().make_partition_data(partition_order);
+  auto&      nodes_in_partition          = partition_data.nodes;
+  auto&      connectivities_of_partition = partition_data.connectivities;
+  const auto num_new_connectivity        = connectivities_of_partition.size();
+
+  // accumulate nodes in partition
+  nodes_in_total_partition_data.add_nodes(std::move(nodes_in_partition));
+
+  // acumulate connectivities of partitions
+  connectivities_of_total_connectivities.reserve(num_connectivity + num_new_connectivity);
+
+  std::vector<int> new_connectivity;
+  for (int i = 0; i < num_new_connectivity; ++i)
+  {
+    const auto& ref_connectivity = connectivities_of_partition[i];
+
+    for (const auto node_index : ref_connectivity)
+    {
+      const auto node_number = start_node_number + node_index;
+      new_connectivity.push_back(node_number);
+    }
+    connectivities_of_total_connectivities.push_back(std::move(new_connectivity));
+  }
+}
+
+void Element::accumulate_partition_data(ms::geo::Partition_Data& total_partition_data, const int partition_order) const
+{
+  struct Near
+  {
+  public:
+    bool operator==(const ms::geo::Node_Const_Wrapper other) const
+    {
+      constexpr auto epsilon = 1.0e-10;
+
+      for (int i = 0; i < node.dimension(); ++i)
+      {
+        if (epsilon < std::abs(node[i] - other[i])) return false;
+      }
+
+      return true;
+    }
+
+  public:
+    ms::geo::Node_Const_Wrapper node;
+  };
+
+  /*
+
+
+
+
+
+  */
+
+  auto&       nodes_in_total_partition        = total_partition_data.nodes;
+  auto&       connectivity_of_total_partition = total_partition_data.connectivities;
+  const auto& nodes_in_elem                   = this->_numbered_nodes.nodes;
+
+  auto        partition_data              = this->get_geometry().make_partition_data(partition_order);
+  const auto& nodes_in_partition          = partition_data.nodes;
+  auto&       connectivities_of_partition = partition_data.connectivities;
+
+  const auto num_nodes_in_partition = nodes_in_partition.num_nodes();
+
+  std::map<int, int> index_to_node_number;
+
+  for (int i = 0; i < num_nodes_in_partition; ++i)
+  {
+    const auto node_in_partition = nodes_in_partition[i];
+
+    const auto iter = std::find(nodes_in_elem.begin(), nodes_in_elem.end(), Near(node_in_partition));
+
+    if (iter == nodes_in_elem.end())
+    {
+      nodes_in_total_partition.add_node(node_in_partition);
+      const auto node_number = nodes_in_total_partition.num_nodes();
+
+      index_to_node_number.emplace(i, node_number);
+    }
+    else
+    {
+      const auto elme_index  = iter - nodes_in_elem.begin();
+      const auto node_number = this->_numbered_nodes.numbers[elme_index];
+
+      index_to_node_number.emplace(i, node_number);
+    }
+  }
+
+  for (auto& connectivity : connectivities_of_partition)
+  {
+    for (auto& index : connectivity)
+    {
+      index = index_to_node_number.at(index);
+    }
+  }
+
+  connectivity_of_total_partition.insert(connectivity_of_total_partition.end(), connectivities_of_partition.begin(), connectivities_of_partition.end());
 }
 
 int Element::dimension(void) const
@@ -151,6 +261,70 @@ const ms::geo::Geometry& Element::get_geometry(void) const
   return this->_geometry;
 }
 
+bool Element::is_outward_face(const Element& face_element) const
+{
+  REQUIRE(this->_type == Element_Type::CELL, "owner cell should be cell type");
+  REQUIRE(face_element._type != Element_Type::CELL, "face element should not be cell type");
+
+  const auto& face_geometry = face_element.get_geometry();
+
+  // convention
+  if (face_geometry.is_point()) return true;
+
+  const auto bdry_vnode_numbers               = face_element.vertex_node_numbers();
+  const auto face_index_to_face_vnode_numbers = this->face_index_to_face_vertex_node_numbers();
+
+  if (face_geometry.is_line())
+  {
+    for (const auto& face_vnode_numbers : face_index_to_face_vnode_numbers)
+    {
+      if (!std::is_permutation(face_vnode_numbers.begin(), face_vnode_numbers.end(), bdry_vnode_numbers.begin()))
+      {
+        continue;
+      }
+
+      if (bdry_vnode_numbers == face_vnode_numbers)
+      {
+        return false;
+      }
+      else
+      {
+        return true;
+      }
+    }
+  }
+  else
+  {
+    std::boyer_moore_searcher searcher(bdry_vnode_numbers.begin(), bdry_vnode_numbers.end());
+
+    std::vector<int> temp;
+    for (const auto& face_vnode_numbers : face_index_to_face_vnode_numbers)
+    {
+      if (!std::is_permutation(face_vnode_numbers.begin(), face_vnode_numbers.end(), bdry_vnode_numbers.begin()))
+      {
+        continue;
+      }
+
+      // check circular permutation
+      temp.clear();
+      temp.insert(temp.end(), face_vnode_numbers.begin(), face_vnode_numbers.end());
+      temp.insert(temp.end(), face_vnode_numbers.begin(), face_vnode_numbers.end());
+
+      if (std::search(temp.begin(), temp.end(), searcher) == temp.end())
+      {
+        return false;
+      }
+      else
+      {
+        return true;
+      }
+    }
+  }
+
+  EXCEPTION("This is not my face!");
+  return false;
+}
+
 Element Element::make_face_element(const int face_index) const
 {
   const auto face_figure       = this->_geometry.face_figure(face_index);
@@ -188,6 +362,11 @@ void Element::node_numbers(int* node_numbers) const
   {
     node_numbers[i] = numbers[i];
   }
+}
+
+Element_Type Element::type(void) const
+{
+  return this->_type;
 }
 
 std::vector<int> Element::vertex_node_numbers(void) const

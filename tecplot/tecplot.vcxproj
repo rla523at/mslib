@@ -19,12 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\_src\mstecplot\Binary_Writer.cpp" />
+    <ClCompile Include="..\_src\mstecplot\Binary_File.cpp" />
     <ClCompile Include="..\_src\mstecplot\Data.cpp" />
     <ClCompile Include="..\_src\mstecplot\Writer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\_src\mstecplot\Binary_Writer.h" />
+    <ClInclude Include="..\_src\mstecplot\Binary_File.h" />
     <ClInclude Include="..\_src\mstecplot\Data.h" />
     <ClInclude Include="..\_src\mstecplot\Writer.h" />
   </ItemGroup>

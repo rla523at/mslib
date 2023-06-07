@@ -35,6 +35,7 @@ public:
   Figure                        face_figure(const int face_index) const override;
   std::vector<std::vector<int>> face_index_to_face_vnode_indexes(void) const override;
   const std::vector<double>&    get_quadrature_weights(const int integrand_degree) const override;
+  const Partition_Data&         get_partition_data(const int partition_order) const override;
   bool                          is_valid_num_points(const int num_points) const override;
   bool                          is_point(void) const override;
   bool                          is_line(void) const override;
@@ -61,24 +62,26 @@ class Reference_Geometry_Common : public Reference_Geometry
 public:
   ms::sym::Polynomials       cal_parametric_functions(const std::vector<Node_Const_Wrapper>& consisting_nodes) const override;
   const std::vector<double>& get_quadrature_weights(const int integrand_degree) const override;
+  const Partition_Data&      get_partition_data(const int partition_order) const override;
   bool                       is_point(void) const override;
   Nodes_Const_Wrapper        quadrature_points(const int integrand_degree) const override;
 
 protected:
-  virtual int                  cal_quadrature_rule_tag(const int integrand_degree) const       = 0;
-  virtual void                 create_and_store_quadrature_points(const int tag) const         = 0;
-  virtual void                 create_and_store_quadrature_weights(const int tag) const        = 0;
-  virtual int                  num_quadrature_points(const int tag) const                      = 0;
-  virtual int                  num_parametric_function_reference_points(const int tag) const   = 0;
-  virtual ms::sym::Polynomials make_parametric_function_bases(const int tag) const             = 0;
-  virtual std::vector<double>  make_parametric_functions_reference_coords(const int tag) const = 0;
+  virtual int                  cal_quadrature_rule_tag(const int integrand_degree) const        = 0;
+  virtual void                 create_and_store_partition_data(const int partition_order) const = 0;
+  virtual void                 create_and_store_quadrature_points(const int tag) const          = 0;
+  virtual void                 create_and_store_quadrature_weights(const int tag) const         = 0;
+  virtual int                  num_quadrature_points(const int tag) const                       = 0;
+  virtual int                  num_parametric_function_reference_points(const int tag) const    = 0;
+  virtual ms::sym::Polynomials make_parametric_function_bases(const int tag) const              = 0;
+  virtual std::vector<double>  make_parametric_functions_reference_coords(const int tag) const  = 0;
 
 private:
   const ms::sym::Polynomials& get_shape_functions(const int parameter_order) const;
   ms::sym::Polynomials        make_shape_functions(const int parameter_order) const;
 
 protected:
-  mutable std::map<int, Nodes>                _tag_to_equal_distance_points;
+  mutable std::map<int, Partition_Data>       _order_to_partition_data;
   mutable std::map<int, Nodes>                _tag_to_quadrature_points;
   mutable std::map<int, std::vector<double>>  _tag_to_quadrature_weights;
   mutable std::map<int, ms::sym::Polynomials> _parameter_order_to_shape_functions;
@@ -107,6 +110,7 @@ public:
   // overriding methods from Reference_Geometry_Common
 protected:
   int                  cal_quadrature_rule_tag(const int integrand_degree) const override;
+  void                 create_and_store_partition_data(const int partition_order) const override;
   void                 create_and_store_quadrature_points(const int tag) const override;
   void                 create_and_store_quadrature_weights(const int tag) const override;
   int                  num_quadrature_points(const int tag) const override;

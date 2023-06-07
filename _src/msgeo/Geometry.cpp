@@ -3,6 +3,7 @@
 #include "Reference_Geometry_Container.h"
 
 #include "msexception/Exception.h"
+#include "msmath/Vector.h"
 
 namespace ms::geo
 {
@@ -12,8 +13,6 @@ Geometry::Geometry(const Figure figure, const std::vector<Node_Const_Wrapper>& c
       _consisting_nodes(consisting_nodes)
 {
   this->_parametric_functions = this->_reference_geometry.cal_parametric_functions(this->_consisting_nodes);
-  this->_scale_function       = this->_reference_geometry.cal_scale_function(this->_parametric_functions);
-  //
 }
 
 Geometry::Geometry(const Figure figure, std::vector<Node_Const_Wrapper>&& consisting_nodes)
@@ -21,7 +20,6 @@ Geometry::Geometry(const Figure figure, std::vector<Node_Const_Wrapper>&& consis
       _consisting_nodes(std::move(consisting_nodes))
 {
   this->_parametric_functions = this->_reference_geometry.cal_parametric_functions(this->_consisting_nodes);
-  this->_scale_function       = this->_reference_geometry.cal_scale_function(this->_parametric_functions);
 }
 
 void Geometry::change_nodes(std::vector<Node_Const_Wrapper>&& new_nodes)
@@ -30,7 +28,30 @@ void Geometry::change_nodes(std::vector<Node_Const_Wrapper>&& new_nodes)
 
   this->_consisting_nodes     = std::move(new_nodes);
   this->_parametric_functions = this->_reference_geometry.cal_parametric_functions(this->_consisting_nodes);
-  this->_scale_function       = this->_reference_geometry.cal_scale_function(this->_parametric_functions);
+  
+  if (this->_is_scale_function_initialized)
+  {
+    this->_scale_function = this->_reference_geometry.cal_scale_function(this->_parametric_functions);
+  }
+  if (this->_is_normal_functions_initialized)
+  {
+    this->_normal_functions                = this->_reference_geometry.cal_normal_functions(this->_parametric_functions);
+  }
+}
+
+void Geometry::cal_normal(double* normal, const Node_Const_Wrapper node) const
+{
+  if (!this->_is_normal_functions_initialized)
+  {
+    this->_normal_functions                = this->_reference_geometry.cal_normal_functions(this->_parametric_functions);
+    this->_is_normal_functions_initialized = true;
+  }
+
+  const auto dimension = this->dimension();
+  for (int i = 0; i < dimension; ++i)
+  {
+    normal[i] = this->_normal_functions[i](node);
+  }
 }
 
 void Geometry::cal_projected_volumes(double* projected_volumes) const
@@ -61,7 +82,7 @@ void Geometry::cal_projected_volumes(double* projected_volumes) const
 
     for (int i = 0; i < dimension; ++i)
     {
-      cal_projected_volumes[i] = coordinate_maxs[i] - coordinate_mins[i];
+      projected_volumes[i] = coordinate_maxs[i] - coordinate_mins[i];
     }
   }
   else if (ref_geo_dim == 3)
@@ -106,6 +127,21 @@ double Geometry::cal_volume(const int expected_scale_function_order) const
   }
 
   return volume;
+}
+
+Node Geometry::center(void) const
+{
+  const auto ref_center = this->_reference_geometry.center_point();
+
+  const auto          dimension = this->dimension();
+  std::vector<double> coordinates(dimension);
+
+  for (int i = 0; i < dimension; ++i)
+  {
+    coordinates[i] = this->_parametric_functions[i](ref_center);
+  }
+
+  return coordinates;
 }
 
 void Geometry::center(double* coordinates) const
@@ -167,6 +203,32 @@ bool Geometry::is_line(void) const
   return this->_reference_geometry.is_line();
 }
 
+Partition_Data Geometry::make_partition_data(const int partition_order) const
+{
+  REQUIRE(0 <= partition_order, "partition order should not be negative");
+
+  const auto& ref_partition_data   = this->_reference_geometry.get_partition_data(partition_order);
+  const auto& ref_nodes            = ref_partition_data.nodes;
+  const auto& ref_connectivities   = ref_partition_data.connectivities;
+  const auto  num_new_connectivity = ref_connectivities.size();
+
+  const auto num_new_nodes = ref_nodes.num_nodes();
+  const auto dim           = ref_nodes.dimension();
+  const auto coord_type    = ref_nodes.coordinates_type();
+
+  Nodes new_nodes(coord_type, num_new_nodes, dim);
+  for (int i = 0; i < num_new_nodes; ++i)
+  {
+    auto new_node_wrap = new_nodes[i];
+    auto ref_node_wrap = ref_nodes[i];
+
+    this->_parametric_functions.calculate(new_node_wrap, ref_node_wrap);
+  }
+
+  Partition_Data result(std::move(new_nodes), std::move(ref_connectivities));
+  return result;
+}
+
 int Geometry::num_faces(void) const
 {
   return this->_reference_geometry.num_faces();
@@ -177,8 +239,81 @@ int Geometry::num_vertices(void) const
   return this->_reference_geometry.num_vertices();
 }
 
+// std::vector<Euclidean_Vector> Geometry::post_points(const ushort post_order) const
+//{
+//   const auto& ref_post_points = this->reference_geometry_->get_post_points(post_order);
+//   const auto  num_post_points = ref_post_points.size();
+//
+//   std::vector<Euclidean_Vector> post_points;
+//   post_points.reserve(num_post_points);
+//
+//   for (const auto& point : ref_post_points)
+//   {
+//     post_points.push_back(this->mapping_vf_(point));
+//   }
+//
+//   return post_points;
+// }
+//
+// std::vector<Euclidean_Vector> Geometry::post_element_centers(const ushort post_order) const
+//{
+//   const auto  post_points        = this->post_points(post_order);
+//   const auto& ref_connectivities = this->reference_geometry_->get_connectivities(post_order);
+//
+//   const auto                    num_post_element = ref_connectivities.size();
+//   std::vector<Euclidean_Vector> post_element_centers;
+//   post_element_centers.reserve(num_post_element);
+//
+//   for (const auto& connectivity : ref_connectivities)
+//   {
+//     Euclidean_Vector center(this->space_dimension_);
+//
+//     for (const auto index : connectivity)
+//     {
+//       center += post_points[index];
+//     }
+//
+//     center *= 1.0 / connectivity.size();
+//
+//     post_element_centers.push_back(center);
+//   }
+//
+//   return post_element_centers;
+// }
+//
+// std::vector<std::vector<int>> Geometry::post_connectivities(const ushort post_order, const size_t connectivity_start_index) const
+//{
+//   const auto& ref_connectivities = this->reference_geometry_->get_connectivities(post_order);
+//
+//   const auto                    num_connectivity = ref_connectivities.size();
+//   std::vector<std::vector<int>> connectivities(num_connectivity);
+//
+//   for (ushort i = 0; i < num_connectivity; ++i)
+//   {
+//     auto&       connectivity      = connectivities[i];
+//     const auto& ref_connecitivity = ref_connectivities[i];
+//
+//     const auto num_index = ref_connecitivity.size();
+//     connectivity.resize(num_index);
+//
+//     for (ushort j = 0; j < num_index; ++j)
+//     {
+//       const auto new_index = static_cast<int>(ref_connecitivity[j] + connectivity_start_index);
+//       connectivity[j]      = new_index;
+//     }
+//   }
+//
+//   return connectivities;
+// }
+
 void Geometry::create_and_store_quadrature_rule(const int integrand_degree) const
 {
+  if (!this->_is_scale_function_initialized)
+  {
+    this->_scale_function = this->_reference_geometry.cal_scale_function(this->_parametric_functions);
+    this->_is_scale_function_initialized = true;
+  }
+
   REQUIRE(0 <= integrand_degree, "integrand degree should be positive");
 
   const auto  ref_quadrature_points  = this->_reference_geometry.quadrature_points(integrand_degree);
@@ -202,7 +337,7 @@ void Geometry::create_and_store_quadrature_rule(const int integrand_degree) cons
     }
     ptr += dimension;
 
-    transformed_QW[i] = this->_scale_function(ref_QP) * ref_weight; // operator for double 만들필요는 없지 이상하잖아
+    transformed_QW[i] = this->_scale_function(ref_QP) * ref_weight;
   }
 
   auto points          = Nodes(Coordinates_Type::NODAL, num_QP, dimension, std::move(transformed_coordiantes));
@@ -322,75 +457,9 @@ void Geometry::create_and_store_quadrature_rule(const int integrand_degree) cons
 //         return normalized_normal_vectors;
 // }
 //
-// std::vector<Euclidean_Vector> Geometry::post_points(const ushort post_order)
-//     const
-//{
-//         const auto& ref_post_points = this->reference_geometry_->get_post_points(post_order);
-//         const auto
-//             num_post_points
-//             = ref_post_points.size();
+
 //
-//         std::vector<Euclidean_Vector> post_points;
-//         post_points.reserve(num_post_points);
-//
-//         for (const auto& point : ref_post_points) {
-//             post_points.push_back(this->mapping_vf_(point));
-//         }
-//
-//         return post_points;
-// }
-//
-// std::vector<Euclidean_Vector> Geometry::post_element_centers(const ushort
-//         post_order) const
-//{
-//         const auto post_points = this->post_points(post_order);
-//         const auto& ref_connectivities = this->reference_geometry_->get_connectivities(post_order);
-//
-//         const auto num_post_element = ref_connectivities.size();
-//         std::vector<Euclidean_Vector> post_element_centers;
-//         post_element_centers.reserve(num_post_element);
-//
-//         for (const auto& connectivity : ref_connectivities) {
-//             Euclidean_Vector center(this->space_dimension_);
-//
-//             for (const auto index : connectivity) {
-//                 center += post_points[index];
-//             }
-//
-//             center *= 1.0 / connectivity.size();
-//
-//             post_element_centers.push_back(center);
-//         }
-//
-//         return post_element_centers;
-// }
-//
-// std::vector<std::vector<int>> Geometry::post_connectivities(const ushort
-//                                                                 post_order,
-//     const size_t connectivity_start_index) const
-//{
-//         const auto& ref_connectivities = this->reference_geometry_->get_connectivities(post_order);
-//
-//         const auto num_connectivity = ref_connectivities.size();
-//         std::vector<std::vector<int>> connectivities(num_connectivity);
-//
-//         for (ushort i = 0; i < num_connectivity; ++i) {
-//             auto& connectivity = connectivities[i];
-//             const auto& ref_connecitivity = ref_connectivities[i];
-//
-//             const auto num_index = ref_connecitivity.size();
-//             connectivity.resize(num_index);
-//
-//             for (ushort j = 0; j < num_index; ++j) {
-//                 const auto new_index = static_cast<int>(ref_connecitivity[j]
-//                     + connectivity_start_index);
-//                 connectivity[j] = new_index;
-//             }
-//         }
-//
-//         return connectivities;
-// }
-//
+
 // Vector_Function<Polynomial> Geometry::orthonormal_basis_vector_function(const ushort solution_order) const
 //{
 //         const auto initial_basis_vector_function = this->initial_basis_vector_function(solution_order);

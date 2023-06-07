@@ -28,7 +28,6 @@ enum class Transpose_Type
 class Matrix_Const_Wrapper
 {
 public:
-  Matrix_Const_Wrapper(void) = default;
   Matrix_Const_Wrapper(const int num_rows, const int num_columns, const double* ptr, const Transpose_Type transpose_type);
   Matrix_Const_Wrapper(const int num_rows, const int num_columns, const double* ptr, const int leading_dimension = -1, const Transpose_Type transpose_type = Transpose_Type::not_transposed);
 
@@ -68,17 +67,21 @@ protected:
   std::vector<double> values_vector(void) const;
 
 protected:
-  int           num_rows_          = 0;
-  int           num_columns_       = 0;
+  int           _num_rows          = 0;
+  int           _num_columns       = 0;
   int           leading_dimension_ = 0;
   const double* const_data_ptr_    = nullptr;
   bool          is_transposed_     = false;
+
+protected:
+  // The default constructor, which creates objects that do not function properly, has been blocked from access.
+  // The reason why it was not deleted is that the constructor of the Matrix class uses the default constructor.
+  Matrix_Const_Wrapper(void) = default;
 };
 
 class Matrix_Wrapper : public Matrix_Const_Wrapper
 {
 public:
-  Matrix_Wrapper(void) = default;
   Matrix_Wrapper(const int num_row, const int num_column, double* ptr, const Transpose_Type transpose_type)
       : Matrix_Const_Wrapper(num_row, num_column, ptr, transpose_type),
         data_ptr_(ptr){};
@@ -110,6 +113,11 @@ public:
 
 protected:
   double* data_ptr_ = nullptr;
+
+protected:
+  // The default constructor, which creates objects that do not function properly, has been blocked from access.
+  // The reason why it was not deleted is that the constructor of the Matrix class uses the default constructor.
+  Matrix_Wrapper(void) = default;
 };
 
 class Matrix : public Matrix_Wrapper
@@ -128,11 +136,14 @@ public:
   void operator=(const Matrix& other);
   void operator=(Matrix&& other) noexcept;
 
-private:
-  void essential_code_for_constructor(void);
+public:
+  void resize(const int row, const int column);
 
 private:
-  std::vector<double> values_;
+  void reallocate_data_pointer(void);
+
+private:
+  std::vector<double> _values;
 };
 
 } // namespace ms::math

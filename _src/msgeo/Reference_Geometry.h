@@ -5,6 +5,15 @@
 #include "mssym/Symbol.h"
 #include <vector>
 
+namespace ms::geo
+{
+struct Partition_Data
+{
+  Nodes                         nodes = Nodes::Null_Nodes();
+  std::vector<std::vector<int>> connectivities;
+};
+} // namespace ms::geo
+
 // class declaration
 namespace ms::geo
 {
@@ -20,6 +29,7 @@ public:
   virtual int                           dimension(void) const                                                                   = 0;
   virtual Figure                        face_figure(const int face_index) const                                                 = 0;
   virtual std::vector<std::vector<int>> face_index_to_face_vnode_indexes(void) const                                            = 0;
+  virtual const Partition_Data&         get_partition_data(const int partition_order) const                                     = 0;
   virtual const std::vector<double>&    get_quadrature_weights(const int integrand_degree) const                                = 0;
   virtual bool                          is_valid_num_points(const int num_points) const                                         = 0;
   virtual bool                          is_point(void) const                                                                    = 0;

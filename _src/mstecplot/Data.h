@@ -11,8 +11,8 @@ enum class Variable_Location
   CELLCENTERED
 };
 
-// coordinates_ptr format
-// dimension X num nodes  (x1,...,xn,y1,...,yn,z1,...,zn)
+// 1. coordinates_ptr format :  dimension X num nodes  (x1,...,xn,y1,...,yn,z1,...,zn)
+// 2. connectivities start from 1
 struct Grid_Data
 {
 public:
@@ -26,7 +26,7 @@ public:
   const std::vector<std::vector<int>>& connectivities;
 };
 
-// values_ptr format
+// 1. values_ptr format
 // num variables X num_nodes ((v1)1, ..., (v1)nn , ... , (vn)1,...,(vn)nn) (variable location = NODAL)
 // num variables X num_cells ((v1)1, ..., (v1)nc , ... , (vn)1,...,(vn)nc) (variable location = CELLCENTERD)
 struct Solution_Data

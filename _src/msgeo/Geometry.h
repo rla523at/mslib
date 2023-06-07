@@ -3,7 +3,6 @@
 #include <map>
 #include <vector>
 
-// class declaration
 namespace ms::geo
 {
 
@@ -12,6 +11,12 @@ struct Quadrature_Rule
   Nodes               points;
   std::vector<double> weights;
 };
+
+} // namespace ms::geo
+
+// class declaration
+namespace ms::geo
+{
 
 class Geometry
 {
@@ -23,8 +28,10 @@ public:
   void change_nodes(std::vector<Node_Const_Wrapper>&& new_nodes);
 
 public:
+  void                          cal_normal(double* normal, const Node_Const_Wrapper node) const;
   void                          cal_projected_volumes(double* projected_volumes) const;
   double                        cal_volume(const int expected_scale_function_order = 0) const;
+  Node                          center(void) const;
   void                          center(double* coordinates) const;
   int                           dimension(void) const;
   Figure                        face_figure(const int face_index) const;
@@ -33,8 +40,9 @@ public:
   const Quadrature_Rule&        get_quadrature_rule(const int integrand_degree) const;
   bool                          is_point(void) const;
   bool                          is_line(void) const;
-  int                           num_vertices(void) const;
+  Partition_Data                make_partition_data(const int partition_order) const;
   int                           num_faces(void) const;
+  int                           num_vertices(void) const;
 
 private:
   void create_and_store_quadrature_rule(const int integrand_degree) const;
@@ -43,12 +51,12 @@ private:
   const Reference_Geometry&       _reference_geometry;
   std::vector<Node_Const_Wrapper> _consisting_nodes;
 
-  // 1. 나중에 필요할 때 만들어도 될것 같은데 초기화 할 떄만 만들고 저장 안하기
-  // 2. 위에처럼 안되면 쓰기전에 empty면 만들게 하고 계속 쓰기
   ms::sym::Polynomials _parametric_functions;
-  ms::sym::Symbol      _scale_function;
-  ms::sym::Polynomials _normal_functions;
 
+  mutable bool                           _is_scale_function_initialized = false;
+  mutable ms::sym::Symbol                _scale_function;
+  mutable bool                           _is_normal_functions_initialized = false;
+  mutable ms::sym::Polynomials           _normal_functions;
   mutable std::map<int, Quadrature_Rule> _degree_to_quadrature_rule;
 };
 

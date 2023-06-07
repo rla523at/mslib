@@ -59,7 +59,7 @@ struct Grid_Element_Data
 
 struct Grid_Peridoic_Data
 {
-  Grid_Element_Data        element_data;
+  Grid_Element_Data   element_data;
   std::vector<double> periodic_direction;
 };
 

@@ -11,20 +11,22 @@ namespace ms::geo
 
 ms::sym::Polynomials Reference_Point::cal_normal_functions(const ms::sym::Polynomials& parametric_functions) const
 {
-  return {1.0};
+  ms::sym::Polynomials result;
+  result[0] = 1.0;
+  return result;
 }
 
-ms::sym::Polynomials Reference_Point::cal_parametric_functions(const std::vector<Node_Const_Wrapper>& consisting_nodes) const
+ms::sym::Polynomials Reference_Point::cal_parametric_functions(const std::vector<Node_Const_Wrapper>& consisting_node_wraps) const
 {
-  REQUIRE(consisting_nodes.size() == 1, "Point must consist of only one single point.");
+  REQUIRE(consisting_node_wraps.size() == 1, "Point must consist of only one single point.");
 
-  const auto& node      = consisting_nodes.front();
-  const auto  dimension = node.dimension();
+  const auto& node_cwrap = consisting_node_wraps.front();
+  const auto  dimension = node_cwrap.dimension();
 
   ms::sym::Polynomials result(dimension);
   for (int i = 0; i < dimension; ++i)
   {
-    result[i] = node[i];
+    result[i] = node_cwrap[i];
   }
 
   return result;
@@ -91,8 +93,7 @@ int Reference_Point::num_faces(void) const
 
 int Reference_Point::num_vertices(void) const
 {
-  EXCEPTION("Point doesn't have any vertices");
-  return -1;
+  return 1;
 }
 
 Nodes_Const_Wrapper Reference_Point::quadrature_points(const int integrand_degree) const
@@ -105,6 +106,12 @@ const std::vector<double>& Reference_Point::get_quadrature_weights(const int int
 {
   EXCEPTION("Integration is not possible over a point.");
   return {};
+}
+
+const Partition_Data& Reference_Point::get_partition_data(const int partition_order) const
+{
+  EXCEPTION("Partition is not possible over a point.");
+  return {Nodes{Coordinates_Type::NOT_SUPPROTED, -1, -1}, {}};
 }
 
 ms::sym::Polynomials Reference_Geometry_Common::cal_parametric_functions(const std::vector<Node_Const_Wrapper>& consisting_nodes) const
@@ -157,6 +164,16 @@ const std::vector<double>& Reference_Geometry_Common::get_quadrature_weights(con
   }
 
   return this->_tag_to_quadrature_weights.at(tag);
+}
+
+const Partition_Data& Reference_Geometry_Common::get_partition_data(const int partition_order) const
+{
+  if (!this->_order_to_partition_data.contains(partition_order))
+  {
+    this->create_and_store_partition_data(partition_order);
+  }
+
+  return this->_order_to_partition_data.at(partition_order);
 }
 
 const ms::sym::Polynomials& Reference_Geometry_Common::get_shape_functions(const int porder) const
@@ -324,6 +341,40 @@ int Reference_Line::cal_quadrature_rule_tag(const int integrand_degree) const
   return integrand_degree / 2;
 }
 
+void Reference_Line::create_and_store_partition_data(const int partition_order) const
+{
+  constexpr auto dimension      = 1;
+  constexpr auto X0_start_coord = -1.0;
+
+  const auto num_consisting_nodes    = partition_order + 2;
+  const auto num_consisting_elements = partition_order + 1;
+
+  Nodes consisting_nodes(Coordinates_Type::NODAL, num_consisting_nodes, dimension);
+
+  const auto delta = 2.0 / num_consisting_elements;
+
+  for (int i = 0; i < num_consisting_nodes; ++i)
+  {
+    auto node_wrap = consisting_nodes[i];
+
+    const auto X0_coord = X0_start_coord + delta * i;
+    node_wrap[0]        = X0_coord;
+  }
+
+  std::vector<std::vector<int>> connectivities(num_consisting_elements);
+
+  for (int i = 0; i < num_consisting_elements; i++)
+  {
+    auto& connectivity = connectivities[i];
+
+    //   i 式式式式 i+1
+    connectivity = {i, i + 1};
+  }
+
+  Partition_Data data(std::move(consisting_nodes), std::move(connectivities));
+  this->_order_to_partition_data.emplace(partition_order, std::move(data));
+}
+
 void Reference_Line::create_and_store_quadrature_points(const int tag) const
 {
   REQUIRE(0 <= tag, "param_order can not be negative");
@@ -470,6 +521,7 @@ ms::sym::Polynomials Reference_Line::make_parametric_function_bases(const int ta
   // 1 r r^2 ...
   return VCF_bases;
 }
+
 } // namespace ms::geo
 
 namespace ms::geo
@@ -553,14 +605,7 @@ ms::sym::Polynomials cal_paramteric_curve_normal_functions(const ms::sym::Polyno
 //
 // ushort Reference_Line::num_vertices(void) const { return 2; }
 //
-// ushort Reference_Line::num_post_nodes(const ushort post_order) const {
-//  return post_order + 2;
-//}
-//
-// ushort Reference_Line::num_post_elements(const ushort post_order) const {
-//  const auto n = post_order;
-//  return n + 1;
-//}
+
 //
 // Quadrature_Rule Reference_Line::make_quadrature_rule(
 //    const ushort integrand_order) const {
@@ -751,43 +796,7 @@ ms::sym::Polynomials cal_paramteric_curve_normal_functions(const ms::sym::Polyno
 //  }
 //}
 //
-// std::vector<Euclidean_Vector> Reference_Line::make_post_points(
-//    const ushort post_order) const {
-//  const auto n = post_order;
-//  const auto num_post_nodes = n + 2;
-//
-//  std::vector<Euclidean_Vector> post_points;
-//  post_points.reserve(num_post_nodes);
-//
-//  const auto num_division = n + 1;
-//  const auto delta = 2.0 / num_division;
-//
-//  const auto X0_start_coord = -1.0;
-//
-//  for (ushort i = 0; i <= n + 1; ++i) {
-//    const auto X0_coord = X0_start_coord + delta * i;
-//    post_points.push_back({X0_coord});
-//  }
-//
-//  return post_points;
-//}
-//
-// std::vector<std::vector<uint>> Reference_Line::make_connectivities(
-//    const ushort post_order) const {
-//  const auto n = post_order;
-//  const auto num_connecitivity = n + 1;
-//
-//  std::vector<std::vector<uint>> connectivities;
-//  connectivities.reserve(num_connecitivity);
-//
-//  for (ushort j = 0; j < n + 1; j++) {
-//    //   I1式式式式I1+1
-//    const uint I1 = j;
-//    connectivities.push_back({I1, I1 + 1});
-//  }
-//
-//  return connectivities;
-//}
+
 // Vector_Function<Polynomial>
 // Reference_Line::make_mapping_monomial_vector_function(void) const {
 //  const auto num_monomial = this->order_ + 1;

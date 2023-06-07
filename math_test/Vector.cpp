@@ -12,15 +12,6 @@ std::ostream& operator<<(std::ostream& os, const Vector<dim>& vec)
 }
 // for google test cout message
 
-Vector function(void)
-{
-
-}
-
-TEST(Vector, function_return)
-{
-}
-
 TEST(Vector, construct_1)
 {
   std::vector<double> values = {1, 2, 3};

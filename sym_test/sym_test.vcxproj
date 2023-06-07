@@ -44,6 +44,9 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <ItemGroup>
+    <ProjectReference Include="..\geo\geo.vcxproj">
+      <Project>{09adad60-d5bc-41cb-befd-70df556b7ce1}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\sym\sym.vcxproj">
       <Project>{eb3d5635-a62e-4846-ab9c-595352887bf2}</Project>
     </ProjectReference>

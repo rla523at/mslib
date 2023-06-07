@@ -10,7 +10,6 @@ namespace ms::sym
 {
 class Poly_Term;
 class Polynomial;
-using Polynomials = std::vector<Polynomial>;
 } // namespace ms::sym
 
 // class declration
@@ -66,6 +65,19 @@ private:
   std::vector<double>                  coefficients_;
 };
 
+/*
+
+
+
+
+
+
+
+
+
+
+*/
+
 class Powered_Poly_Term
 {
 public:
@@ -75,7 +87,8 @@ public:
   Powered_Poly_Term(const Simple_Poly_Term& simple_poly_term)
       : base_(simple_poly_term){};
   Powered_Poly_Term(const Simple_Poly_Term& simple_poly_term, const int exponent)
-      : base_(simple_poly_term), exponent_(exponent){};
+      : base_(simple_poly_term),
+        exponent_(exponent){};
 
 public:
   void multiply_assign_with_same_base(const Powered_Poly_Term& other);
@@ -102,6 +115,19 @@ private:
   Simple_Poly_Term base_     = 0.0;
   int              exponent_ = 1;
 };
+
+/*
+
+
+
+
+
+
+
+
+
+
+*/
 
 // constant * powered poly term1 * powered poly term2 * ...
 class Poly_Term
@@ -154,6 +180,19 @@ private:
   std::array<Powered_Poly_Term, small_criterion_> small_buffer_    = {0};
   std::vector<Powered_Poly_Term>                  terms_;
 };
+
+/*
+
+
+
+
+
+
+
+
+
+
+*/
 
 // simple poly term + poly term1 + poly term2 + ...
 class Polynomial : public Base
@@ -211,6 +250,39 @@ private:
 private:
   Simple_Poly_Term       simple_poly_term_ = 0.0;
   std::vector<Poly_Term> poly_terms_;
+};
+
+/*
+
+
+
+
+
+
+
+
+
+
+*/
+
+class Polynomials
+{
+public:
+  Polynomials(void);
+  Polynomials(const int range_dimension);
+
+public:
+  Polynomial& operator[](const int index);
+
+public:
+  const Polynomial& operator[](const int index) const;
+
+public:
+  void calculate(const std::pair<double*, int>& result, const std::pair<const double*, int>& input) const;
+  int  size(void) const;
+
+private:
+  std::vector<Polynomial> _polynomials;
 };
 
 } // namespace ms::sym

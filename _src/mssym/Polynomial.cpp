@@ -253,6 +253,19 @@ void Simple_Poly_Term::change_domain_dimension(const int new_domain_dimension)
 
 bool Simple_Poly_Term::is_small(void) const { return this->coefficients_.empty(); }
 
+/*
+
+
+
+
+
+
+
+
+
+
+*/
+
 void Powered_Poly_Term::multiply_assign_with_same_base(
     const Powered_Poly_Term& other)
 {
@@ -341,6 +354,19 @@ std::string Powered_Poly_Term::to_string(void) const
   else
     return str;
 }
+
+/*
+
+
+
+
+
+
+
+
+
+
+*/
 
 // PolyTerm::PolyTerm(const double constant) {
 //	this->constant_ = constant;
@@ -647,6 +673,19 @@ bool Poly_Term::is_constant(void) const
 
 bool Poly_Term::is_small(void) const { return this->terms_.empty(); }
 
+/*
+
+
+
+
+
+
+
+
+
+
+*/
+
 Polynomial::Polynomial(const Simple_Poly_Term& simple_poly_term)
 {
   this->simple_poly_term_ += simple_poly_term;
@@ -943,6 +982,72 @@ void Polynomial::minus_assign_poly_term(const Poly_Term& term)
   this->poly_terms_.push_back(-1 * term);
 }
 
+/*
+
+
+
+
+
+
+
+
+
+
+*/
+
+Polynomials::Polynomials(void)
+{
+  this->_polynomials.resize(1);
+}
+
+Polynomials::Polynomials(const int range_dimension)
+{
+  this->_polynomials.resize(range_dimension);
+}
+
+Polynomial& Polynomials::operator[](const int index)
+{
+  REQUIRE(index < this->_polynomials.size(), "index cann't exceed given range");
+
+  return this->_polynomials[index];
+}
+
+const Polynomial& Polynomials::operator[](const int index) const
+{
+  REQUIRE(index < this->_polynomials.size(), "index cann't exceed given range");
+
+  return this->_polynomials[index];
+}
+
+void Polynomials::calculate(const std::pair<double*, int>& result, const std::pair<const double*, int>& input) const
+{
+  const auto [ptr, inc] = result;
+  const auto range_dim  = this->_polynomials.size();
+
+  for (int i = 0; i < range_dim; ++i)
+  {
+    ptr[i * inc] = this->_polynomials[i](input);
+  }
+}
+
+int Polynomials::size(void) const
+{
+  return static_cast<int>(this->_polynomials.size());
+}
+
+/*
+
+
+
+
+
+
+
+
+
+
+*/
+
 std::ostream& operator<<(std::ostream&           ostream,
                          const Simple_Poly_Term& simple_poly_term)
 {
@@ -1002,11 +1107,11 @@ double Simple_Poly_Term::operator()(const double* input) const
 
 double Simple_Poly_Term::operator()(const std::pair<const double*, int>& input) const
 {
-  const auto [ptr, stride] = input;
+  const auto [ptr, inc] = input;
 
   auto result = this->constant_;
   for (int i = 0; i < this->domain_dim_; ++i)
-    result += this->coefficient_ptr_[i] * ptr[i * stride];
+    result += this->coefficient_ptr_[i] * ptr[i * inc];
 
   return result;
 }

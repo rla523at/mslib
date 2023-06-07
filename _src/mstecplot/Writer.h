@@ -1,15 +1,9 @@
 #pragma once
 #include <string>
 #include <vector>
+#include "Data.h"
+#include "Binary_File.h"
 
-// forward declaration
-namespace ms::tecplot
-{
-class Binary_File;
-struct Grid_Data;
-struct Solution_Data;
-enum class Variable_Location;
-} // namespace ms::tecplot
 
 // class declaration
 namespace ms::tecplot

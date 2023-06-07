@@ -1,8 +1,5 @@
 #include "Writer.h"
 
-#include "Binary_Writer.h"
-#include "Data.h"
-
 #include "msexception/Exception.h"
 #include "mspath/path.h"
 #include <algorithm>

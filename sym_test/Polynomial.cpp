@@ -1,5 +1,6 @@
 #pragma once
 #include "mssym/Polynomial.h"
+#include "msgeo/Node.h" // for with nodes test
 #include "gtest/gtest.h"
 
 namespace ms::sym
@@ -1423,6 +1424,37 @@ TEST(Polynomial, to_string)
   const auto ref    = "[x0]";
 
   EXPECT_EQ(ref, result);
+}
+
+TEST(Polynomials, with_nodes)
+{
+  ms::geo::Nodes nodes(ms::geo::Coordinates_Type::BLOCK, 2, 2);
+
+  auto node0 = nodes[0];
+  auto node1 = nodes[1];
+  node0[0]   = 1.0;
+  node0[1]   = 1.0;
+  node1[0]   = 2.0;
+  node1[1]   = 2.0;
+
+  Polynomial x("x0");
+  Polynomial y("x0");
+
+  Polynomials f(2);
+  f[0] = x + y;
+  f[1] = x * x - x * y;
+
+  ms::geo::Nodes result(ms::geo::Coordinates_Type::BLOCK, 2, 2);
+  
+  for (int i = 0; i < 2; ++i)
+  {
+    f.calculate(result[i], nodes[i]);
+  }
+
+  EXPECT_DOUBLE_EQ(result[0][0], 2);
+  EXPECT_DOUBLE_EQ(result[0][1], 0);
+  EXPECT_DOUBLE_EQ(result[1][0], 4);
+  EXPECT_DOUBLE_EQ(result[1][1], 0);
 }
 
 // TEST(Irrational_Function, operator_call_1) {

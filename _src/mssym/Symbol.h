@@ -9,7 +9,7 @@ namespace ms::sym
 class Multiplied_Term;
 class Symbol;
 class Polynomial;
-using Polynomials = std::vector<Polynomial>;
+class Polynomials;
 using Symbols     = std::vector<Symbol>;
 
 } // namespace ms::sym
