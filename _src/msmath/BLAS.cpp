@@ -293,7 +293,7 @@ void cATBT(double* result_ptr, const double c, const double* A_ptr, const double
   }
 }
 
-void Ax(double* result_ptr, const double* m_ptr, const double* v_ptr, const int num_rows, const int num_columns, const int leading_dimension, const int incr, const int incv)
+void Ax(double* result_ptr, const double* A_ptr, const double* x_ptr, const int num_rows, const int num_columns, const int leading_dimension, const int incr, const int incx)
 {
   REQUIRE(0 < num_rows, "result_num_rows should be greater than 0");
   REQUIRE(0 < num_columns, "result_num_columns should be greater than 0");
@@ -304,12 +304,12 @@ void Ax(double* result_ptr, const double* m_ptr, const double* v_ptr, const int 
     result_ptr[i * incr] = 0.0;
     for (int j = 0; j < num_columns; ++j)
     {
-      result_ptr[i * incr] += m_ptr[i * leading_dimension + j] * v_ptr[j * incv];
+      result_ptr[i * incr] += A_ptr[i * leading_dimension + j] * x_ptr[j * incx];
     }
   }
 }
 
-void ATx(double* result_ptr, const double* m_ptr, const double* v_ptr, const int num_rows, const int num_columns, const int leading_dimension, const int incr, const int incv)
+void ATx(double* result_ptr, const double* A_ptr, const double* x_ptr, const int num_rows, const int num_columns, const int leading_dimension, const int incr, const int incx)
 {
   REQUIRE(0 < num_rows, "result_num_rows should be greater than 0");
   REQUIRE(0 < num_columns, "result_num_columns should be greater than 0");
@@ -320,8 +320,44 @@ void ATx(double* result_ptr, const double* m_ptr, const double* v_ptr, const int
     result_ptr[i * incr] = 0.0;
     for (int j = 0; j < num_rows; ++j)
     {
-      result_ptr[i * incr] += m_ptr[j * leading_dimension + i] * v_ptr[j * incv];
+      result_ptr[i * incr] += A_ptr[j * leading_dimension + i] * x_ptr[j * incx];
     }
+  }
+}
+
+void cAx(double* result_ptr, const double c, const double* A_ptr, const double* x_ptr, const int num_rows, const int num_columns, const int leading_dimension, const int incr, const int incx)
+{
+  REQUIRE(0 < num_rows, "result_num_rows should be greater than 0");
+  REQUIRE(0 < num_columns, "result_num_columns should be greater than 0");
+  REQUIRE(num_columns <= leading_dimension, "leading_dimension error");
+
+  for (int i = 0; i < num_rows; ++i)
+  {
+    result_ptr[i * incr] = 0.0;
+    for (int j = 0; j < num_columns; ++j)
+    {
+      result_ptr[i * incr] += A_ptr[i * leading_dimension + j] * x_ptr[j * incx];
+    }
+
+    result_ptr[i * incr] *= c;
+  }
+}
+
+void cATx(double* result_ptr, const double c, const double* A_ptr, const double* x_ptr, const int num_rows, const int num_columns, const int leading_dimension, const int incr, const int incx)
+{
+  REQUIRE(0 < num_rows, "result_num_rows should be greater than 0");
+  REQUIRE(0 < num_columns, "result_num_columns should be greater than 0");
+  REQUIRE(num_columns <= leading_dimension, "leading_dimension error");
+
+  for (int i = 0; i < num_columns; ++i)
+  {
+    result_ptr[i * incr] = 0.0;
+    for (int j = 0; j < num_rows; ++j)
+    {
+      result_ptr[i * incr] += A_ptr[j * leading_dimension + i] * x_ptr[j * incx];
+    }
+
+    result_ptr[i * incr] *= c;
   }
 }
 
@@ -548,7 +584,31 @@ void ATx(double* result_ptr, const double* A_ptr, const double* x_ptr, const int
   cblas_dgemv(Layout, trans, num_rows, num_columns, 1.0, A_ptr, leading_dimension, x_ptr, incx, 0.0, result_ptr, incr);
 }
 
-void invA(double* m_ptr, const int num_rows, const int num_columns, const int leading_dimension)
+void cAx(double* result_ptr, const double c, const double* A_ptr, const double* x_ptr, const int num_rows, const int num_columns, const int leading_dimension, const int incr, const int incx)
+{
+  REQUIRE(0 < num_rows, "result_num_rows should be greater than 0");
+  REQUIRE(0 < num_columns, "result_num_columns should be greater than 0");
+  REQUIRE(num_columns <= leading_dimension, "leading_dimension error");
+
+  const auto Layout = CBLAS_LAYOUT::CblasRowMajor;
+  const auto trans  = CBLAS_TRANSPOSE::CblasNoTrans;
+
+  cblas_dgemv(Layout, trans, num_rows, num_columns, c, A_ptr, leading_dimension, x_ptr, incx, 0.0, result_ptr, incr);
+}
+
+void cATx(double* result_ptr, const double c, const double* A_ptr, const double* x_ptr, const int num_rows, const int num_columns, const int leading_dimension, const int incr, const int incx)
+{
+  REQUIRE(0 < num_rows, "result_num_rows should be greater than 0");
+  REQUIRE(0 < num_columns, "result_num_columns should be greater than 0");
+  REQUIRE(num_columns <= leading_dimension, "leading_dimension error");
+
+  const auto Layout = CBLAS_LAYOUT::CblasRowMajor;
+  const auto trans  = CBLAS_TRANSPOSE::CblasTrans;
+
+  cblas_dgemv(Layout, trans, num_rows, num_columns, c, A_ptr, leading_dimension, x_ptr, incx, 0.0, result_ptr, incr);
+}
+
+void invA(double* A_ptr, const int num_rows, const int num_columns, const int leading_dimension)
 {
   const int        matrix_layout = LAPACK_ROW_MAJOR;
   const lapack_int m             = num_rows;
@@ -557,12 +617,12 @@ void invA(double* m_ptr, const int num_rows, const int num_columns, const int le
 
   // PLU decomposition
   std::vector<int> ipiv(std::min(m, n));
-  const lapack_int PLU_decomposition_routine_info = LAPACKE_dgetrf(matrix_layout, m, n, m_ptr, lda, ipiv.data());
+  const lapack_int PLU_decomposition_routine_info = LAPACKE_dgetrf(matrix_layout, m, n, A_ptr, lda, ipiv.data());
 
   REQUIRE(0 <= PLU_decomposition_routine_info, "info should be greater than 0 when sucess PLU decomposition");
 
   // Inverse
-  const lapack_int inverse_routine_info = LAPACKE_dgetri(matrix_layout, n, m_ptr, lda, ipiv.data());
+  const lapack_int inverse_routine_info = LAPACKE_dgetri(matrix_layout, n, A_ptr, lda, ipiv.data());
 
   REQUIRE(inverse_routine_info == 0, "info should be 0 when success matrix get_inverse");
   // info > 0 "U is singular matrix in L-U decomposition"
@@ -828,33 +888,57 @@ void cATBT(double* result_ptr, const double c, const double* A_ptr, const double
   }
 }
 
-void Ax(double* result_ptr, const double* m_ptr, const double* v_ptr, const int num_rows, const int num_columns, const int leading_dimension, const int incr, const int incv)
+void Ax(double* result_ptr, const double* A_ptr, const double* x_ptr, const int num_rows, const int num_columns, const int leading_dimension, const int incr, const int incx)
 {
   if (num_rows * num_columns < ms::math::blas::gemv_criteria)
   {
-    ms::math::blas::manual::Ax(result_ptr, m_ptr, v_ptr, num_rows, num_columns, leading_dimension, incr, incv);
+    ms::math::blas::manual::Ax(result_ptr, A_ptr, x_ptr, num_rows, num_columns, leading_dimension, incr, incx);
   }
   else
   {
-    ms::math::blas::mkl::Ax(result_ptr, m_ptr, v_ptr, num_rows, num_columns, leading_dimension, incr, incv);
+    ms::math::blas::mkl::Ax(result_ptr, A_ptr, x_ptr, num_rows, num_columns, leading_dimension, incr, incx);
   }
 }
 
-void ATx(double* result_ptr, const double* m_ptr, const double* v_ptr, const int num_rows, const int num_columns, const int leading_dimension, const int incr, const int incv)
+void ATx(double* result_ptr, const double* A_ptr, const double* x_ptr, const int num_rows, const int num_columns, const int leading_dimension, const int incr, const int incx)
 {
   if (num_rows * num_columns < ms::math::blas::gemv_criteria)
   {
-    ms::math::blas::manual::ATx(result_ptr, m_ptr, v_ptr, num_rows, num_columns, leading_dimension, incr, incv);
+    ms::math::blas::manual::ATx(result_ptr, A_ptr, x_ptr, num_rows, num_columns, leading_dimension, incr, incx);
   }
   else
   {
-    ms::math::blas::mkl::ATx(result_ptr, m_ptr, v_ptr, num_rows, num_columns, leading_dimension, incr, incv);
+    ms::math::blas::mkl::ATx(result_ptr, A_ptr, x_ptr, num_rows, num_columns, leading_dimension, incr, incx);
   }
 }
 
-void invA(double* m_ptr, const int num_rows, const int num_columns, const int leading_dimension)
+void cAx(double* result_ptr, const double c, const double* A_ptr, const double* x_ptr, const int num_rows, const int num_columns, const int leading_dimension, const int incr, const int incx)
 {
-  ms::math::blas::mkl::invA(m_ptr, num_rows, num_columns, leading_dimension);
+  if (num_rows * num_columns < ms::math::blas::gemv_criteria)
+  {
+    ms::math::blas::manual::cAx(result_ptr, c, A_ptr, x_ptr, num_rows, num_columns, leading_dimension, incr, incx);
+  }
+  else
+  {
+    ms::math::blas::mkl::cAx(result_ptr, c, A_ptr, x_ptr, num_rows, num_columns, leading_dimension, incr, incx);
+  }
+}
+
+void cATx(double* result_ptr, const double c, const double* A_ptr, const double* x_ptr, const int num_rows, const int num_columns, const int leading_dimension, const int incr, const int incx)
+{
+  if (num_rows * num_columns < ms::math::blas::gemv_criteria)
+  {
+    ms::math::blas::manual::cATx(result_ptr, c, A_ptr, x_ptr, num_rows, num_columns, leading_dimension, incr, incx);
+  }
+  else
+  {
+    ms::math::blas::mkl::cATx(result_ptr, c, A_ptr, x_ptr, num_rows, num_columns, leading_dimension, incr, incx);
+  }
+}
+
+void invA(double* A_ptr, const int num_rows, const int num_columns, const int leading_dimension)
+{
+  ms::math::blas::mkl::invA(A_ptr, num_rows, num_columns, leading_dimension);
 }
 
 } // namespace ms::math::blas

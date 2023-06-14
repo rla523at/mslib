@@ -25,7 +25,7 @@ std::string Solution_Data::var_location_str(void) const
 
   for (int i = 0; i < num_variables; ++i)
   {
-    if (var_locations_ptr[i] == Variable_Location::CELLCENTERED)
+    if (var_locations_ptr[i] == Variable_Location::CELL_CENTER)
     {
       const auto var_index = i + 1;
       cell_centered_var_indexes.push_back(var_index);
@@ -34,7 +34,7 @@ std::string Solution_Data::var_location_str(void) const
 
   if (cell_centered_var_indexes.empty())
   {
-    return "NODAL";
+    return "NODE";
   }
   else
   {
@@ -46,7 +46,7 @@ std::string Solution_Data::var_location_str(void) const
     }
 
     var_location_str.pop_back();
-    var_location_str += "] = CELLCENTERED)";
+    var_location_str += "] = CELL_CENTER)";
 
     return var_location_str;
   }

@@ -12,6 +12,14 @@ std::ostream& operator<<(std::ostream& os, const Vector<dim>& vec)
 }
 // for google test cout message
 
+TEST(Vector, cwrapper)
+{
+  const Vector v       = {1, 2, 3};
+  const auto   v_cwrap = v.const_wrapper();
+
+  EXPECT_EQ(v.at(2), v_cwrap.at(2));
+}
+
 TEST(Vector, construct_1)
 {
   std::vector<double> values = {1, 2, 3};

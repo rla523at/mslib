@@ -122,6 +122,11 @@ double Vector_Const_Wrapper::cosine(const Vector_Const_Wrapper& other) const
   return this->inner_product(other) / (this->L2_norm() * other.L2_norm());
 }
 
+Vector_Const_Wrapper Vector_Const_Wrapper::const_wrapper(void) const
+{
+  return *this;
+}
+
 const double* Vector_Const_Wrapper::data(void) const
 {
   return this->_coordinate_const_ptr;
@@ -210,6 +215,19 @@ Vector<3> Vector_Const_Wrapper::cross_product<3>(const Vector_Const_Wrapper& oth
   return result;
 }
 
+/*
+
+
+
+
+
+
+
+
+
+
+*/
+
 void Vector_Wrapper::operator*=(const double constant)
 {
   ms::math::blas::cx(constant, this->_coordinate_ptr, this->_dimension, this->_inc);
@@ -244,7 +262,7 @@ double& Vector_Wrapper::at(const size_t position)
   return this->_coordinate_ptr[position];
 }
 
-void Vector_Wrapper::change_value(const Vector_Const_Wrapper& other)
+void Vector_Wrapper::change_value(const Vector_Const_Wrapper other)
 {
   REQUIRE(this->_dimension == other.dimension(), "other vector should be same size");
   ms::math::blas::copy(this->_coordinate_ptr, other.data(), this->_dimension, this->_inc, other.inc());
@@ -268,58 +286,75 @@ void Vector_Wrapper::normalize(void)
   *this *= 1.0 / this->L2_norm();
 }
 
+Vector_Wrapper Vector_Wrapper::wrapper(void)
+{
+  return *this;
+}
+
+/*
+
+
+
+
+
+
+
+
+
+
+*/
+
+Vector<0> Vector<0>::null_vector(void)
+{
+  return Vector<0>();
+}
+
 Vector<0>::Vector(const int dimension)
     : _coordinates(dimension)
 {
-  this->_dimension            = static_cast<int>(this->_coordinates.size());
-  this->_coordinate_const_ptr = this->_coordinates.data();
-  this->_coordinate_ptr       = this->_coordinates.data();
-  this->_inc                  = 1;
+  this->reallocate_ptr();
+  this->_dimension = static_cast<int>(this->_coordinates.size());
+  this->_inc       = 1;
 }
 
 Vector<0>::Vector(const std::initializer_list<double> list)
     : _coordinates(list)
 {
-  this->_dimension            = static_cast<int>(this->_coordinates.size());
-  this->_coordinate_const_ptr = this->_coordinates.data();
-  this->_coordinate_ptr       = this->_coordinates.data();
-  this->_inc                  = 1;
+  this->reallocate_ptr();
+  this->_dimension = static_cast<int>(this->_coordinates.size());
+  this->_inc       = 1;
 }
 
 Vector<0>::Vector(const std::vector<double>& values)
     : _coordinates(values)
 {
-  this->_dimension            = static_cast<int>(this->_coordinates.size());
-  this->_coordinate_const_ptr = this->_coordinates.data();
-  this->_coordinate_ptr       = this->_coordinates.data();
-  this->_inc                  = 1;
+  this->reallocate_ptr();
+  this->_dimension = static_cast<int>(this->_coordinates.size());
+  this->_inc       = 1;
 }
 
 Vector<0>::Vector(std::vector<double>&& values)
     : _coordinates(std::move(values))
 {
-  this->_dimension            = static_cast<int>(this->_coordinates.size());
-  this->_coordinate_const_ptr = this->_coordinates.data();
-  this->_coordinate_ptr       = this->_coordinates.data();
-  this->_inc                  = 1;
+  this->reallocate_ptr();
+  this->_dimension = static_cast<int>(this->_coordinates.size());
+  this->_inc       = 1;
 };
 
 Vector<0>::Vector(const Vector& other)
     : _coordinates(other._coordinates)
 {
-  this->_dimension            = other._dimension;
-  this->_coordinate_const_ptr = this->_coordinates.data();
-  this->_coordinate_ptr       = this->_coordinates.data();
-  this->_inc                  = other._inc;
+  this->reallocate_ptr();
+  this->_dimension = other._dimension;
+  this->_inc       = other._inc;
 }
 
 Vector<0>::Vector(Vector&& other) noexcept
     : _coordinates(std::move(other._coordinates))
 {
-  this->_dimension            = other._dimension;
-  this->_coordinate_const_ptr = this->_coordinates.data();
-  this->_coordinate_ptr       = this->_coordinates.data();
-  this->_inc                  = other._inc;
+  this->reallocate_ptr();
+  this->_dimension = other._dimension;
+  this->_inc       = other._inc;
 
   other._dimension            = 0;
   other._coordinate_const_ptr = nullptr;
@@ -328,21 +363,52 @@ Vector<0>::Vector(Vector&& other) noexcept
 
 void Vector<0>::operator=(const Vector& other)
 {
-  this->_coordinates          = other._coordinates;
-  this->_dimension            = other._dimension;
-  this->_coordinate_const_ptr = this->_coordinates.data();
-  this->_coordinate_ptr       = this->_coordinates.data();
-  this->_inc                  = other._inc;
+  this->_coordinates = other._coordinates;
+  this->reallocate_ptr();
+
+  this->_dimension = other._dimension;
+  this->_inc       = other._inc;
 }
 
 void Vector<0>::operator=(Vector&& other) noexcept
 {
-  this->_coordinates          = std::move(other._coordinates);
-  this->_dimension            = other._dimension;
+  this->_coordinates = std::move(other._coordinates);
+  this->reallocate_ptr();
+
+  this->_dimension = other._dimension;
+  this->_inc       = other._inc;
+}
+
+void Vector<0>::resize(const int size)
+{
+  REQUIRE(0 < size, "size should be positive");
+
+  if (size <= this->_dimension) return;
+
+  this->_coordinates.resize(size);
+  this->reallocate_ptr();
+
+  this->_dimension = size;
+}
+
+void Vector<0>::reallocate_ptr(void)
+{
   this->_coordinate_const_ptr = this->_coordinates.data();
   this->_coordinate_ptr       = this->_coordinates.data();
-  this->_inc                  = other._inc;
 }
+
+/*
+
+
+
+
+
+
+
+
+
+
+*/
 
 Vector<0> operator*(const double constant, const Vector_Const_Wrapper& x)
 {

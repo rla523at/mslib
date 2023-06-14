@@ -42,7 +42,7 @@ TEST(msTecplot, ASCII_Solution_Test1)
   std::vector<double>                         variables      = {1, 2, 3, 4, -1, -2, 11, 12, 13, 14, 20, 30};
   constexpr auto                              solution_times = 1.0;
   std::vector<std::string>                    variable_strs  = {"A", "B", "C", "D"};
-  std::vector<ms::tecplot::Variable_Location> var_locations  = {ms::tecplot::Variable_Location::NODAL, ms::tecplot::Variable_Location::CELLCENTERED, ms::tecplot::Variable_Location::NODAL, ms::tecplot::Variable_Location::CELLCENTERED};
+  std::vector<ms::tecplot::Variable_Location> var_locations  = {ms::tecplot::Variable_Location::NODE, ms::tecplot::Variable_Location::CELL_CENTER, ms::tecplot::Variable_Location::NODE, ms::tecplot::Variable_Location::CELL_CENTER};
 
   ms::tecplot::Solution_Data solution_data;
   solution_data.values_ptr        = variables.data();
@@ -73,7 +73,7 @@ TEST(msTecplot, ASCII_Solution_Test2)
   std::vector<double>                         variables      = {1, 2};
   constexpr auto                              solution_times = 1.0;
   std::vector<std::string>                    variable_strs  = {"A"};
-  std::vector<ms::tecplot::Variable_Location> var_locations  = {ms::tecplot::Variable_Location::CELLCENTERED};
+  std::vector<ms::tecplot::Variable_Location> var_locations  = {ms::tecplot::Variable_Location::CELL_CENTER};
 
   ms::tecplot::Solution_Data solution_data;
   solution_data.values_ptr        = variables.data();
@@ -128,7 +128,7 @@ TEST(msTecplot, Binary_Solution_Test1)
   std::vector<double>                         variables      = {1, 2, 3, 4, -1, -2, 11, 12, 13, 14, 20, 30};
   constexpr auto                              solution_times = 1.0;
   std::vector<std::string>                    variable_strs  = {"A", "B", "C", "D"};
-  std::vector<ms::tecplot::Variable_Location> var_locations  = {ms::tecplot::Variable_Location::NODAL, ms::tecplot::Variable_Location::CELLCENTERED, ms::tecplot::Variable_Location::NODAL, ms::tecplot::Variable_Location::CELLCENTERED};
+  std::vector<ms::tecplot::Variable_Location> var_locations  = {ms::tecplot::Variable_Location::NODE, ms::tecplot::Variable_Location::CELL_CENTER, ms::tecplot::Variable_Location::NODE, ms::tecplot::Variable_Location::CELL_CENTER};
 
   ms::tecplot::Solution_Data solution_data;
   solution_data.values_ptr        = variables.data();

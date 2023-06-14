@@ -4,6 +4,22 @@
 namespace ms::math
 {
 
+TEST(Matrix, cwrapper1)
+{
+  const Matrix m       = {1, 2, {1, 2}};
+  auto         m_cwrap = m.const_wrapper();
+
+  EXPECT_EQ(m.at(0, 1), 2);
+}
+TEST(Matrix, conversion2)
+{
+  Matrix m      = {1, 2, {1, 2}};
+  auto   m_wrap = m.wrapper();
+  m_wrap.at(0, 1) = 5;
+
+  EXPECT_EQ(m.at(0, 1), 5);
+}
+
 TEST(Matrix, operator_addition_assign_1)
 {
   constexpr auto      num_rows    = 1;
@@ -81,6 +97,31 @@ TEST(Matrix, operator_addition_assign_7)
 
   Matrix ref(3, 5, {2.468734, 347.670345, 634529.8262345, 23461.9124567, 234529.73452345, 4.8808545, 9.066986845, 2345347.645345, 234535.834563245, 623459.4245345, 790245.45978, 149.0654223, 784.42001, 17.3381113, 8316.259});
   matrix_test_API::compare_considering_4ULP(m, ref);
+}
+
+TEST(blas, mpm)
+{
+  constexpr auto      num_rows1    = 2;
+  constexpr auto      num_columns1 = 2;
+  std::vector<double> val1         = {1, 2, 3, 4};
+
+  constexpr auto      num_rows2    = 2;
+  constexpr auto      num_columns2 = 2;
+  std::vector<double> val2         = {1, 2, 3, 4};
+
+  constexpr auto      num_rows3          = 2;
+  constexpr auto      num_columns3       = 2;
+  constexpr auto      leading_dimension3 = 3;
+  std::vector<double> val3(num_rows3 * leading_dimension3);
+
+  const auto cmw1   = Matrix_Const_Wrapper{num_rows1, num_columns1, val1.data()};
+  const auto cmw2   = Matrix_Const_Wrapper{num_rows2, num_columns2, val2.data()};
+  auto       result = Matrix_Wrapper(num_rows3, num_columns3, val3.data(), leading_dimension3);
+
+  ms::math::blas::mpm(result, cmw1, cmw2);
+
+  std::vector<double> ref = {2, 4, 0, 6, 8, 0};
+  EXPECT_EQ(val3, ref);
 }
 
 } // namespace ms::math

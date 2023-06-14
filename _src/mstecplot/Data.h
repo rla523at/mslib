@@ -7,8 +7,8 @@ namespace ms::tecplot
 
 enum class Variable_Location
 {
-  NODAL,
-  CELLCENTERED
+  NODE,
+  CELL_CENTER
 };
 
 // 1. coordinates_ptr format :  dimension X num nodes  (x1,...,xn,y1,...,yn,z1,...,zn)

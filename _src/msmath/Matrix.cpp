@@ -10,7 +10,10 @@ namespace ms::math
 {
 
 Matrix_Const_Wrapper::Matrix_Const_Wrapper(const int num_rows, const int num_columns, const double* ptr, const Transpose_Type transpose_type)
-    : _num_rows(num_rows), _num_columns(num_columns), const_data_ptr_(ptr), leading_dimension_(num_columns)
+    : _num_rows(num_rows),
+      _num_columns(num_columns),
+      const_data_ptr_(ptr),
+      leading_dimension_(num_columns)
 {
   REQUIRE(num_rows > 0 && num_columns > 0, "number of rows or number of columns should be positive");
 
@@ -21,7 +24,10 @@ Matrix_Const_Wrapper::Matrix_Const_Wrapper(const int num_rows, const int num_col
 };
 
 Matrix_Const_Wrapper::Matrix_Const_Wrapper(const int num_rows, const int num_columns, const double* ptr, const int leading_dimension, const Transpose_Type transpose_type)
-    : _num_rows(num_rows), _num_columns(num_columns), const_data_ptr_(ptr), leading_dimension_(leading_dimension)
+    : _num_rows(num_rows),
+      _num_columns(num_columns),
+      const_data_ptr_(ptr),
+      leading_dimension_(leading_dimension)
 {
   REQUIRE(num_rows > 0 && num_columns > 0, "number of rows or number of columns should be positive");
 
@@ -43,7 +49,7 @@ Matrix Matrix_Const_Wrapper::operator+(const Matrix_Const_Wrapper& other) const
   REQUIRE(this->size() == other.size(), "two matrix should be same size");
 
   const auto result_num_rows    = static_cast<int>(this->num_rows());
-  const auto result_num_columns = static_cast<int>(this->num_cols());
+  const auto result_num_columns = static_cast<int>(this->num_columns());
   Matrix     result(result_num_rows, result_num_columns);
 
   constexpr double c = 1.0;
@@ -79,7 +85,7 @@ Matrix Matrix_Const_Wrapper::operator-(const Matrix_Const_Wrapper& other) const
   REQUIRE(this->size() == other.size(), "two matrix should be same size");
 
   const auto result_num_rows    = static_cast<int>(this->num_rows());
-  const auto result_num_columns = static_cast<int>(this->num_cols());
+  const auto result_num_columns = static_cast<int>(this->num_columns());
   Matrix     result(result_num_rows, result_num_columns);
 
   constexpr double c = -1.0;
@@ -143,10 +149,10 @@ Vector<0> Matrix_Const_Wrapper::operator*(const Vector_Const_Wrapper& vec) const
 
 Matrix Matrix_Const_Wrapper::operator*(const Matrix_Const_Wrapper& other) const
 {
-  REQUIRE(this->num_cols() == other.num_rows(), "two matrix size should be mathched");
+  REQUIRE(this->num_columns() == other.num_rows(), "two matrix size should be mathched");
 
   const auto result_num_rows    = static_cast<int>(this->num_rows());
-  const auto result_num_columns = static_cast<int>(other.num_cols());
+  const auto result_num_columns = static_cast<int>(other.num_columns());
   Matrix     result(result_num_rows, result_num_columns);
 
   constexpr double c = 1.0;
@@ -276,6 +282,12 @@ Matrix_Const_Wrapper Matrix_Const_Wrapper::const_part(const int start_row_index,
   }
 }
 
+Matrix_Const_Wrapper Matrix_Const_Wrapper::const_wrapper(void) const
+{
+  Matrix_Const_Wrapper const_wrapper(this->_num_rows, this->_num_columns, this->const_data_ptr_, this->transpose_type());
+  return const_wrapper;
+}
+
 const double* Matrix_Const_Wrapper::data(void) const
 {
   return this->const_data_ptr_;
@@ -302,7 +314,7 @@ Matrix Matrix_Const_Wrapper::inverse_matrix(void) const
   return result;
 }
 
-size_t Matrix_Const_Wrapper::num_cols(void) const
+size_t Matrix_Const_Wrapper::num_columns(void) const
 {
   if (this->is_transposed_)
   {
@@ -354,7 +366,7 @@ std::string Matrix_Const_Wrapper::to_string(void) const
   oss << std::setprecision(16) << std::showpoint << std::left;
   for (int i = 0; i < this->num_rows(); ++i)
   {
-    for (int j = 0; j < this->num_cols(); ++j)
+    for (int j = 0; j < this->num_columns(); ++j)
       oss << std::setw(25) << this->at(i, j);
     oss << "\n";
   }
@@ -507,9 +519,22 @@ std::vector<double> Matrix_Const_Wrapper::values_vector(void) const
   return result;
 }
 
+/*
+
+
+
+
+
+
+
+
+
+
+*/
+
 void Matrix_Wrapper::operator*=(const double constant)
 {
-  ms::math::blas::cA(constant, this->data_ptr_, this->_num_rows, this->_num_columns, this->leading_dimension_);
+  ms::math::blas::cA(constant, this->_data_ptr, this->_num_rows, this->_num_columns, this->leading_dimension_);
 }
 
 void Matrix_Wrapper::operator+=(const Matrix_Const_Wrapper& other)
@@ -521,11 +546,11 @@ void Matrix_Wrapper::operator+=(const Matrix_Const_Wrapper& other)
 
   if (other.is_transposed())
   {
-    ms::math::blas::A_plus_cBT(this->data_ptr_, this->const_data_ptr_, c, other.data(), this->_num_rows, this->_num_columns, this->leading_dimension_, this->leading_dimension_, other.leading_dimension());
+    ms::math::blas::A_plus_cBT(this->_data_ptr, this->const_data_ptr_, c, other.data(), this->_num_rows, this->_num_columns, this->leading_dimension_, this->leading_dimension_, other.leading_dimension());
   }
   else
   {
-    ms::math::blas::A_plus_cB(this->data_ptr_, this->const_data_ptr_, c, other.data(), this->_num_rows, this->_num_columns, this->leading_dimension_, this->leading_dimension_, other.leading_dimension());
+    ms::math::blas::A_plus_cB(this->_data_ptr, this->const_data_ptr_, c, other.data(), this->_num_rows, this->_num_columns, this->leading_dimension_, this->leading_dimension_, other.leading_dimension());
   }
 }
 
@@ -538,11 +563,11 @@ void Matrix_Wrapper::operator-=(const Matrix_Const_Wrapper& other)
 
   if (other.is_transposed())
   {
-    ms::math::blas::A_plus_cBT(this->data_ptr_, this->const_data_ptr_, c, other.data(), this->_num_rows, this->_num_columns, this->leading_dimension_, this->leading_dimension_, other.leading_dimension());
+    ms::math::blas::A_plus_cBT(this->_data_ptr, this->const_data_ptr_, c, other.data(), this->_num_rows, this->_num_columns, this->leading_dimension_, this->leading_dimension_, other.leading_dimension());
   }
   else
   {
-    ms::math::blas::A_plus_cB(this->data_ptr_, this->const_data_ptr_, c, other.data(), this->_num_rows, this->_num_columns, this->leading_dimension_, this->leading_dimension_, other.leading_dimension());
+    ms::math::blas::A_plus_cB(this->_data_ptr, this->const_data_ptr_, c, other.data(), this->_num_rows, this->_num_columns, this->leading_dimension_, this->leading_dimension_, other.leading_dimension());
   }
 }
 
@@ -552,17 +577,17 @@ double& Matrix_Wrapper::at(const int row_index, const int column_index)
 
   if (this->is_transposed_)
   {
-    return this->data_ptr_[column_index * this->leading_dimension_ + row_index];
+    return this->_data_ptr[column_index * this->leading_dimension_ + row_index];
   }
   else
   {
-    return this->data_ptr_[row_index * this->leading_dimension_ + column_index];
+    return this->_data_ptr[row_index * this->leading_dimension_ + column_index];
   }
 }
 
 void Matrix_Wrapper::change_column(const int index, const double* values)
 {
-  const auto num_cols = this->num_cols();
+  const auto num_cols = this->num_columns();
   auto       column   = this->column_wrapper(index);
 
   for (int i = 0; i < num_cols; ++i)
@@ -588,7 +613,7 @@ void Matrix_Wrapper::change_value(const Matrix_Const_Wrapper& cmw)
 
   for (int i = 0; i < this->num_rows(); i++)
   {
-    for (int j = 0; j < this->num_cols(); j++)
+    for (int j = 0; j < this->num_columns(); j++)
     {
       this->at(i, j) = cmw.at(i, j);
     }
@@ -601,14 +626,14 @@ Vector_Wrapper Matrix_Wrapper::column_wrapper(const int index)
 
   if (this->is_transposed_)
   {
-    const auto     start_data_ptr = this->data_ptr_ + index * this->leading_dimension_;
+    const auto     start_data_ptr = this->_data_ptr + index * this->leading_dimension_;
     Vector_Wrapper column_vector(start_data_ptr, this->_num_columns);
 
     return column_vector;
   }
   else
   {
-    const auto     start_data_ptr = this->data_ptr_ + index;
+    const auto     start_data_ptr = this->_data_ptr + index;
     Vector_Wrapper column_vector(start_data_ptr, this->_num_rows, this->leading_dimension_);
 
     return column_vector;
@@ -617,7 +642,7 @@ Vector_Wrapper Matrix_Wrapper::column_wrapper(const int index)
 
 double* Matrix_Wrapper::data(void)
 {
-  return this->data_ptr_;
+  return this->_data_ptr;
 }
 
 Vector_Wrapper Matrix_Wrapper::row_wrapper(const int index)
@@ -626,14 +651,14 @@ Vector_Wrapper Matrix_Wrapper::row_wrapper(const int index)
 
   if (this->is_transposed_)
   {
-    const auto     start_data_ptr = this->data_ptr_ + index;
+    const auto     start_data_ptr = this->_data_ptr + index;
     Vector_Wrapper row_vector(start_data_ptr, this->_num_rows, this->leading_dimension_);
 
     return row_vector;
   }
   else
   {
-    const auto     start_data_ptr = this->data_ptr_ + index * this->leading_dimension_;
+    const auto     start_data_ptr = this->_data_ptr + index * this->leading_dimension_;
     Vector_Wrapper row_vector(start_data_ptr, this->_num_columns);
 
     return row_vector;
@@ -650,14 +675,14 @@ Matrix_Wrapper Matrix_Wrapper::part(const int start_row_index, const int end_row
 
   if (this->is_transposed_)
   {
-    const auto start_data_ptr = this->data_ptr_ + start_column_index * this->leading_dimension_ + start_row_index;
+    const auto start_data_ptr = this->_data_ptr + start_column_index * this->leading_dimension_ + start_row_index;
 
     Matrix_Wrapper part(num_column, num_row, start_data_ptr, this->leading_dimension_, Transpose_Type::transposed);
     return part;
   }
   else
   {
-    const auto start_data_ptr = this->data_ptr_ + start_row_index * this->leading_dimension_ + start_column_index;
+    const auto start_data_ptr = this->_data_ptr + start_row_index * this->leading_dimension_ + start_column_index;
 
     Matrix_Wrapper part(num_row, num_column, start_data_ptr, this->leading_dimension_, Transpose_Type::not_transposed);
     return part;
@@ -669,7 +694,7 @@ void Matrix_Wrapper::inverse(void)
   REQUIRE(this->is_square_matrix(), "invertable matrix should be square matrix");
   REQUIRE(!this->is_transposed_, "matrix should not be transposed");
 
-  ms::math::blas::invA(this->data_ptr_, this->_num_rows, this->_num_columns, this->leading_dimension_);
+  ms::math::blas::invA(this->_data_ptr, this->_num_rows, this->_num_columns, this->leading_dimension_);
 }
 
 void Matrix_Wrapper::transpose(void)
@@ -677,8 +702,33 @@ void Matrix_Wrapper::transpose(void)
   this->is_transposed_ = !this->is_transposed_;
 }
 
+Matrix_Wrapper Matrix_Wrapper::wrapper(void)
+{
+  Matrix_Wrapper wrapper(this->_num_rows, this->_num_columns, this->_data_ptr, this->transpose_type());
+  return wrapper;
+}
+
+/*
+
+
+
+
+
+
+
+
+
+
+*/
+
+Matrix Matrix::null_matrix(void)
+{
+  return Matrix();
+}
+
 Matrix::Matrix(const int matrix_order)
-    : Matrix_Wrapper(matrix_order, matrix_order, this->_values.data()), _values(matrix_order * matrix_order)
+    : Matrix_Wrapper(matrix_order, matrix_order, this->_values.data()),
+      _values(matrix_order * matrix_order)
 {
   this->reallocate_data_pointer();
 
@@ -689,7 +739,8 @@ Matrix::Matrix(const int matrix_order)
 }
 
 Matrix::Matrix(const int matrix_order, const std::vector<double>& diagonal_values)
-    : Matrix_Wrapper(matrix_order, matrix_order, this->_values.data()), _values(matrix_order * matrix_order)
+    : Matrix_Wrapper(matrix_order, matrix_order, this->_values.data()),
+      _values(matrix_order * matrix_order)
 {
   REQUIRE(matrix_order == diagonal_values.size(), "number of diagonal value of square matrix should be same with matrix order");
 
@@ -702,19 +753,22 @@ Matrix::Matrix(const int matrix_order, const std::vector<double>& diagonal_value
 }
 
 Matrix::Matrix(const int num_row, const int num_column, const Transpose_Type transpose_type)
-    : Matrix_Wrapper(num_row, num_column, this->_values.data(), transpose_type), _values(num_row * num_column)
+    : Matrix_Wrapper(num_row, num_column, this->_values.data(), transpose_type),
+      _values(num_row * num_column)
 {
   this->reallocate_data_pointer();
 }
 
 Matrix::Matrix(const int num_row, const int num_column, const double* value_ptr)
-    : Matrix_Wrapper(num_row, num_column, this->_values.data()), _values(value_ptr, value_ptr + num_row * num_column)
+    : Matrix_Wrapper(num_row, num_column, this->_values.data()),
+      _values(value_ptr, value_ptr + num_row * num_column)
 {
   this->reallocate_data_pointer();
 }
 
 Matrix::Matrix(const int num_row, const int num_column, std::vector<double>&& values, const Transpose_Type transpose_type)
-    : Matrix_Wrapper(num_row, num_column, this->_values.data(), transpose_type), _values(std::move(values))
+    : Matrix_Wrapper(num_row, num_column, this->_values.data(), transpose_type),
+      _values(std::move(values))
 {
   REQUIRE(num_row * num_column == this->_values.size(), "num value should be same with matrix size");
 
@@ -722,18 +776,20 @@ Matrix::Matrix(const int num_row, const int num_column, std::vector<double>&& va
 }
 
 Matrix::Matrix(const Matrix& other)
-    : Matrix_Wrapper(other._num_rows, other._num_columns, this->_values.data(), other.leading_dimension_, other.transpose_type()), _values(other._values)
+    : Matrix_Wrapper(other._num_rows, other._num_columns, this->_values.data(), other.leading_dimension_, other.transpose_type()),
+      _values(other._values)
 {
   this->reallocate_data_pointer();
 }
 
 Matrix::Matrix(Matrix&& other) noexcept
-    : Matrix_Wrapper(other._num_rows, other._num_columns, this->_values.data(), other.leading_dimension_, other.transpose_type()), _values(std::move(other._values))
+    : Matrix_Wrapper(other._num_rows, other._num_columns, this->_values.data(), other.leading_dimension_, other.transpose_type()),
+      _values(std::move(other._values))
 {
   this->reallocate_data_pointer();
 
   other.const_data_ptr_ = nullptr;
-  other.data_ptr_       = nullptr;
+  other._data_ptr       = nullptr;
 }
 
 void Matrix::operator=(const Matrix& other)
@@ -743,7 +799,7 @@ void Matrix::operator=(const Matrix& other)
   this->_num_columns    = other._num_columns;
   this->_values         = other._values;
   this->const_data_ptr_ = this->_values.data();
-  this->data_ptr_       = this->_values.data();
+  this->_data_ptr       = this->_values.data();
 }
 
 void Matrix::operator=(Matrix&& other) noexcept
@@ -753,20 +809,19 @@ void Matrix::operator=(Matrix&& other) noexcept
   this->_num_columns    = other._num_columns;
   this->_values         = std::move(other._values);
   this->const_data_ptr_ = this->_values.data();
-  this->data_ptr_       = this->_values.data();
+  this->_data_ptr       = this->_values.data();
 
   other.const_data_ptr_ = nullptr;
-  other.data_ptr_       = nullptr;
+  other._data_ptr       = nullptr;
 }
 
 void Matrix::resize(const int row, const int column)
 {
-  this->_num_rows = row;
+  this->_num_rows    = row;
   this->_num_columns = column;
   this->_values.resize(row, column);
   this->reallocate_data_pointer();
 }
-
 
 void Matrix::reallocate_data_pointer(void)
 {
@@ -776,7 +831,7 @@ void Matrix::reallocate_data_pointer(void)
   // Thus, "data_ptr_" related member variables reassigned here
 
   this->const_data_ptr_ = this->_values.data();
-  this->data_ptr_       = this->_values.data();
+  this->_data_ptr       = this->_values.data();
 }
 
 Matrix operator*(const double constant, const Matrix_Const_Wrapper& M)
@@ -795,3 +850,76 @@ std::ostream& operator<<(std::ostream& os, const Matrix& m)
 }
 
 } // namespace ms::math
+
+namespace ms::math::blas
+{
+void mpm(Matrix_Wrapper result, const Matrix_Const_Wrapper m1, const Matrix_Const_Wrapper m2)
+{
+  REQUIRE(result.size() == m1.size(), "two matrix should be same size");
+  REQUIRE(m1.size() == m2.size(), "two matrix should be same size");
+
+  const auto num_rows   = static_cast<int>(m1.num_rows());
+  const auto num_cols   = static_cast<int>(m1.num_columns());
+  const auto result_ptr = result.data();
+  const auto m1_ptr     = m1.data();
+  const auto m2_ptr     = m2.data();
+  const auto result_ld  = result.leading_dimension();
+  const auto m1_ld      = m1.leading_dimension();
+  const auto m2_ld      = m2.leading_dimension();
+
+  constexpr double c = 1.0;
+
+  if (m1.is_transposed())
+  {
+    if (m2.is_transposed())
+    {
+      ms::math::blas::AT_plus_cBT(result_ptr, m1_ptr, c, m2_ptr, num_rows, num_cols, result_ld, m1_ld, m2_ld);
+    }
+    else
+    {
+      ms::math::blas::AT_plus_cB(result_ptr, m1_ptr, c, m2_ptr, num_rows, num_cols, result_ld, m1_ld, m2_ld);
+    }
+  }
+  else
+  {
+    if (m2.is_transposed())
+    {
+      ms::math::blas::A_plus_cBT(result_ptr, m1_ptr, c, m2_ptr, num_rows, num_cols, result_ld, m1_ld, m2_ld);
+    }
+    else
+    {
+      ms::math::blas::A_plus_cB(result_ptr, m1_ptr, c, m2_ptr, num_rows, num_cols, result_ld, m1_ld, m2_ld);
+    }
+  }
+}
+
+void cmv(Vector_Wrapper result, const double c, const Matrix_Const_Wrapper m, const Vector_Const_Wrapper v)
+{
+  const auto num_rows   = static_cast<int>(m.num_rows());
+  const auto num_cols   = static_cast<int>(m.num_columns());
+  const auto result_dim = result.dimension();
+  const auto result_ptr = result.data();
+  const auto result_inc = result.inc();
+  const auto m_ptr      = m.data();
+  const auto m_ld       = m.leading_dimension();
+  const auto v_dim      = v.dimension();
+  const auto v_ptr      = v.data();
+  const auto v_inc      = v.inc();
+
+  if (m.is_transposed())
+  {
+    REQUIRE(num_rows == v_dim, "size should be mathced");
+    REQUIRE(num_cols == result_dim, "size should be matched");
+
+    ms::math::blas::cATx(result_ptr, c, m_ptr, v_ptr, num_rows, num_cols, m_ld, result_inc, v_inc);
+  }
+  else
+  {
+    REQUIRE(num_cols == v_dim, "size should be mathced");
+    REQUIRE(num_rows == result_dim, "size should be matched");
+
+    ms::math::blas::cAx(result_ptr, c, m_ptr, v_ptr, num_rows, num_cols, m_ld, result_inc, v_inc);
+  }
+}
+
+} // namespace ms::math::blas

@@ -222,3 +222,19 @@ TEST(ms_blas, A_plus_cBT_1)
 	const std::vector<double> ref = { 2,5,8,9,9,6,9,12,9,9 };
 	EXPECT_EQ(A, ref);
 }
+TEST(ms_blas, cAx)
+{
+  constexpr auto      A_num_rows          = 2;
+  constexpr auto      A_num_columns       = 3;
+  constexpr auto      A_leading_dimension = 5;
+  std::vector<double> A                   = {1, 2, 3, 9, 9, 4, 5, 6, 9, 9};
+  std::vector<double> x                   = {1, 2, 1};
+
+	std::vector<double> result(2);
+
+  constexpr auto c = 0.5;
+  ms::math::blas::cAx(result.data(), c, A.data(), x.data(), A_num_rows, A_num_columns, A_leading_dimension);
+
+  const std::vector<double> ref = {4,10};
+  EXPECT_EQ(result, ref);
+}

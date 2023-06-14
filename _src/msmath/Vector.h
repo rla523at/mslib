@@ -24,6 +24,11 @@ using if_is_more_than_two = std::enable_if_t<2 <= sizeof...(Args), bool>;
 
 
 
+
+
+
+
+
 */
 
 // forward declaration
@@ -60,12 +65,13 @@ public:
   bool      operator!=(const Vector_Const_Wrapper& other) const;
 
 public:
-  operator std::pair<const double*,int>(void) const;
+  operator std::pair<const double*, int>(void) const;
 
 public:
   double               at(const size_t position) const;
   const double*        begin(void) const;
   double               cosine(const Vector_Const_Wrapper& other) const;
+  Vector_Const_Wrapper const_wrapper(void) const;
   const double*        data(void) const;
   size_t               dimension(void) const;
   const double*        end(void) const;
@@ -93,6 +99,19 @@ protected:
   int           _inc                  = 0;
 };
 
+/*
+
+
+
+
+
+
+
+
+
+
+*/
+
 class Vector_Wrapper : public Vector_Const_Wrapper
 {
 public:
@@ -102,6 +121,8 @@ public:
   Vector_Wrapper(std::vector<double>& coordinates, const int incx = 1)
       : Vector_Const_Wrapper(coordinates, incx),
         _coordinate_ptr(coordinates.data()){};
+  template <int dim>
+  Vector_Wrapper(const Vector<dim>& vec) = delete;
 
 public:
   void    operator*=(const double constant);
@@ -113,11 +134,12 @@ public:
   operator double*(void);
 
 public:
-  double& at(const size_t position);
-  void    change_value(const Vector_Const_Wrapper& other);
-  double* data(void);
-  void    initalize(void);
-  void    normalize(void);
+  double&        at(const size_t position);
+  void           change_value(const Vector_Const_Wrapper other);
+  double*        data(void);
+  void           initalize(void);
+  void           normalize(void);
+  Vector_Wrapper wrapper(void);
 
   // resolve base class method hiding problem (overloading across scope problem)
 public:
@@ -133,6 +155,19 @@ protected:
 protected:
   double* _coordinate_ptr = nullptr;
 };
+
+/*
+
+
+
+
+
+
+
+
+
+
+*/
 
 template <int Dim = 0>
 class Vector : public Vector_Wrapper
@@ -165,6 +200,19 @@ private:
   std::array<double, Dim> coordinates_ = {0};
 };
 
+/*
+
+
+
+
+
+
+
+
+
+
+*/
+
 template <>
 class Vector<0> : public Vector_Wrapper
 {
@@ -175,7 +223,7 @@ class Vector<0> : public Vector_Wrapper
   // we chose to use the inaccessible default constructor to solve the problem."
 
 public:
-  Vector(void) = delete;
+  static Vector<0> null_vector(void);
   explicit Vector(const int dimension);
   Vector(const std::initializer_list<double> list);
   Vector(const std::vector<double>& values);
@@ -188,9 +236,8 @@ public:
   Vector(Iter first, Iter last)
       : _coordinates(first, last)
   {
-    this->_dimension            = static_cast<int>(this->_coordinates.size());
-    this->_coordinate_const_ptr = this->_coordinates.data();
-    this->_coordinate_ptr       = this->_coordinates.data();
+    this->reallocate_ptr();
+    this->_dimension = static_cast<int>(this->_coordinates.size());
     this->_inc                  = 1;
   };
 
@@ -198,8 +245,16 @@ public:
   void operator=(const Vector& other);
   void operator=(Vector&& other) noexcept;
 
+public:
+  void resize(const int size);
+
+  private:
+  void reallocate_ptr(void);
+
 private:
   std::vector<double> _coordinates;
+
+  Vector(void) = default;
 };
 
 } // namespace ms::math

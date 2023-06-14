@@ -29,6 +29,8 @@ void cATBT(double* result_ptr, const double c, const double* A_ptr, const double
 
 void Ax(double* result_ptr, const double* A_ptr, const double* x_ptr, const int num_rows, const int num_columns, const int leading_dimension, const int incr = 1, const int incv = 1);
 void ATx(double* result_ptr, const double* A_ptr, const double* x_ptr, const int num_rows, const int num_columns, const int leading_dimension, const int incr = 1, const int incv = 1);
+void cAx(double* result_ptr, const double c, const double* A_ptr, const double* x_ptr, const int num_rows, const int num_columns, const int leading_dimension, const int incr = 1, const int incx = 1);
+void cATx(double* result_ptr, const double* A_ptr, const double* x_ptr, const int num_rows, const int num_columns, const int leading_dimension, const int incr = 1, const int incv = 1);
 } // namespace ms::math::blas::manual
 
 namespace ms::math::blas::mkl
@@ -58,6 +60,8 @@ void cATBT(double* result_ptr, const double c, const double* A_ptr, const double
 
 void Ax(double* result_ptr, const double* A_ptr, const double* x_ptr, const int num_rows, const int num_columns, const int leading_dimension, const int incr = 1, const int incx = 1);
 void ATx(double* result_ptr, const double* A_ptr, const double* x_ptr, const int num_rows, const int num_columns, const int leading_dimension, const int incr = 1, const int incx = 1);
+void cAx(double* result_ptr, const double c, const double* A_ptr, const double* x_ptr, const int num_rows, const int num_columns, const int leading_dimension, const int incr = 1, const int incx = 1);
+void cATx(double* result_ptr, const double c, const double* A_ptr, const double* x_ptr, const int num_rows, const int num_columns, const int leading_dimension, const int incr = 1, const int incx = 1);
 void invA(double* A_ptr, const int num_rows, const int num_columns, const int leading_dimension);
 } // namespace ms::math::blas::mkl
 
@@ -112,5 +116,7 @@ void cATBT(double* result_ptr, const double c, const double* A_ptr, const double
 
 void Ax(double* result_ptr, const double* A_ptr, const double* x_ptr, const int num_rows, const int num_columns, const int leading_dimension, const int incr = 1, const int incv = 1);
 void ATx(double* result_ptr, const double* A_ptr, const double* x_ptr, const int num_rows, const int num_columns, const int leading_dimension, const int incr = 1, const int incv = 1);
+void cAx(double* result_ptr, const double c, const double* A_ptr, const double* x_ptr, const int num_rows, const int num_columns, const int leading_dimension, const int incr = 1, const int incv = 1);
+void cATx(double* result_ptr, const double c, const double* A_ptr, const double* x_ptr, const int num_rows, const int num_columns, const int leading_dimension, const int incr = 1, const int incv = 1);
 void invA(double* A_ptr, const int num_rows, const int num_columns, const int leading_dimension);
 } // namespace ms::math::blas

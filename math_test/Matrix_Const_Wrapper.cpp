@@ -754,7 +754,7 @@ TEST(Matrix_Const_Wrapper, at_1)
   int index = 0;
   for (int i = 0; i < m.num_rows(); i++)
   {
-    for (int j = 0; j < m.num_cols(); j++)
+    for (int j = 0; j < m.num_columns(); j++)
     {
       EXPECT_EQ(m.at(i, j), ref[index]);
       index++;

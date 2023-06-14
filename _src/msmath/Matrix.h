@@ -15,6 +15,19 @@ class Vector;
 class Matrix;
 } // namespace ms::math
 
+/*
+
+
+
+
+
+
+
+
+
+
+*/
+
 // class declaration
 namespace ms::math
 {
@@ -24,6 +37,19 @@ enum class Transpose_Type
   not_transposed,
   transposed
 };
+
+/*
+
+
+
+
+
+
+
+
+
+
+*/
 
 class Matrix_Const_Wrapper
 {
@@ -44,11 +70,12 @@ public:
   Vector_Const_Wrapper      const_column_vector_wrapper(const int index) const;
   Vector_Const_Wrapper      const_row_vector_wrapper(const int index) const;
   Matrix_Const_Wrapper      const_part(const int start_row_index, const int end_row_index, const int start_column_index, const int end_column_index);
+  Matrix_Const_Wrapper      const_wrapper(void) const;
   const double*             data(void) const;
   bool                      has_compact_data(void) const;
   bool                      is_transposed(void) const;
   Matrix                    inverse_matrix(void) const;
-  size_t                    num_cols(void) const;
+  size_t                    num_columns(void) const;
   size_t                    num_rows(void) const;
   size_t                    num_values(void) const;
   int                       leading_dimension(void) const;
@@ -79,15 +106,29 @@ protected:
   Matrix_Const_Wrapper(void) = default;
 };
 
+/*
+
+
+
+
+
+
+
+
+
+
+*/
+
 class Matrix_Wrapper : public Matrix_Const_Wrapper
 {
 public:
   Matrix_Wrapper(const int num_row, const int num_column, double* ptr, const Transpose_Type transpose_type)
       : Matrix_Const_Wrapper(num_row, num_column, ptr, transpose_type),
-        data_ptr_(ptr){};
+        _data_ptr(ptr){};
   Matrix_Wrapper(const int num_row, const int num_column, double* ptr, const int leading_dimension = -1, const Transpose_Type transpose_type = Transpose_Type::not_transposed)
       : Matrix_Const_Wrapper(num_row, num_column, ptr, leading_dimension, transpose_type),
-        data_ptr_(ptr){};
+        _data_ptr(ptr){};
+  Matrix_Wrapper(const Matrix& matrix) = delete;
 
 public:
   void operator*=(const double constant);
@@ -105,6 +146,7 @@ public:
   Matrix_Wrapper part(const int start_row_index, const int end_row_index, const int start_col_index, const int end_col_index);
   Vector_Wrapper row_wrapper(const int index);
   void           transpose(void);
+  Matrix_Wrapper wrapper(void);
 
   // resolve parent method hiding problem (overloading across scope problem)
 public:
@@ -112,7 +154,7 @@ public:
   using Matrix_Const_Wrapper::data;
 
 protected:
-  double* data_ptr_ = nullptr;
+  double* _data_ptr = nullptr;
 
 protected:
   // The default constructor, which creates objects that do not function properly, has been blocked from access.
@@ -120,10 +162,23 @@ protected:
   Matrix_Wrapper(void) = default;
 };
 
+/*
+
+
+
+
+
+
+
+
+
+
+*/
+
 class Matrix : public Matrix_Wrapper
 {
 public:
-  Matrix(void) = default;
+  static Matrix null_matrix(void);
   Matrix(const int matrix_order);
   Matrix(const int matrix_order, const std::vector<double>& value);
   Matrix(const int num_row, const int num_column, const Transpose_Type transpose_type = Transpose_Type::not_transposed);
@@ -144,9 +199,24 @@ private:
 
 private:
   std::vector<double> _values;
+
+  Matrix(void) = default;
 };
 
 } // namespace ms::math
+
+/*
+
+
+
+
+
+
+
+
+
+
+*/
 
 // free function declaration
 namespace ms::math
@@ -155,3 +225,22 @@ Matrix        operator*(const double constant, const Matrix_Const_Wrapper& M);
 std::ostream& operator<<(std::ostream& os, const Matrix_Const_Wrapper& m);
 std::ostream& operator<<(std::ostream& os, const Matrix& m);
 } // namespace ms::math
+
+/*
+
+
+
+
+
+
+
+
+
+
+*/
+
+namespace ms::math::blas
+{
+void mpm(Matrix_Wrapper result, const Matrix_Const_Wrapper m1, const Matrix_Const_Wrapper m2);
+void cmv(Vector_Wrapper result, const double c, const Matrix_Const_Wrapper m, const Vector_Const_Wrapper v);
+} // namespace ms::math::blas

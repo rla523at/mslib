@@ -285,7 +285,7 @@ std::vector<int> Writer::make_binary_variable_string(const std::vector<std::stri
 
 int Writer::num_solution_datas(const Variable_Location variable_location)
 {
-  if (variable_location == Variable_Location::NODAL)
+  if (variable_location == Variable_Location::NODE)
   {
     return THIS::_num_nodes;
   }
@@ -501,11 +501,11 @@ void Writer::write_binary_solution_file_header(Binary_File& out_file, const Solu
   {
     const auto var_location = info.var_locations_ptr[i];
 
-    if (var_location == Variable_Location::NODAL)
+    if (var_location == Variable_Location::NODE)
     {
       out_file << 0;
     }
-    else if (var_location == Variable_Location::CELLCENTERED)
+    else if (var_location == Variable_Location::CELL_CENTER)
     {
       out_file << 1;
     }
