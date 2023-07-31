@@ -41,6 +41,9 @@
     <ClCompile Include="Matrix_Const_Wrapper.cpp">
       <Filter>TEST</Filter>
     </ClCompile>
+    <ClCompile Include="Vector_Values.cpp">
+      <Filter>TEST</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

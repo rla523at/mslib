@@ -20,6 +20,7 @@ TEST(Vector_Wrapper, construct_1)
 
   EXPECT_EQ(vw1, vw2);
 }
+
 TEST(Vector_Wrapper, operator_assign_1)
 {
   std::vector<double>       vec1 = {0, 0, 0};
@@ -70,9 +71,8 @@ TEST(Vector_Wrapper, operator_scalar_multiplication_assign_1)
 TEST(Vector_Wrapper, operator_scalar_multiplication_assign_2)
 {
   std::vector<double> vec = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-
-  constexpr auto inc = 3;
-  Vector_Wrapper v   = {vec, inc};
+  constexpr auto      inc = 3;
+  Vector_Wrapper      v   = {vec, inc};
   v *= 2;
 
   const std::vector<double> ref = {2, 2, 3, 8, 5, 6, 14, 8, 9};

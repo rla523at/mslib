@@ -19,11 +19,43 @@ std::ostream& operator<<(std::ostream& os, const Vector<dim>& vec)
 
 TEST(Vector_Const_Wrapper, construct_1)
 {
-  const std::vector<double>  vec1 = {1, 2, 3};
-  const Vector_Const_Wrapper cvw1 = vec1;
-  const auto                 cvw2 = cvw1;
+  const std::vector<double> vec1 = {1, 2, 3};
+  Vector_Const_Wrapper      cvw1 = vec1;
+  const auto                cvw2 = cvw1;
 
   EXPECT_EQ(cvw1, cvw2);
+}
+TEST(Vector_Const_Wrapper, construct_2)
+{
+  const std::vector<double> vals = {1, 2, 3};
+  Vector_Const_Wrapper      vec  = vals;
+
+  for (int i = 0; i < 3; ++i)
+  {
+    EXPECT_EQ(vals[i], vec[i]);
+  }
+}
+TEST(Vector_Const_Wrapper, construct_3)
+{
+  const std::vector<double> vals = {1, 2, 3};
+  Vector_Const_Wrapper      vec  = {vals, 2};
+
+  const std::vector<double> ref = {1, 3};
+  for (int i = 0; i < 2; ++i)
+  {
+    EXPECT_EQ(ref[i], vec[i]);
+  }
+}
+TEST(Vector_Const_Wrapper, construct_4)
+{
+  const std::vector<double> vals = {1, 2, 3};
+  Vector_Const_Wrapper      vec  = {vals, 2};
+
+  const std::vector<double> ref = {1, 3};
+  for (int i = 0; i < 2; ++i)
+  {
+    EXPECT_EQ(ref[i], vec[i]);
+  }
 }
 
 TEST(Vector_Const_Wrapper, operator_addition_1)
@@ -120,10 +152,9 @@ TEST(Vector_Const_Wrapper, operator_addition_7)
 
   const Vector_Const_Wrapper cvw1 = vec1;
 
-  const auto                 start_ptr = vec2.data() + 1;
-  constexpr auto             dim       = 3;
-  constexpr auto             inc       = 2;
-  const Vector_Const_Wrapper cvw2      = {start_ptr, dim, inc};
+  std::span<const double>    s(vec2.begin() + 1, vec2.end());
+  constexpr auto             inc  = 2;
+  const Vector_Const_Wrapper cvw2 = {s, inc};
 
   const auto result = cvw1 + cvw2;
 
@@ -137,10 +168,9 @@ TEST(Vector_Const_Wrapper, operator_addition_8)
 
   const Vector_Const_Wrapper cvw1 = vec1;
 
-  const auto                 start_ptr = vec2.data();
-  constexpr auto             dim       = 4;
-  constexpr auto             inc       = 3;
-  const Vector_Const_Wrapper cvw2      = {start_ptr, dim, inc};
+  std::span<const double>    s(vec2.begin(), 10);
+  constexpr auto             inc  = 3;
+  const Vector_Const_Wrapper cvw2 = {s, inc};
 
   constexpr auto start_pos = 0;
   constexpr auto end_pos   = 3;
@@ -165,11 +195,9 @@ TEST(Vector_Const_Wrapper, operator_scalar_multiplication_2)
 {
   const std::vector<double> vec = {1, 2, 3, 4, 5, 6, 7, 8, 9};
 
-  const auto     start_ptr = vec.data() + 2;
-  constexpr auto n         = 3;
-  constexpr auto inc       = 3;
-
-  const Vector_Const_Wrapper cvw    = {start_ptr, n, inc};
+  std::span<const double>    s      = {vec.begin() + 2, vec.end()};
+  constexpr auto             inc    = 3;
+  const Vector_Const_Wrapper cvw    = {s, inc};
   const auto                 result = 2 * cvw;
 
   const Vector ref = {6, 12, 18};
@@ -180,13 +208,12 @@ TEST(Vector_Const_Wrapper, operator_equal_1)
   const std::vector<double> vec1 = {1, 2, 3, 4, 5, 6, 7, 8, 9};
   const std::vector<double> vec2 = {3, 2, 1, 6, 5, 4, 9, 8, 7};
 
-  const auto     start_ptr1 = vec1.data() + 2;
-  const auto     start_ptr2 = vec2.data();
-  constexpr auto n          = 3;
-  constexpr auto inc        = 3;
+  std::span<const double> s1  = {vec1.begin() + 2, vec1.end()};
+  std::span<const double> s2  = {vec2.begin(), vec2.end()};
+  constexpr auto          inc = 3;
 
-  Vector_Const_Wrapper cvw1 = {start_ptr1, n, inc};
-  Vector_Const_Wrapper cvw2 = {start_ptr2, n, inc};
+  Vector_Const_Wrapper cvw1 = {s1, inc};
+  Vector_Const_Wrapper cvw2 = {s2, inc};
 
   EXPECT_TRUE(cvw1 == cvw2);
 }
@@ -251,17 +278,12 @@ TEST(Vector_Const_Wrapper, cross_product_3)
 }
 TEST(Vector_Const_Wrapper, cross_product_4)
 {
-  std::vector<double> values1 = {7, 8, 1, 2, 3, 2, 1, 1, 3};
-  std::vector<double> values2 = {1, 3, 2, 5, 2, 2, 3, 1, 1};
+  std::vector<double> vec1 = {7, 8, 1, 2, 3, 2, 1, 1, 3};
+  std::vector<double> vec2 = {1, 3, 2, 5, 2, 2, 3, 1, 1};
 
-  const auto           start_data_ptr1 = values1.data() + 2;
-  constexpr auto       n               = 3;
-  constexpr auto       inc             = 3;
-  Vector_Const_Wrapper cvw1            = {start_data_ptr1, n, inc};
-
-  const auto           start_data_ptr2 = values2.data() + 1;
-  Vector_Const_Wrapper cvw2            = {start_data_ptr2, n, inc};
-  ;
+  constexpr auto       inc  = 3;
+  Vector_Const_Wrapper cvw1 = {vec1.begin() + 2, vec1.end(), inc};
+  Vector_Const_Wrapper cvw2 = {vec2.begin() + 1, vec2.end() - 1, inc};
 
   const auto result = cvw1.cross_product<3>(cvw2);
 

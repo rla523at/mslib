@@ -11,6 +11,10 @@ MaxEmptyLinesToKeep: 1
 
 BreakBeforeBraces: Allman
 
+BreakBeforeConceptDeclarations: true
+LambdaBodyIndentation: OuterScope
+IndentRequires: false
+
 AccessModifierOffset: -2
 AllowAllConstructorInitializersOnNextLine : false
 AllowShortIfStatementsOnASingleLine: OnlyFirstIf

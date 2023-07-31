@@ -5,7 +5,7 @@ namespace ms::math
 {
 
 // for google test cout message
-template <size_t dim>
+template <int dim>
 std::ostream& operator<<(std::ostream& os, const Vector<dim>& vec)
 {
   return os << vec.to_string();
@@ -17,7 +17,7 @@ TEST(Vector, cwrapper)
   const Vector v       = {1, 2, 3};
   const auto   v_cwrap = v.const_wrapper();
 
-  EXPECT_EQ(v.at(2), v_cwrap.at(2));
+  EXPECT_EQ(v[2], v_cwrap[2]);
 }
 
 TEST(Vector, construct_1)
@@ -25,7 +25,7 @@ TEST(Vector, construct_1)
   std::vector<double> values = {1, 2, 3};
   Vector<3>           v      = {1, 2, 3};
 
-  for (size_t i = 0; i < values.size(); i++)
+  for (int i = 0; i < values.size(); i++)
   {
     EXPECT_EQ(v[i], values[i]);
   }
@@ -35,7 +35,7 @@ TEST(Vector, construct_2)
   std::vector<double> values = {1, 2, 3};
   Vector              v      = {1, 2, 3};
 
-  for (size_t i = 0; i < values.size(); i++)
+  for (int i = 0; i < values.size(); i++)
   {
     EXPECT_EQ(v[i], values[i]);
   }
@@ -45,7 +45,7 @@ TEST(Vector, construct_3)
   std::vector<double> values = {1, 2};
   Vector              v      = {1, 2};
 
-  for (size_t i = 0; i < values.size(); i++)
+  for (int i = 0; i < values.size(); i++)
   {
     EXPECT_EQ(v[i], values[i]);
   }
@@ -55,7 +55,7 @@ TEST(Vector, construct_4)
   std::vector<double> values = {1, 2, 3};
   Vector              v(values.begin(), values.end());
 
-  for (size_t i = 0; i < values.size(); i++)
+  for (int i = 0; i < values.size(); i++)
   {
     EXPECT_EQ(v[i], values[i]);
   }
@@ -65,7 +65,7 @@ TEST(Vector, construct_5)
   std::vector<double> values(5);
   Vector              v(5);
 
-  for (size_t i = 0; i < values.size(); i++)
+  for (int i = 0; i < values.size(); i++)
   {
     EXPECT_EQ(v[i], values[i]);
   }
@@ -76,7 +76,7 @@ TEST(Vector, construct_6)
 
   std::vector<double> ref = {1, 2, 3};
 
-  for (size_t i = 0; i < ref.size(); i++)
+  for (int i = 0; i < ref.size(); i++)
   {
     EXPECT_EQ(v[i], ref[i]);
   }
@@ -88,7 +88,7 @@ TEST(Vector, construct_7)
 
   std::vector<double> ref = {4, 5, 6, 7};
 
-  for (size_t i = 0; i < ref.size(); i++)
+  for (int i = 0; i < ref.size(); i++)
   {
     EXPECT_EQ(v[i], ref[i]);
   }
@@ -244,14 +244,6 @@ TEST(Vector, cross_product3)
   const auto result = v1.cross_product<3>(v2);
 
   const Vector ref = {-3, 0, 1};
-  EXPECT_EQ(ref, result);
-}
-TEST(Vector, inc_1)
-{
-  Vector     v(5);
-  const auto result = v.inc();
-
-  constexpr auto ref = 1;
   EXPECT_EQ(ref, result);
 }
 TEST(Vector, inner_product_1)
@@ -452,9 +444,9 @@ TEST(Vector, different_size_1)
 //	constexpr ushort range_dimension = 3;
 //	Vector_Function<Polynomial> vf = { 1,x,y };
 //
-//	EXPECT_EQ(vf.at(0), 1);
-//	EXPECT_EQ(vf.at(1), x);
-//	EXPECT_EQ(vf.at(2), y);
+//	EXPECT_EQ(vf[0], 1);
+//	EXPECT_EQ(vf[1], x);
+//	EXPECT_EQ(vf[2], y);
 //}
 // TEST(Vector_Function, at_1)
 //{
@@ -464,7 +456,7 @@ TEST(Vector, different_size_1)
 //	Vector_Function<Polynomial> vf = { 0 , 2 * x + y };
 //
 //	const auto ref = 2 * x + y;
-//	EXPECT_EQ(ref, vf.at(1));
+//	EXPECT_EQ(ref, vf[1]);
 //}
 // TEST(Vector_Function, operator_call_1)
 //{
@@ -506,7 +498,7 @@ TEST(Vector, different_size_1)
 //	auto p3 = y + z;
 //	Vector_Function<Polynomial> f = { p1,p2,p3 };
 //
-//	constexpr size_t variable_index = 0;
+//	constexpr int variable_index = 0;
 //	const auto result = f.get_differentiate(variable_index);
 //
 //	Vector_Function<Polynomial> ref = { 1,1,0 };
@@ -523,7 +515,7 @@ TEST(Vector, different_size_1)
 //	auto p3 = y + z;
 //	Vector_Function<Polynomial> f = { p1,p2,p3 };
 //
-//	constexpr size_t variable_index = 0;
+//	constexpr int variable_index = 0;
 //	const auto result = f.get_differentiate(variable_index);
 //
 //	Vector_Function<Polynomial> ref = { y,1,0 };
@@ -540,7 +532,7 @@ TEST(Vector, different_size_1)
 //	auto p3 = y + z;
 //	Vector_Function<Polynomial> f = { p1,p2,p3 };
 //
-//	constexpr size_t variable_index = 1;
+//	constexpr int variable_index = 1;
 //	const auto result = f.get_differentiate(variable_index);
 //
 //	Vector_Function<Polynomial> ref = { x,z,1 };
@@ -557,7 +549,7 @@ TEST(Vector, different_size_1)
 //	auto p3 = 0;
 //	Vector_Function<Polynomial> f = { p1,p2,p3 };
 //
-//	constexpr size_t variable_index = 0;
+//	constexpr int variable_index = 0;
 //	const auto result = f.get_differentiate(variable_index);
 //
 //	Vector_Function<Polynomial> ref = { 1.5,0,0 };
@@ -574,7 +566,7 @@ TEST(Vector, different_size_1)
 //	auto p3 = 0;
 //	Vector_Function<Polynomial> f = { p1,p2,p3 };
 //
-//	constexpr size_t variable_index = 1;
+//	constexpr int variable_index = 1;
 //	const auto result = f.get_differentiate(variable_index);
 //
 //	Vector_Function<Polynomial> ref = { 0.5,1,0 };
@@ -644,7 +636,7 @@ TEST(Vector, different_size_1)
 ////	EXPECT_EQ(result, ref);
 ////}
 //// TEST(Vector_Function, L2_norm_1) {
-////constexpr size_t domain_dimension = 2;
+////constexpr int domain_dimension = 2;
 ////Polynomial x("x0");
 ////Polynomial y("x1");
 ////
