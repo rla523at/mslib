@@ -4,14 +4,18 @@
 TEST(Vector_Values_Const_Iterator, is_input_iterator)
 {
   EXPECT_TRUE(std::input_iterator<ms::math::Vector_Values_Const_Iterator>);
+  
 }
-
+TEST(Vector_Values_Const_Iterator, contiguous_iterator)
+{
+  EXPECT_FALSE(std::contiguous_iterator<ms::math::Vector_Values_Const_Iterator>);
+}
 TEST(Vector_Values_Const_Wrapper, const_span)
 {
   EXPECT_TRUE(ms::math::const_span<std::span<double>>);
 }
 
-template <std::input_iterator T, ms::math::input_iterator_or_int U>
+template <std::input_iterator T, ms::math::contiguous_iterator_or_int U>
 void test(T t, U u)
 {
   std::span<const double> s(t, u);
@@ -51,6 +55,21 @@ TEST(Vector_Values_Const_Wrapper, iterator2)
   for (int i = 0; i < 3; ++i)
   {
     EXPECT_EQ(ref[i], *iter++);
+  }
+}
+TEST(Vector_Values_Const_Wrapper, iterator3)
+{
+  std::vector<double>                   v = {1, 2, 3, 4, 5, 6, 7};
+  ms::math::Vector_Values_Const_Wrapper values1(v, 3);
+  ms::math::Vector_Values_Const_Wrapper values2 = values1;
+
+  auto iter1 = values1.begin();
+  auto iter2 = values2.begin();
+
+  std::vector<double> ref = {1, 4, 7};
+  for (int i = 0; i < 3; ++i)
+  {
+    EXPECT_EQ(*iter1++, *iter2++);
   }
 }
 
