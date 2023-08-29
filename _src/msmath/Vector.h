@@ -68,9 +68,10 @@ concept more_than_two = (2 <= sizeof...(Args));
 
 */
 
+// Vector_Const_Iterator Class Declaration
 namespace ms::math
 {
-class Vector_Values_Const_Iterator
+class Vector_Const_Iterator
 {
 public:
   using iterator_category = std::input_iterator_tag;
@@ -80,20 +81,20 @@ public:
   using reference         = const double&;
 
 public:
-  Vector_Values_Const_Iterator(const double* data_ptr, const int inc, const double* last_data_ptr)
+  Vector_Const_Iterator(const double* data_ptr, const int inc, const double* last_data_ptr)
       : _const_data_ptr(data_ptr),
         _inc(inc),
         _last_data_ptr(last_data_ptr){};
 
 public:
-  Vector_Values_Const_Iterator& operator++();
-  Vector_Values_Const_Iterator  operator++(int); // Postfix increment
+  Vector_Const_Iterator& operator++();
+  Vector_Const_Iterator  operator++(int); // Postfix increment
 
 public:
   reference operator*(void) const;
   pointer   operator->(void) const;
-  bool      operator==(const Vector_Values_Const_Iterator other) const;
-  bool      operator!=(const Vector_Values_Const_Iterator other) const;
+  bool      operator==(const Vector_Const_Iterator other) const;
+  bool      operator!=(const Vector_Const_Iterator other) const;
 
 private:
   pointer _const_data_ptr = nullptr;
@@ -115,39 +116,51 @@ private:
 
 */
 
-// Vector_Values_Const_Wrapper class declaration
+// Vector_View Class Declaration
 namespace ms::math
 {
-class Vector_Values_Const_Wrapper
+
+class Vector_View
 {
 public:
-  using const_iterator = Vector_Values_Const_Iterator;
-
-public:
-  Vector_Values_Const_Wrapper(void) = default;
+  Vector_View(void) = default;
 
   template <const_span T>
-  Vector_Values_Const_Wrapper(const T& values, const int inc = 1);
+  Vector_View(const T& values, const int inc = 1);
 
   template <std::contiguous_iterator T, contiguous_iterator_or_int U>
-  Vector_Values_Const_Wrapper(const T& t, const U& u, const int inc = 1);
+  Vector_View(const T& t, const U& u, const int inc = 1);
 
 public:
-  double operator[](const int position) const;
-  bool   operator==(const Vector_Values_Const_Wrapper& other) const;
-  bool   operator!=(const Vector_Values_Const_Wrapper& other) const;
+  Vector<0> operator*(const double scalar) const;
+  Vector<0> operator-(const Vector_View& other) const;
+  Vector<0> operator+(const Vector_View& other) const;
+  double    operator[](const int position) const;
+  bool      operator==(const Vector_View& other) const;
+  bool      operator!=(const Vector_View& other) const;
 
 public:
-  double                       at(const int position) const;
-  Vector_Values_Const_Iterator begin(void) const;
-  Vector_Values_Const_Iterator end(void) const;
-  const double*                data(void) const;
-  bool                         empty(void) const;
-  int                          num_values(void) const;
-  int                          inc(void) const;
-  Vector_Values_Const_Wrapper  part(const int start_position, const int end_position) const;
-  std::string                  to_string(void) const;
-  std::vector<double>          to_vector(void) const;
+  double                at(const int position) const;
+  Vector_Const_Iterator begin(void) const;
+  Vector_Const_Iterator end(void) const;
+  double                cosine(const Vector_View& other) const;
+  int                   dimension(void) const;
+  const double*         data(void) const;
+  bool                  empty(void) const;
+  Vector_View           get_view(void) const;
+  int                   inc(void) const;
+  double                inner_product(const Vector_View& other) const;
+  bool                  is_parallel(const Vector_View& other) const;
+  double                L1_norm(void) const;
+  double                L2_norm(void) const;
+  double                Linf_norm(void) const;
+  Vector_View           part(const int start_position, const int end_position) const;
+  std::string           to_string(void) const;
+  std::vector<double>   to_vector(void) const;
+
+public:
+  template <int dim>
+  Vector<3> cross_product(const Vector_View& other) const;
 
 private:
   void initialize(void);
@@ -156,9 +169,9 @@ private:
   const double* end_ptr(void) const;
 
 protected:
-  std::span<const double> _const_values;
-  int                     _num_values = 0;
-  int                     _inc        = 1;
+  std::span<const double> _values_view;
+  int                     _dimension = 0;
+  int                     _inc       = 1;
 };
 
 } // namespace ms::math
@@ -176,189 +189,45 @@ protected:
 
 */
 
-// Vector_Values_Wrapper class declaration
+// Vector_Wrap Class Declaration
 namespace ms::math
 {
 
-class Vector_Values_Wrapper : public Vector_Values_Const_Wrapper
+class Vector_Wrap : public Vector_View
 {
 public:
-  Vector_Values_Wrapper(void) = default;
+  Vector_Wrap(void) = default;
 
-  template <span T>
-  Vector_Values_Wrapper(T& values, const int inc = 1)
-      : Vector_Values_Const_Wrapper(values, inc),
-        _values(values){};
+  template <const_span T>
+  Vector_Wrap(T& values, const int inc = 1)
+      : Vector_View(values, inc),
+        _values_wrap(values){};
 
-  template <output_iterator T, output_iterator_or_int U>
-  Vector_Values_Wrapper(T& t, const U& u, const int inc = 1)
-      : Vector_Values_Const_Wrapper(t, u, inc),
-        _values(t, u){};
+  template <std::contiguous_iterator T, contiguous_iterator_or_int U>
+  Vector_Wrap(const T& t, const U& u, const int inc = 1)
+      : Vector_View(t, u, inc),
+        _values_wrap(t, u){};
 
 public:
+  void    operator*=(const double constant);
+  void    operator+=(const Vector_View other);
+  void    operator-=(const Vector_View other);
   double& operator[](const int position);
 
 public:
   double& at(const int position);
+  void    change_value(const Vector_View other);
   double* data(void);
-  void    change_value(const Vector_Values_Const_Wrapper other);
-
-public:
-  using Vector_Values_Const_Wrapper::operator[];
-  using Vector_Values_Const_Wrapper::at;
-  using Vector_Values_Const_Wrapper::data;
-
-private:
-  std::span<double> _values;
-};
-
-} // namespace ms::math
-
-/*
-
-
-
-
-
-
-
-
-
-
-*/
-
-// miscellaneous definitions
-namespace ms::math
-{
-
-template <typename T>
-concept vector_const_values = requires(const T& t) { ms::math::Vector_Values_Const_Wrapper(t); };
-
-template <typename T>
-concept values_wrapper_constructable = requires(T& t) { ms::math::Vector_Values_Wrapper(t); };
-
-} // namespace ms::math
-
-/*
-
-
-
-
-
-
-
-
-
-
-*/
-
-// Vector_Const_Wrapper class declaration
-namespace ms::math
-{
-class Vector_Const_Wrapper
-{
-public:
-  Vector_Const_Wrapper(void) = default;
-
-  Vector_Const_Wrapper(const Vector_Values_Const_Wrapper values)
-      : _values_cwrap(values){};
-
-  template <const_span T>
-  Vector_Const_Wrapper(const T& values, const int inc = 1)
-      : _values_cwrap(values, inc){};
-
-  template <std::input_iterator T, contiguous_iterator_or_int U>
-  Vector_Const_Wrapper(const T& t, const U& u, const int inc = 1)
-      : _values_cwrap(t, u, inc){};
-
-public:
-  Vector<0> operator*(const double scalar) const;
-  Vector<0> operator-(const Vector_Const_Wrapper& other) const;
-  Vector<0> operator+(const Vector_Const_Wrapper& other) const;
-  double    operator[](const int position) const;
-  bool      operator==(const Vector_Const_Wrapper& other) const;
-  bool      operator!=(const Vector_Const_Wrapper& other) const;
-
-public:
-  double               cosine(const Vector_Const_Wrapper& other) const;
-  Vector_Const_Wrapper const_wrapper(void) const;
-  const double*        data(void) const;
-  int                  dimension(void) const;
-  double               inner_product(const Vector_Const_Wrapper& other) const;
-  bool                 is_parallel(const Vector_Const_Wrapper& other) const;
-  int                  inc(void) const;
-  double               L1_norm(void) const;
-  double               L2_norm(void) const;
-  double               Linf_norm(void) const;
-  Vector_Const_Wrapper part(const int start_pos, const int end_pos) const;
-  std::string          to_string(void) const;
-
-public:
-  template <int dim>
-  Vector<3> cross_product(const Vector_Const_Wrapper& other) const;
-
-protected:
-  Vector_Values_Const_Wrapper _values_cwrap;
-};
-
-} // namespace ms::math
-
-/*
-
-
-
-
-
-
-
-
-
-
-*/
-
-// Vector_Wrapper class declaration
-namespace ms::math
-{
-
-class Vector_Wrapper : public Vector_Const_Wrapper
-{
-public:
-  Vector_Wrapper(void) = default;
-
-  Vector_Wrapper(Vector_Values_Wrapper values)
-      : Vector_Const_Wrapper(values),
-        _values_wrap(values){};
-
-  template <span T>
-  Vector_Wrapper(T& values, const int inc = 1)
-      : Vector_Const_Wrapper(values, inc),
-        _values_wrap(values, inc){};
-
-  template <output_iterator T, output_iterator_or_int U>
-  Vector_Wrapper(const T& t, const U& u, const int inc = 1)
-      : Vector_Const_Wrapper(t, u, inc),
-        _values_wrap(t, u, inc){};
-
-public:
-  void    operator*=(const double constant);
-  void    operator+=(const Vector_Const_Wrapper& other);
-  void    operator-=(const Vector_Const_Wrapper& other);
-  double& operator[](const int position);
-
-public:
-  void           change_value(const Vector_Const_Wrapper other);
-  void           normalize(void);
-  Vector_Wrapper wrapper(void);
+  void    normalize(void);
 
   // resolve base class method hiding problem (overloading across scope problem)
 public:
-  using Vector_Const_Wrapper::operator[];
+  using Vector_View::at;
+  using Vector_View::data;
+  using Vector_View::operator[];
 
 protected:
-  double* data(void);
-
-protected:
-  Vector_Values_Wrapper _values_wrap;
+  std::span<double> _values_wrap;
 };
 
 } // namespace ms::math
@@ -381,7 +250,7 @@ namespace ms::math
 {
 
 template <int Dim = 0>
-class Vector : public Vector_Wrapper
+class Vector : public Vector_Wrap
 {
   COMPILE_TIME_REQUIREMENT(0 <= Dim, "dimension shold be positive");
 
@@ -422,13 +291,13 @@ namespace ms::math
 {
 
 template <>
-class Vector<0> : public Vector_Wrapper
+class Vector<0> : public Vector_Wrap
 {
 public:
   Vector(void) = default;
   explicit Vector(const int dimension); // prevent implicit convsersion to int
   Vector(const std::initializer_list<double> list);
-  Vector(Vector_Values_Const_Wrapper values_cwrap);
+  Vector(const Vector_View vector_view);
   Vector(const Vector& other);
   Vector(Vector&& other) noexcept;
 
@@ -491,17 +360,37 @@ Vector(Args... args) -> Vector<sizeof...(Args)>;
 
 */
 
+// free function decalarations
+namespace ms::math
+{
+Vector<0> operator*(const double constant, const Vector_View x);
+}
+
+/*
+
+
+
+
+
+
+
+
+
+
+*/
+
 // template definitions
 namespace ms::math
 {
+
 template <ms::math::const_span T>
-Vector_Values_Const_Wrapper::Vector_Values_Const_Wrapper(const T& values, const int inc)
-    : _const_values(values),
+Vector_View::Vector_View(const T& values, const int inc)
+    : _values_view(values),
       _inc(inc) { this->initialize(); };
 
 template <std::contiguous_iterator T, ms::math::contiguous_iterator_or_int U>
-Vector_Values_Const_Wrapper::Vector_Values_Const_Wrapper(const T& t, const U& u, const int inc)
-    : _const_values(t, u),
+Vector_View::Vector_View(const T& t, const U& u, const int inc)
+    : _values_view(t, u),
       _inc(inc)
 {
   this->initialize();
@@ -536,8 +425,10 @@ void Vector<Dim>::operator=(const Vector& other)
 template <int Dim>
 void Vector<Dim>::reallocate_values(void)
 {
-  this->_values_cwrap = Vector_Values_Const_Wrapper(this->_coordinates);
-  this->_values_wrap  = Vector_Values_Wrapper(this->_coordinates);
+  this->_values_view = this->_coordinates;
+  this->_dimension   = static_cast<int>(this->_coordinates.size());
+  this->_inc         = 1;
+  this->_values_wrap = this->_coordinates;
 }
 
 template <std::input_iterator Iter>
@@ -548,22 +439,3 @@ Vector<0>::Vector(Iter first, Iter last)
 };
 
 } // namespace ms::math
-
-/*
-
-
-
-
-
-
-
-
-
-
-*/
-
-// free function decalarations
-namespace ms::math
-{
-Vector<0> operator*(const double constant, const Vector_Const_Wrapper& x);
-}

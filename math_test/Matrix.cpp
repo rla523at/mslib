@@ -74,7 +74,7 @@ TEST(Matrix, operator_addition_assign_6)
 
   Matrix                     m    = {num_rows1, num_columns1, val1.data()};
   const Matrix_Const_Wrapper cmw  = {num_rows2, num_columns2, val2.data()};
-  const auto                 cmwT = cmw.transposed_const_matrix_wrapper();
+  const auto                 cmwT = cmw.cal_transpose();
   m += cmwT;
 
   Matrix ref(2, 5, {2.468734, 347.670345, 634529.8262345, 23461.9124567, 234529.73452345, 4.8808545, 9.066986845, 2345347.645345, 234535.834563245, 623459.4245345});
@@ -92,7 +92,7 @@ TEST(Matrix, operator_addition_assign_7)
 
   Matrix                     m    = {num_rows1, num_columns1, val1.data()};
   const Matrix_Const_Wrapper cmw  = {num_rows2, num_columns2, val2.data()};
-  const auto                 cmwT = cmw.transposed_const_matrix_wrapper();
+  const auto                 cmwT = cmw.cal_transpose();
   m += cmwT;
 
   Matrix ref(3, 5, {2.468734, 347.670345, 634529.8262345, 23461.9124567, 234529.73452345, 4.8808545, 9.066986845, 2345347.645345, 234535.834563245, 623459.4245345, 790245.45978, 149.0654223, 784.42001, 17.3381113, 8316.259});

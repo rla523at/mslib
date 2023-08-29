@@ -15,9 +15,9 @@ std::ostream& operator<<(std::ostream& os, const Vector<dim>& vec)
 TEST(Vector, cwrapper)
 {
   const Vector v       = {1, 2, 3};
-  const auto   v_cwrap = v.const_wrapper();
+  const auto   v_view = v.get_view();
 
-  EXPECT_EQ(v[2], v_cwrap[2]);
+  EXPECT_EQ(v[2], v_view[2]);
 }
 
 TEST(Vector, construct_1)

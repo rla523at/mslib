@@ -35,13 +35,10 @@
     <ClCompile Include="Vector_Wrapper.cpp">
       <Filter>TEST</Filter>
     </ClCompile>
-    <ClCompile Include="Vector_Const_Wrapper.cpp">
-      <Filter>TEST</Filter>
-    </ClCompile>
     <ClCompile Include="Matrix_Const_Wrapper.cpp">
       <Filter>TEST</Filter>
     </ClCompile>
-    <ClCompile Include="Vector_Values.cpp">
+    <ClCompile Include="Vector_View.cpp">
       <Filter>TEST</Filter>
     </ClCompile>
   </ItemGroup>

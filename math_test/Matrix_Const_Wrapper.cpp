@@ -89,7 +89,7 @@ TEST(Matrix_Const_Wrapper, operator_addition_4)
   const Matrix_Const_Wrapper cmw1 = {num_rows1, num_columns1, val1.data()};
   const Matrix_Const_Wrapper cmw2 = {num_rows2, num_columns2, val2.data()};
 
-  const auto cmw3 = cmw2.transposed_const_matrix_wrapper();
+  const auto cmw3 = cmw2.cal_transpose();
 
   const auto result = cmw1 + cmw3;
 
@@ -106,8 +106,8 @@ TEST(Matrix_Const_Wrapper, operator_addition_5)
   const Matrix_Const_Wrapper cmw1 = {num_rows, num_columns, val1.data()};
   const Matrix_Const_Wrapper cmw2 = {num_rows, num_columns, val2.data()};
 
-  const auto cmw1T = cmw1.transposed_const_matrix_wrapper();
-  const auto cmw2T = cmw2.transposed_const_matrix_wrapper();
+  const auto cmw1T = cmw1.cal_transpose();
+  const auto cmw2T = cmw2.cal_transpose();
 
   const auto result = cmw1T + cmw2T;
 
@@ -126,7 +126,7 @@ TEST(Matrix_Const_Wrapper, operator_addition_6)
 
   const Matrix_Const_Wrapper cmw1   = {num_rows1, num_columns1, val1.data()};
   const Matrix_Const_Wrapper cmw2   = {num_rows2, num_columns2, val2.data()};
-  const auto                 cmw2T  = cmw2.transposed_const_matrix_wrapper();
+  const auto                 cmw2T  = cmw2.cal_transpose();
   const auto                 result = cmw1 + cmw2T;
 
   Matrix ref(2, 5, {2.468734, 347.670345, 634529.8262345, 23461.9124567, 234529.73452345, 4.8808545, 9.066986845, 2345347.645345, 234535.834563245, 623459.4245345});
@@ -144,7 +144,7 @@ TEST(Matrix_Const_Wrapper, operator_addition_7)
 
   const Matrix_Const_Wrapper cmw1   = {num_rows1, num_columns1, val1.data()};
   const Matrix_Const_Wrapper cmw2   = {num_rows2, num_columns2, val2.data()};
-  const auto                 cmw2T  = cmw2.transposed_const_matrix_wrapper();
+  const auto                 cmw2T  = cmw2.cal_transpose();
   const auto                 result = cmw1 + cmw2T;
 
   Matrix ref(3, 5, {2.468734, 347.670345, 634529.8262345, 23461.9124567, 234529.73452345, 4.8808545, 9.066986845, 2345347.645345, 234535.834563245, 623459.4245345, 790245.45978, 149.0654223, 784.42001, 17.3381113, 8316.259});
@@ -488,7 +488,7 @@ TEST(Matrix_Const_Wrapper, operator_mm_4)
 
   const Matrix_Const_Wrapper A      = {A_num_rows, A_num_columns, A_vals.data(), A_leading_dimension};
   const Matrix_Const_Wrapper B      = {B_num_rows, B_num_columns, B_vals.data(), B_leading_dimension};
-  const auto                 AT     = A.transposed_const_matrix_wrapper();
+  const auto                 AT     = A.cal_transpose();
   const auto                 result = AT * B;
 
   Matrix ref = {2, 2, {13, 18, 18, 26}};
@@ -508,7 +508,7 @@ TEST(Matrix_Const_Wrapper, operator_mm_5)
 
   const Matrix_Const_Wrapper A      = {A_num_rows, A_num_columns, A_vals.data(), A_leading_dimension};
   const Matrix_Const_Wrapper B      = {B_num_rows, B_num_columns, B_vals.data(), B_leading_dimension};
-  const auto                 AT     = A.transposed_const_matrix_wrapper();
+  const auto                 AT     = A.cal_transpose();
   const auto                 result = AT * B;
 
   Matrix ref = {2, 2, {13, 18, 18, 26}};
@@ -528,7 +528,7 @@ TEST(Matrix_Const_Wrapper, operator_mm_6)
 
   const Matrix_Const_Wrapper A      = {A_num_rows, A_num_columns, A_vals.data(), A_leading_dimension};
   const Matrix_Const_Wrapper B      = {B_num_rows, B_num_columns, B_vals.data(), B_leading_dimension};
-  const auto                 AT     = A.transposed_const_matrix_wrapper();
+  const auto                 AT     = A.cal_transpose();
   const auto                 result = AT * B;
 
   Matrix ref = {3, 3, {13, 10, 7, 17, 14, 11, 21, 18, 15}};
@@ -548,7 +548,7 @@ TEST(Matrix_Const_Wrapper, operator_mm_7)
 
   const Matrix_Const_Wrapper A      = {A_num_rows, A_num_columns, A_vals.data(), A_leading_dimension};
   const Matrix_Const_Wrapper B      = {B_num_rows, B_num_columns, B_vals.data(), B_leading_dimension};
-  const auto                 AT     = A.transposed_const_matrix_wrapper();
+  const auto                 AT     = A.cal_transpose();
   const auto                 result = AT * B;
 
   Matrix ref = {3, 3, {18.470224531309999, 16.712738084116999, 10.418514118810000, 22.167911283120002, 21.030398669553001, 14.150019875622000, 27.174477241769999, 26.434492089979003, 18.454029295989997}};
@@ -568,7 +568,7 @@ TEST(Matrix_Const_Wrapper, operator_mm_8)
 
   const Matrix_Const_Wrapper A      = {A_num_rows, A_num_columns, A_vals.data(), A_leading_dimension};
   const Matrix_Const_Wrapper B      = {B_num_rows, B_num_columns, B_vals.data(), B_leading_dimension};
-  const auto                 AT     = A.transposed_const_matrix_wrapper();
+  const auto                 AT     = A.cal_transpose();
   const auto                 result = AT * B;
 
   Matrix ref = {3, 3, {18.470224531309999, 16.712738084116999, 10.418514118810000, 22.167911283120002, 21.030398669553001, 14.150019875622000, 27.174477241769999, 26.434492089979003, 18.454029295989997}};
@@ -588,7 +588,7 @@ TEST(Matrix_Const_Wrapper, operator_mm_9)
 
   const Matrix_Const_Wrapper A      = {A_num_rows, A_num_columns, A_vals.data(), A_leading_dimension};
   const Matrix_Const_Wrapper B      = {B_num_rows, B_num_columns, B_vals.data(), B_leading_dimension};
-  const auto                 BT     = B.transposed_const_matrix_wrapper();
+  const auto                 BT     = B.cal_transpose();
   const auto                 result = A * BT;
 
   Matrix ref = {2, 2, {7, 14, 15, 32}};
@@ -608,7 +608,7 @@ TEST(Matrix_Const_Wrapper, operator_mm_10)
 
   const Matrix_Const_Wrapper A      = {A_num_rows, A_num_columns, A_vals.data(), A_leading_dimension};
   const Matrix_Const_Wrapper B      = {B_num_rows, B_num_columns, B_vals.data(), B_leading_dimension};
-  const auto                 BT     = B.transposed_const_matrix_wrapper();
+  const auto                 BT     = B.cal_transpose();
   const auto                 result = A * BT;
 
   Matrix ref = {2, 2, {14, 10, 32, 28}};
@@ -628,7 +628,7 @@ TEST(Matrix_Const_Wrapper, operator_mm_11)
 
   const Matrix_Const_Wrapper A      = {A_num_rows, A_num_columns, A_vals.data(), A_leading_dimension};
   const Matrix_Const_Wrapper B      = {B_num_rows, B_num_columns, B_vals.data(), B_leading_dimension};
-  const auto                 BT     = B.transposed_const_matrix_wrapper();
+  const auto                 BT     = B.cal_transpose();
   const auto                 result = A * BT;
 
   Matrix ref = {2, 2, {18.515714565372999, 17.342737125037932, 36.932522712599997, 39.438937931479998}};
@@ -648,7 +648,7 @@ TEST(Matrix_Const_Wrapper, operator_mm_12)
 
   const Matrix_Const_Wrapper A      = {A_num_rows, A_num_columns, A_vals.data(), A_leading_dimension};
   const Matrix_Const_Wrapper B      = {B_num_rows, B_num_columns, B_vals.data(), B_leading_dimension};
-  const auto                 BT     = B.transposed_const_matrix_wrapper();
+  const auto                 BT     = B.cal_transpose();
   const auto                 result = A * BT;
 
   Matrix ref = {2, 2, {18.515714565372999, 17.342737125037932, 36.932522712599997, 39.438937931479998}};
@@ -669,8 +669,8 @@ TEST(Matrix_Const_Wrapper, operator_mm_13)
 
   const Matrix_Const_Wrapper A      = {A_num_rows, A_num_columns, A_vals.data(), A_leading_dimension};
   const Matrix_Const_Wrapper B      = {B_num_rows, B_num_columns, B_vals.data(), B_leading_dimension};
-  const auto                 AT     = A.transposed_const_matrix_wrapper();
-  const auto                 BT     = B.transposed_const_matrix_wrapper();
+  const auto                 AT     = A.cal_transpose();
+  const auto                 BT     = B.cal_transpose();
   const auto                 result = AT * BT;
 
   Matrix ref = {2, 2, {10, 19, 14, 28}};
@@ -690,8 +690,8 @@ TEST(Matrix_Const_Wrapper, operator_mm_14)
 
   const Matrix_Const_Wrapper A      = {A_num_rows, A_num_columns, A_vals.data(), A_leading_dimension};
   const Matrix_Const_Wrapper B      = {B_num_rows, B_num_columns, B_vals.data(), B_leading_dimension};
-  const auto                 AT     = A.transposed_const_matrix_wrapper();
-  const auto                 BT     = B.transposed_const_matrix_wrapper();
+  const auto                 AT     = A.cal_transpose();
+  const auto                 BT     = B.cal_transpose();
   const auto                 result = AT * BT;
 
   Matrix ref = {3, 3, {9, 15, 6, 12, 21, 9, 15, 27, 12}};
@@ -711,8 +711,8 @@ TEST(Matrix_Const_Wrapper, operator_mm_15)
 
   const Matrix_Const_Wrapper A      = {A_num_rows, A_num_columns, A_vals.data(), A_leading_dimension};
   const Matrix_Const_Wrapper B      = {B_num_rows, B_num_columns, B_vals.data(), B_leading_dimension};
-  const auto                 AT     = A.transposed_const_matrix_wrapper();
-  const auto                 BT     = B.transposed_const_matrix_wrapper();
+  const auto                 AT     = A.cal_transpose();
+  const auto                 BT     = B.cal_transpose();
   const auto                 result = AT * BT;
 
   Matrix ref = {3, 3, {9, 15, 6, 12, 21, 9, 15, 27, 12}};
