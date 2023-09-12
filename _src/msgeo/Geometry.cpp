@@ -8,21 +8,21 @@
 namespace ms::geo
 {
 
-Geometry::Geometry(const Figure figure, const std::vector<Node_Const_Wrapper>& consisting_nodes)
+Geometry::Geometry(const Figure figure, const std::vector<Node_View>& consisting_nodes)
     : _reference_geometry(Reference_Geometry_Container::get(figure)),
       _consisting_nodes(consisting_nodes)
 {
   this->_parametric_functions = this->_reference_geometry.cal_parametric_functions(this->_consisting_nodes);
 }
 
-Geometry::Geometry(const Figure figure, std::vector<Node_Const_Wrapper>&& consisting_nodes)
+Geometry::Geometry(const Figure figure, std::vector<Node_View>&& consisting_nodes)
     : _reference_geometry(Reference_Geometry_Container::get(figure)),
       _consisting_nodes(std::move(consisting_nodes))
 {
   this->_parametric_functions = this->_reference_geometry.cal_parametric_functions(this->_consisting_nodes);
 }
 
-void Geometry::change_nodes(std::vector<Node_Const_Wrapper>&& new_nodes)
+void Geometry::change_nodes(std::vector<Node_View>&& new_nodes)
 {
   REQUIRE(this->_reference_geometry.is_valid_num_points(static_cast<int>(new_nodes.size())), "The number of nodes is not valid for the current reference geometry.");
 
@@ -39,7 +39,7 @@ void Geometry::change_nodes(std::vector<Node_Const_Wrapper>&& new_nodes)
   }
 }
 
-void Geometry::cal_normal(double* normal, const Node_Const_Wrapper node) const
+void Geometry::cal_normal(double* normal, const Node_View node) const
 {
   if (!this->_is_normal_functions_initialized)
   {
@@ -50,7 +50,7 @@ void Geometry::cal_normal(double* normal, const Node_Const_Wrapper node) const
   const auto dimension = this->dimension();
   for (int i = 0; i < dimension; ++i)
   {
-    normal[i] = this->_normal_functions[i](node);
+    normal[i] = this->_normal_functions[i](node.to_vector_view());
   }
 }
 
@@ -138,7 +138,7 @@ Node Geometry::center(void) const
 
   for (int i = 0; i < dimension; ++i)
   {
-    coordinates[i] = this->_parametric_functions[i](ref_center);
+    coordinates[i] = this->_parametric_functions[i](ref_center.to_vector_view());
   }
 
   return coordinates;
@@ -151,7 +151,7 @@ void Geometry::center(double* coordinates) const
   const auto dimension = this->dimension();
   for (int i = 0; i < dimension; ++i)
   {
-    coordinates[i] = this->_parametric_functions[i](ref_center);
+    coordinates[i] = this->_parametric_functions[i](ref_center.to_vector_view());
   }
 }
 
@@ -214,13 +214,12 @@ Partition_Data Geometry::make_partition_data(const int partition_order) const
 
   const auto num_new_nodes = ref_nodes.num_nodes();
   const auto dim           = ref_nodes.dimension();
-  const auto coord_type    = ref_nodes.coordinates_type();
 
-  Nodes new_nodes(coord_type, num_new_nodes, dim);
+  Nodes new_nodes(num_new_nodes, dim);
   for (int i = 0; i < num_new_nodes; ++i)
   {
-    auto new_node_wrap = new_nodes[i];
-    auto ref_node_wrap = ref_nodes[i];
+    auto new_node_wrap = new_nodes[i].to_vector_wrap();
+    auto ref_node_wrap = ref_nodes[i].to_vector_view();
 
     this->_parametric_functions.calculate(new_node_wrap, ref_node_wrap);
   }
@@ -333,14 +332,14 @@ void Geometry::create_and_store_quadrature_rule(const int integrand_degree) cons
 
     for (int j = 0; j < dimension; ++j)
     {
-      ptr[j] = this->_parametric_functions[j](ref_QP);
+      ptr[j] = this->_parametric_functions[j](ref_QP.to_vector_view());
     }
     ptr += dimension;
 
-    transformed_QW[i] = this->_scale_function(ref_QP) * ref_weight;
+    transformed_QW[i] = this->_scale_function(ref_QP.to_vector_view()) * ref_weight;
   }
 
-  auto points          = Nodes(Coordinates_Type::NODAL, num_QP, dimension, std::move(transformed_coordiantes));
+  auto points          = Nodes(num_QP, dimension, std::move(transformed_coordiantes));
   auto quadrature_rule = Quadrature_Rule(std::move(points), std::move(transformed_QW));
   this->_degree_to_quadrature_rule.emplace(integrand_degree, std::move(quadrature_rule));
 }

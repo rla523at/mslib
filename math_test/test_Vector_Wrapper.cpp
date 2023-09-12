@@ -62,6 +62,44 @@ TEST(Vector_Wrap, operator_scalar_multiplication_assign_2)
   EXPECT_EQ(vec, ref);
 }
 
+TEST(Vector_Wrap, part_wrap1)
+{
+  std::vector<double>   v = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+  ms::math::Vector_Wrap values(v, 3); // 1 4 7 10
+
+  constexpr auto start_position = 0;
+  constexpr auto inc            = 3;
+  constexpr auto num_values     = 2;
+  const auto     sub_wrap      = values.sub_wrap(start_position, inc, num_values);
+
+  std::vector<double> ref_v = {1, 10};
+  EXPECT_EQ(sub_wrap, ref_v);
+}
+TEST(Vector_Wrap, part_wrap2)
+{
+  std::vector<double>   v = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
+  ms::math::Vector_Wrap values(v, 3); // 1 4 7 10 13
+
+  constexpr auto start_position = 1;
+  constexpr auto inc            = 3;
+  constexpr auto num_values     = 2;
+  const auto     sub_wrap      = values.sub_wrap(start_position, inc, num_values);
+
+  std::vector<double> ref_v = {4, 13};
+  EXPECT_EQ(sub_wrap, ref_v);
+}
+TEST(Vector_Wrap, part_wrap3)
+{
+  std::vector<double>   v = {1, 2, 3, 4, 5, 6, 7};
+  ms::math::Vector_Wrap values(v);
+
+  auto sub_wrap = values.sub_wrap(2, 7);
+
+  std::vector<double>   ref_v = {3, 4, 5, 6, 7};
+  ms::math::Vector_Wrap ref_values(ref_v);
+  EXPECT_EQ(ref_values, sub_wrap);
+}
+
 // Caution!
 #ifdef _DEBUG
 TEST(Vector_Wrap, different_size_1)

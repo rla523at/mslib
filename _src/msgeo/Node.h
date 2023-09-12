@@ -1,18 +1,23 @@
 #pragma once
-#include <vector>
+#include <span>
 #include <string>
+#include <vector>
 
-// data definition
+#include "msmath/Vector.h"
+
+// miscellaneous definitions
 namespace ms::geo
 {
+
 // NODAL coords format : (X1,Y1,Z1) ... (Xn,Yn, Zn)
 // BLOCK coords format : (X1,...,Xn) ... (Z1,...,Zn)
-enum class Coordinates_Type
-{
-  NODAL,
-  BLOCK,
-  NOT_SUPPROTED
-};
+
+template <typename T>
+concept const_span = requires(const T& t) { std::span<const double>(t); };
+
+template <typename T>
+concept span = requires(T& t) { std::span<double>(t); };
+
 } // namespace ms::geo
 
 /*
@@ -32,35 +37,40 @@ enum class Coordinates_Type
 namespace ms::geo
 {
 
-class Node_Const_Wrapper
+class Node_View
 {
 public:
-  Node_Const_Wrapper(const int dimension, const double* coords_ptr, const int inc = 1);
+  Node_View(void) = default;
+
+  template <const_span T>
+  Node_View(const T& coordinates);
+
+  template <const_span T>
+  Node_View(const T& coordinates, const int dimenion, const int inc = 1);
 
 public:
-  std::vector<double> operator-(const Node_Const_Wrapper& other) const;
+  ms::math::Vector<0> operator-(const Node_View& other) const;
   double              operator[](const int index) const;
-  bool                operator==(const Node_Const_Wrapper& other) const;
+  bool                operator==(const Node_View& other) const;
 
 public:
-  operator std::pair<const double*, int>(void) const;
-
-public:
-  int         dimension(void) const;
-  void        other_to_this_vector(const Node_Const_Wrapper& other, double* vector_components) const;
-  int         size(void) const; // When a point is viewed as tuple, return a size of tuple
-  std::string to_string(void) const;
-
-protected:
-  int           _dimension             = 0;
-  const double* _coordinates_const_ptr = nullptr;
-  int           _inc                   = 0;
+  double                at(const int index) const;
+  int                   dimension(void) const;
+  void                  other_to_this_vector(const Node_View& other, ms::math::Vector_Wrap vector_wrap) const;
+  int                   size(void) const; // When a point is viewed as tuple, return a size of tuple
+  std::string           to_string(void) const;
+  ms::math::Vector_View to_vector_view(void) const;
 
 protected:
-  // Acess to the default constructor has been blocked, because it creates objects that do not function properly.
-  // The reason why it was not deleted is that the constructor of the Node class uses the default constructor.
-  Node_Const_Wrapper(void) = default;
+  const double* data(void) const;
+
+protected:
+  std::span<const double> _coordinates_view;
+  int                     _dimension = 0;
+  int                     _inc       = 0;
 };
+
+} // namespace ms::geo
 
 /*
 
@@ -75,31 +85,41 @@ protected:
 
 */
 
-class Node_Wrapper : public Node_Const_Wrapper
+namespace ms::geo
+{
+
+class Node_Wrap : public Node_View
 {
 public:
-  Node_Wrapper(const int dimension, double* coords_ptr, const int inc = 1)
-      : Node_Const_Wrapper(dimension, coords_ptr, inc),
-        _coordinates_ptr(coords_ptr){};
+  Node_Wrap(void) = default;
+
+  template <span T>
+  Node_Wrap(T& coordinates)
+      : Node_View(coordinates),
+        _coordinates_wrap(coordinates){};
+
+  template <span T>
+  Node_Wrap(T& coordsinates, const int dimension, const int inc = 1)
+      : Node_View(coordsinates, dimension, inc),
+        _coordinates_wrap(coordsinates){};
 
 public:
-  double& operator[](const int position);
+  double& operator[](const int index);
 
 public:
-  operator std::pair<double*, int>(void) const;
+  double&               at(const int index);
+  ms::math::Vector_Wrap to_vector_wrap(void);
 
   // resolve base class method hiding problem (overloading across scope problem)
 public:
-  using Node_Const_Wrapper::operator[];
+  using Node_View::at;
+  using Node_View::operator[];
 
 protected:
-  double* _coordinates_ptr = nullptr;
-
-protected:
-  // Acess to the default constructor has been blocked, because it creates objects that do not function properly.
-  // The reason why it was not deleted is that the constructor of the Node class uses the default constructor.
-  Node_Wrapper(void) = default;
+  std::span<double> _coordinates_wrap;
 };
+
+} // namespace ms::geo
 
 /*
 
@@ -113,9 +133,11 @@ protected:
 
 
 */
-// class Nodes;
 
-class Node : public Node_Wrapper
+namespace ms::geo
+{
+
+class Node : public Node_Wrap
 {
 public:
   Node(const int dim);
@@ -123,14 +145,14 @@ public:
   Node(const Node& other);
   Node(Node&& other) noexcept;
 
-public:
-  operator Node_Const_Wrapper(void) const;
+private:
+  void reallocate_coordinates(void);
 
 private:
   std::vector<double> _coordinates;
-
-  // friend Nodes;
 };
+
+} // namespace ms::geo
 
 /*
 
@@ -145,42 +167,36 @@ private:
 
 */
 
-class Nodes_Const_Wrapper
+namespace ms::geo
+{
+
+class Nodes_View
 {
 public:
-  Nodes_Const_Wrapper(const Coordinates_Type type, const int num_nodes, const int dimension, const double* coords_ptr);
+  Nodes_View(void) = default;
+
+  template <const_span T>
+  Nodes_View(const T& coordinates, const int num_nodes, const int dimension);
 
 public:
-  Node_Const_Wrapper operator[](const int index) const;
+  Node_View operator[](const int index) const;
 
 public:
-  Node_Const_Wrapper              at(const int index) const;
-  void                            copy_coordinates(double* dest) const;
-  const double*                   coordinates_ptr(void) const;
-  Coordinates_Type                coordinates_type(void) const;
-  int                             dimension(void) const;
-  int                             num_coordinates(void) const;
-  int                             num_nodes(void) const;
-  std::vector<Node_Const_Wrapper> nodes_at_indexes(const std::vector<int>& numbers) const;
-  void                            nodes_at_indexes(std::vector<Node_Const_Wrapper>& result, const std::vector<int>& numbers) const;
+  Node_View              at(const int index) const;
+  void                   copy_coordinates(double* dest) const;
+  int                    dimension(void) const;
+  int                    num_coordinates(void) const;
+  int                    num_nodes(void) const;
+  std::vector<Node_View> nodes_at_indexes(const std::vector<int>& numbers) const;
+  void                   nodes_at_indexes(std::vector<Node_View>& result, const std::vector<int>& numbers) const;
 
 protected:
-  bool is_nodal(void) const;
-
-private:
-  const double* coordinates_ptr_at(const int index) const;
-
-protected:
-  int           _num_nodes             = 0;
-  int           _dimension             = 0;
-  const double* _coordinates_const_ptr = nullptr;
-  int           _inc                   = 0;
-
-protected:
-  // Acess to the default constructor has been blocked, because it creates objects that do not function properly.
-  // The reason why it was not deleted is that the constructor of the Nodes class uses the default constructor.
-  Nodes_Const_Wrapper(void) = default;
+  std::span<const double> _coordinates_view;
+  int                     _num_nodes = 0;
+  int                     _dimension = 0;
 };
+
+} // namespace ms::geo
 
 /*
 
@@ -195,44 +211,58 @@ protected:
 
 */
 
-class Nodes_Wrapper : public Nodes_Const_Wrapper
+namespace ms::geo
+{
+
+class Nodes_Wrapper : public Nodes_View
 {
 public:
-  Nodes_Wrapper(const Coordinates_Type type, const int num_nodes, const int dimension, double* coords_ptr)
-      : Nodes_Const_Wrapper(type, num_nodes, dimension, coords_ptr),
-        _coordinates_ptr(coords_ptr){};
+  Nodes_Wrapper(void) = default;
+
+  template <span T>
+  Nodes_Wrapper(T& coordinates, const int num_nodes, const int dimension)
+      : Nodes_View(coordinates, num_nodes, dimension),
+        _coordinates_wrap(coordinates){};
 
 public:
-  Node_Wrapper operator[](const int index);
+  Node_Wrap operator[](const int index);
 
 public:
-  Node_Wrapper at(const int index);
-
-private:
-  double* coordinates_ptr_at(const int index);
+  Node_Wrap at(const int index);
 
   // resolve base class method hiding problem (overloading across scope problem)
 public:
-  using Nodes_Const_Wrapper::operator[];
-  using Nodes_Const_Wrapper::at;
+  using Nodes_View::operator[];
+  using Nodes_View::at;
 
 protected:
-  double* _coordinates_ptr = nullptr;
-
-protected:
-  // Acess to the default constructor has been blocked, because it creates objects that do not function properly.
-  // The reason why it was not deleted is that the constructor of the Node class uses the default constructor.
-  Nodes_Wrapper(void) = default;
+  std::span<double> _coordinates_wrap;
 };
+
+} // namespace ms::geo
+
+/*
+
+
+
+
+
+
+
+
+
+
+*/
+
+namespace ms::geo
+{
 
 class Nodes : public Nodes_Wrapper
 {
 public:
-  static Nodes Null_Nodes(void);
-
-public:
-  Nodes(const Coordinates_Type type, const int num_nodes, const int dimension);
-  Nodes(const Coordinates_Type type, const int num_nodes, const int dimension, std::vector<double>&& coordinates);
+  Nodes(void) = default;
+  Nodes(const int num_nodes, const int dimension);
+  Nodes(const int num_nodes, const int dimension, std::vector<double>&& coordinates);
   Nodes(const Nodes& other);
   Nodes(Nodes&& other) noexcept;
 
@@ -241,21 +271,62 @@ public:
   void operator=(Nodes&& other);
 
 public:
-  operator Nodes_Const_Wrapper(void) const;
-
-public:
-  void add_node(const Node_Const_Wrapper node);
+  void add_node(const Node_View node);
   void add_nodes(Nodes&& other);
-  void to_block_type(void);
 
 private:
   bool is_null_node(void) const;
 
 private:
-  std::vector<double> _coordinates;
+  std::vector<double> _coordinates; // it always be nodal coordinate type
+};
 
-private:
-  Nodes(void) = default;
+} // namespace ms::geo
+
+/*
+
+
+
+
+
+
+
+
+
+
+*/
+
+// template definitions
+namespace ms::geo
+{
+template <const_span T>
+inline Node_View::Node_View(const T& coordinates)
+    : _coordinates_view(coordinates)
+{
+  this->_dimension = static_cast<int>(this->_coordinates_view.size());
+  this->_inc       = 1;
+}
+
+template <const_span T>
+inline Node_View::Node_View(const T& coordinates, const int dimension, const int inc)
+    : _coordinates_view(coordinates),
+      _dimension(dimension),
+      _inc(inc)
+{
+  REQUIRE(0 < this->_dimension, "dimension should be natural number");
+  REQUIRE(0 < this->_inc, "inc should be natural number");
+  REQUIRE(this->_dimension * this->_inc == this->_coordinates_view.size(), "Given coordinates should be matched wtih given size");
+}
+
+template <const_span T>
+inline Nodes_View::Nodes_View(const T& coordinates, const int num_nodes, const int dimension)
+    : _coordinates_view(coordinates),
+      _num_nodes(num_nodes),
+      _dimension(dimension)
+{
+  REQUIRE(0 < this->_num_nodes, "number of nodes should be natural number");
+  REQUIRE(0 < this->_dimension, "dimension should be natural number");
+  REQUIRE(this->_coordinates_view.size() == this->_num_nodes * this->_dimension, "Given coordinates size should be matched with given size");
 };
 
 } // namespace ms::geo

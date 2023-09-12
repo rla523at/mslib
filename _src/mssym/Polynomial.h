@@ -21,7 +21,7 @@ class Simple_Poly_Term
 {
 public:
   Simple_Poly_Term(const double constant)
-      : constant_(constant){};
+      : _constant(constant){};
   Simple_Poly_Term(const std::string& variable);
   Simple_Poly_Term(const std::vector<double>& coeffs, const double c = 0);
   Simple_Poly_Term(const Simple_Poly_Term& other);
@@ -38,6 +38,7 @@ public:
   Poly_Term        operator*(const Simple_Poly_Term& other) const;
   double           operator()(const double* input) const;
   double           operator()(const std::pair<const double*, int>& input) const;
+  double           operator()(const ms::math::Vector_View input) const;
   bool             operator==(const Simple_Poly_Term& other) const;
   bool             operator!=(const Simple_Poly_Term& other) const;
   bool             operator<(const Simple_Poly_Term& other) const;
@@ -58,9 +59,9 @@ private:
 private:
   static constexpr int small_criterion_ = 4;
 
-  int                                  domain_dim_         = 0;
-  double                               constant_           = 0.0;
-  double*                              coefficient_ptr_    = this->coefficient_buffer_.data();
+  int                                  _domain_dim         = 0;
+  double                               _constant           = 0.0;
+  double*                              _coefficient_ptr    = this->coefficient_buffer_.data();
   std::array<double, small_criterion_> coefficient_buffer_ = {0};
   std::vector<double>                  coefficients_;
 };
@@ -97,6 +98,7 @@ public:
   Poly_Term operator*(const double constant) const;
   double    operator()(const double* input) const;
   double    operator()(const std::pair<const double*, int>& input) const;
+  double    operator()(const ms::math::Vector_View input) const;
   bool      operator==(const Powered_Poly_Term& other) const;
   bool      operator<(const Powered_Poly_Term& other) const; // for Poly_Term::has_same_form
 
@@ -152,6 +154,7 @@ public:
   Poly_Term operator*(const Poly_Term& other) const;
   double    operator()(const double* input) const;
   double    operator()(const std::pair<const double*, int>& input) const;
+  double    operator()(const ms::math::Vector_View input) const;
   bool      operator==(const Poly_Term& other) const;
   bool      operator!=(const Poly_Term& other) const;
 
@@ -175,7 +178,7 @@ private:
 private:
   static constexpr int                            small_criterion_ = 3;
   int                                             num_term_        = 0;
-  double                                          constant_        = 0.0;
+  double                                          _constant        = 0.0;
   Powered_Poly_Term*                              term_ptr_        = small_buffer_.data();
   std::array<Powered_Poly_Term, small_criterion_> small_buffer_    = {0};
   std::vector<Powered_Poly_Term>                  terms_;
@@ -209,6 +212,7 @@ public:
 public:
   double operator()(const double* input) const override;
   double operator()(const std::pair<const double*, int>& input) const override;
+  double operator()(const ms::math::Vector_View input) const override;
 
 public:
   Sym_Base    copy(void) const override;
@@ -279,6 +283,7 @@ public:
 
 public:
   void calculate(const std::pair<double*, int>& result, const std::pair<const double*, int>& input) const;
+  void calculate(ms::math::Vector_Wrap result, const ms::math::Vector_View input) const;
   int  size(void) const;
 
 private:

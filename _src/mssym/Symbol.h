@@ -36,6 +36,7 @@ public:
 public:
   double operator()(const double* input) const;
   double operator()(const std::pair<const double*, int>& input) const;
+  double operator()(const ms::math::Vector_View input) const;
 
 public:
   Multiplied_Term get_differentiate(const int variable_index) const;
@@ -69,6 +70,7 @@ public:
   Multiplied_Term operator*(const Multiplied_Term& other) const;
   double          operator()(const double* input) const;
   double          operator()(const std::pair<const double*, int>& input) const;
+  double          operator()(const ms::math::Vector_View input) const;
 
 public:
   Symbol      get_differentiate(const int variable_index) const;
@@ -78,7 +80,7 @@ public:
 
 private:
   int                       num_term_ = 0;
-  double                    constant_ = 0.0;
+  double                    _constant = 0.0;
   std::vector<Powered_Term> pterms_;
 };
 
@@ -87,13 +89,15 @@ class Symbol : public Base
 {
 public:
   Symbol(void) = default;
-  Symbol(const double constant) : constant_(constant){};
+  Symbol(const double constant) : _constant(constant){};
   Symbol(const Sym_Base& base_ptr);
   Symbol(Powered_Term&& pterm);
 
 public:
   double operator()(const double* input) const override;
   double operator()(const std::pair<const double*, int>& input) const override;
+  double operator()(const ms::math::Vector_View input) const override;
+
 
 public:
   Sym_Base    copy(void) const override;
@@ -129,7 +133,7 @@ public:
 
 private:
   std::vector<Multiplied_Term> mterms_;
-  double                       constant_    = 0.0;
+  double                       _constant    = 0.0;
   bool                         is_absolute_ = false;
 };
 

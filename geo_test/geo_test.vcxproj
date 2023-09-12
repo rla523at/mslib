@@ -44,8 +44,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <ItemGroup>
-    <ClCompile Include="Geometry.cpp" />
-    <ClCompile Include="Node.cpp">
+    <ClCompile Include="test_Geometry.cpp" />
+    <ClCompile Include="test_Node.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Reference_Geometry.cpp">

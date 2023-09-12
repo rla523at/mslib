@@ -70,7 +70,7 @@ void Element::accumulate_partition_data(ms::geo::Partition_Data& total_partition
   struct Near
   {
   public:
-    bool operator==(const ms::geo::Node_Const_Wrapper other) const
+    bool operator==(const ms::geo::Node_View other) const
     {
       constexpr auto epsilon = 1.0e-10;
 
@@ -83,7 +83,7 @@ void Element::accumulate_partition_data(ms::geo::Partition_Data& total_partition
     }
 
   public:
-    ms::geo::Node_Const_Wrapper node;
+    ms::geo::Node_View node;
   };
 
   /*

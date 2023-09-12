@@ -8,7 +8,7 @@
 // forward declaration
 namespace ms::math
 {
-class Vector_Wrapper;
+class Vector_Wrap;
 
 template <int dim>
 class Vector;
@@ -133,34 +133,35 @@ public:
 
 public:
   Vector<0> operator*(const double scalar) const;
-  Vector<0> operator-(const Vector_View& other) const;
-  Vector<0> operator+(const Vector_View& other) const;
+  Vector<0> operator-(const Vector_View other) const;
+  Vector<0> operator+(const Vector_View other) const;
   double    operator[](const int position) const;
-  bool      operator==(const Vector_View& other) const;
-  bool      operator!=(const Vector_View& other) const;
+  bool      operator==(const Vector_View other) const;
+  bool      operator!=(const Vector_View other) const;
 
 public:
   double                at(const int position) const;
   Vector_Const_Iterator begin(void) const;
   Vector_Const_Iterator end(void) const;
-  double                cosine(const Vector_View& other) const;
+  double                cosine(const Vector_View other) const;
   int                   dimension(void) const;
   const double*         data(void) const;
   bool                  empty(void) const;
   Vector_View           get_view(void) const;
   int                   inc(void) const;
-  double                inner_product(const Vector_View& other) const;
-  bool                  is_parallel(const Vector_View& other) const;
+  double                inner_product(const Vector_View other) const;
+  bool                  is_parallel(const Vector_View other) const;
   double                L1_norm(void) const;
   double                L2_norm(void) const;
   double                Linf_norm(void) const;
-  Vector_View           part(const int start_position, const int end_position) const;
+  Vector_View           sub_view(const int start_position, const int end_position) const;
+  Vector_View           sub_view(const int start_position, const int inc, const int num_values) const;
   std::string           to_string(void) const;
   std::vector<double>   to_vector(void) const;
 
 public:
   template <int dim>
-  Vector<3> cross_product(const Vector_View& other) const;
+  Vector<3> cross_product(const Vector_View other) const;
 
 private:
   void initialize(void);
@@ -215,10 +216,12 @@ public:
   double& operator[](const int position);
 
 public:
-  double& at(const int position);
-  void    change_value(const Vector_View other);
-  double* data(void);
-  void    normalize(void);
+  double&     at(const int position);
+  void        change_value(const Vector_View other);
+  double*     data(void);
+  void        normalize(void);
+  Vector_Wrap sub_wrap(const int start_position, const int end_position) const;
+  Vector_Wrap sub_wrap(const int start_position, const int inc, const int num_values) const;
 
   // resolve base class method hiding problem (overloading across scope problem)
 public:

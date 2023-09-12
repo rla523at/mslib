@@ -8,11 +8,11 @@ TEST(Geometry, cal_volume1)
 {
   const auto fig = Figure::LINE;
 
-  const std::vector<double>       c1    = {1, 1};
-  const std::vector<double>       c2    = {2, 2};
-  Node_Const_Wrapper              n1    = {static_cast<int>(c1.size()), c1.data()};
-  Node_Const_Wrapper              n2    = {static_cast<int>(c2.size()), c2.data()};
-  std::vector<Node_Const_Wrapper> nodes = {n1, n2};
+  const std::vector<double> c1    = {1, 1};
+  const std::vector<double> c2    = {2, 2};
+  Node_View                 n1    = c1;
+  Node_View                 n2    = c2;
+  std::vector<Node_View>    nodes = {n1, n2};
 
   Geometry   geometry(fig, std::move(nodes));
   const auto result = geometry.cal_volume();
@@ -25,18 +25,17 @@ TEST(Geometry, cal_volume2)
   const auto fig = Figure::LINE;
 
   // r1 : t^2 +1, r2: t+1,
-  const std::vector<double>       c1    = {1, 1};
-  const std::vector<double>       c2    = {2, 2};
-  const std::vector<double>       c3    = {5.0 / 4.0, 3.0 / 2.0};
-  Node_Const_Wrapper              n1    = {static_cast<int>(c1.size()), c1.data()};
-  Node_Const_Wrapper              n2    = {static_cast<int>(c2.size()), c2.data()};
-  Node_Const_Wrapper              n3    = {static_cast<int>(c3.size()), c3.data()};
-  std::vector<Node_Const_Wrapper> nodes = {n1, n2, n3};
+  const std::vector<double> c1    = {1, 1};
+  const std::vector<double> c2    = {2, 2};
+  const std::vector<double> c3    = {5.0 / 4.0, 3.0 / 2.0};
+  Node_View                 n1    = c1;
+  Node_View                 n2    = c2;
+  Node_View                 n3    = c3;
+  std::vector<Node_View>    nodes = {n1, n2, n3};
 
   Geometry   geometry(fig, std::move(nodes));
   const auto result = geometry.cal_volume(4);
 
-  
   // https://www.wolframalpha.com/widgets/view.jsp?id=73ca780640d6d04415634639d49035cc
   const auto ref = 1.478942857544597433827906019433914435071697;
 

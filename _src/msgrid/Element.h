@@ -13,7 +13,7 @@ namespace ms::grid
 struct Numbered_Nodes
 {
   std::vector<int>                         numbers;
-  std::vector<ms::geo::Node_Const_Wrapper> nodes;
+  std::vector<ms::geo::Node_View> nodes;
 };
 
 } // namespace ms::grid

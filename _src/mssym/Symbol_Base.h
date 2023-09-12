@@ -2,6 +2,8 @@
 #include <memory>
 #include <string>
 
+#include "msmath/Vector.h"
+
 namespace ms::sym
 {
 
@@ -13,6 +15,7 @@ public:
 public:
   virtual double operator()(const double* input) const = 0;
   virtual double operator()(const std::pair<const double*, int>& input) const = 0;
+  virtual double operator()(const ms::math::Vector_View input) const          = 0;
 
 public:
   virtual std::unique_ptr<Base> copy(void) const                                  = 0;

@@ -14,7 +14,7 @@ TEST(Reference_Line, parametric_functions_1)
   std::vector<double> coords = {1, 2, 4, 2};
 
   constexpr auto      dim        = 2;
-  std::vector<Node_Const_Wrapper> nodes;
+  std::vector<Node_View> nodes;
   nodes.push_back({dim, coords.data()});
   nodes.push_back({dim, coords.data() + dim});
 
@@ -46,7 +46,7 @@ TEST(Reference_Line, 2D_normal_function_1)
   std::vector<double> coords = {1, 2, 4, 2};
 
   constexpr auto dim        = 2;
-  std::vector<Node_Const_Wrapper> nodes;
+  std::vector<Node_View> nodes;
   nodes.push_back({dim, coords.data()});
   nodes.push_back({dim, coords.data() + dim});
 
@@ -71,7 +71,7 @@ TEST(Reference_Line, 3D_normal_functions)
   std::vector<double> coords = {1, 2, 3, 4, 2, 7};
 
   constexpr auto dim        = 3;
-  std::vector<Node_Const_Wrapper> nodes;
+  std::vector<Node_View> nodes;
   nodes.push_back({dim, coords.data()});
   nodes.push_back({dim, coords.data() + dim});
 

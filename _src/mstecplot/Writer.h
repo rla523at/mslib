@@ -17,7 +17,7 @@ enum class File_Format
 
 struct Configuration
 {
-  File_Format file_fomrat;
+  File_Format file_format;
   std::string folder_path;
   std::string title;
 };

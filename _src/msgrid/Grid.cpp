@@ -197,7 +197,7 @@ void Grid::boundary_outward_unit_normal_at_center(double* normal, const int boun
   const auto bdry_center = bdry_geometry.center();
   bdry_geometry.cal_normal(normal, bdry_center);
 
-  ms::math::Vector_Wrapper normal_v(normal, this->dimension());
+  ms::math::Vector_Wrap normal_v(normal, this->dimension());
   normal_v.normalize();
 
   if (!oc_element.is_outward_face(bdry_element))
@@ -282,7 +282,7 @@ void Grid::inter_cell_face_outward_unit_normal_at_center(double* normal, const i
 {
   const auto num_inter_cell_face = this->_inter_cell_face_elements.size();
 
-  ms::math::Vector_Wrapper normal_v(normal, this->dimension());
+  ms::math::Vector_Wrap normal_v(normal, this->dimension());
 
   if (inter_cell_face_number < num_inter_cell_face)
   {

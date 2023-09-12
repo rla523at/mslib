@@ -21,14 +21,14 @@ namespace ms::geo
 class Geometry
 {
 public:
-  Geometry(const Figure figure, const std::vector<Node_Const_Wrapper>& consisting_nodes);
-  Geometry(const Figure figure, std::vector<Node_Const_Wrapper>&& consisting_nodes);
+  Geometry(const Figure figure, const std::vector<Node_View>& consisting_nodes);
+  Geometry(const Figure figure, std::vector<Node_View>&& consisting_nodes);
 
 public:
-  void change_nodes(std::vector<Node_Const_Wrapper>&& new_nodes);
+  void change_nodes(std::vector<Node_View>&& new_nodes);
 
 public:
-  void                          cal_normal(double* normal, const Node_Const_Wrapper node) const;
+  void                          cal_normal(double* normal, const Node_View node) const;
   void                          cal_projected_volumes(double* projected_volumes) const;
   double                        cal_volume(const int expected_scale_function_order = 0) const;
   Node                          center(void) const;
@@ -49,7 +49,7 @@ private:
 
 private:
   const Reference_Geometry&       _reference_geometry;
-  std::vector<Node_Const_Wrapper> _consisting_nodes;
+  std::vector<Node_View> _consisting_nodes;
 
   ms::sym::Polynomials _parametric_functions;
 

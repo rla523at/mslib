@@ -75,7 +75,7 @@ TEST(Vector_View, construct_3)
 TEST(Vector_View, construct_4)
 {
   std::vector<double> v = {1, 2, 3, 4, 5, 6};
-  Vector_View         vec(v.begin(), v.end()-1);
+  Vector_View         vec(v.begin(), v.end() - 1);
 
   const std::vector<double> ref = {1, 2, 3, 4, 5};
   for (int i = 0; i < 5; ++i)
@@ -124,27 +124,66 @@ TEST(Vector_View, iterator3)
   }
 }
 
-TEST(Vector_View, part1)
+TEST(Vector_View, part_view1)
 {
   std::vector<double>   v = {1, 2, 3, 4, 5, 6, 7};
   ms::math::Vector_View values(v);
 
-  auto part = values.part(1, 3);
+  auto part = values.sub_view(1, 3);
 
   std::vector<double>   ref_v = {2, 3};
   ms::math::Vector_View ref_values(ref_v);
   EXPECT_EQ(ref_values, part);
 }
-TEST(Vector_View, part2)
+TEST(Vector_View, part_view2)
 {
   std::vector<double>   v = {1, 2, 3, 4, 5, 6, 7};
   ms::math::Vector_View values(v, 3);
 
-  auto part = values.part(1, 3);
+  auto part = values.sub_view(1, 3);
 
   std::vector<double>   ref_v = {4, 7};
   ms::math::Vector_View ref_values(ref_v);
   EXPECT_EQ(ref_values, part);
+}
+TEST(Vector_View, part_view3)
+{
+  std::vector<double>   v = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+  ms::math::Vector_View values(v);
+
+  constexpr auto start_position = 0;
+  constexpr auto inc            = 3;
+  constexpr auto num_values     = 3;
+  auto           sub_view      = values.sub_view(start_position, inc, num_values);
+
+  std::vector<double> ref_v = {1, 4, 7};
+  EXPECT_EQ(sub_view, ref_v);
+}
+TEST(Vector_View, part_view4)
+{
+  std::vector<double>   v = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+  ms::math::Vector_View values(v, 3); // 1 4 7 10
+
+  constexpr auto start_position = 0;
+  constexpr auto inc            = 3;
+  constexpr auto num_values     = 2;
+  const auto     sub_view      = values.sub_view(start_position, inc, num_values);
+
+  std::vector<double> ref_v = {1, 10};
+  EXPECT_EQ(sub_view, ref_v);
+}
+TEST(Vector_View, part_view5)
+{
+  std::vector<double>   v = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
+  ms::math::Vector_View values(v, 3); // 1 4 7 10 13
+
+  constexpr auto start_position = 1;
+  constexpr auto inc            = 3;
+  constexpr auto num_values     = 2;
+  const auto     sub_view      = values.sub_view(start_position, inc, num_values);
+
+  std::vector<double> ref_v = {4, 13};
+  EXPECT_EQ(sub_view, ref_v);
 }
 
 TEST(Vector_View, operator_addition_1)
@@ -212,7 +251,7 @@ TEST(Vector_View, operator_addition_5)
 
   constexpr auto start_index  = 2;
   constexpr auto end_index    = 5;
-  const auto     part_of_cvw2 = cvw2.part(start_index, end_index);
+  const auto     part_of_cvw2 = cvw2.sub_view(start_index, end_index);
 
   const auto result = cvw1 + part_of_cvw2;
 
@@ -263,7 +302,7 @@ TEST(Vector_View, operator_addition_8)
 
   constexpr auto start_pos = 0;
   constexpr auto end_pos   = 3;
-  const auto     pcvw2     = cvw2.part(start_pos, end_pos);
+  const auto     pcvw2     = cvw2.sub_view(start_pos, end_pos);
 
   const auto result = cvw1 + pcvw2;
 

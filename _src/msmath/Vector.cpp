@@ -98,7 +98,7 @@ Vector<0> Vector_View::operator*(const double scalar) const
   return result;
 }
 
-Vector<0> Vector_View::operator+(const Vector_View& other) const
+Vector<0> Vector_View::operator+(const Vector_View other) const
 {
   constexpr auto incr = 1;
 
@@ -116,7 +116,7 @@ Vector<0> Vector_View::operator+(const Vector_View& other) const
   return result;
 }
 
-Vector<0> Vector_View::operator-(const Vector_View& other) const
+Vector<0> Vector_View::operator-(const Vector_View other) const
 {
   constexpr auto incr = 1;
 
@@ -141,7 +141,7 @@ double Vector_View::operator[](const int position) const
   return this->_values_view[position * this->_inc];
 }
 
-bool Vector_View::operator==(const Vector_View& other) const
+bool Vector_View::operator==(const Vector_View other) const
 {
   if (this->_dimension != other._dimension)
     return false;
@@ -155,7 +155,7 @@ bool Vector_View::operator==(const Vector_View& other) const
   return true;
 }
 
-bool Vector_View::operator!=(const Vector_View& other) const
+bool Vector_View::operator!=(const Vector_View other) const
 {
   return !((*this) == other);
 }
@@ -180,7 +180,7 @@ Vector_Const_Iterator Vector_View::end(void) const
   return end;
 }
 
-double Vector_View::cosine(const Vector_View& other) const
+double Vector_View::cosine(const Vector_View other) const
 {
   const auto dim       = this->dimension();
   const auto other_dim = other.dimension();
@@ -213,7 +213,7 @@ inline int Vector_View::inc(void) const
   return this->_inc;
 }
 
-double Vector_View::inner_product(const Vector_View& other) const
+double Vector_View::inner_product(const Vector_View other) const
 {
   const auto dim        = this->dimension();
   const auto data       = this->data();
@@ -226,7 +226,7 @@ double Vector_View::inner_product(const Vector_View& other) const
   return ms::math::blas::x_dot_y(data, other_data, dim, inc, other_inc);
 }
 
-bool Vector_View::is_parallel(const Vector_View& other) const
+bool Vector_View::is_parallel(const Vector_View other) const
 {
   const auto abs_cosine = std::abs(this->cosine(other));
   return compare_double(abs_cosine, 1.0);
@@ -255,16 +255,35 @@ double Vector_View::Linf_norm(void) const
   return this->_values_view[pos];
 }
 
-Vector_View Vector_View::part(const int start_pos, const int end_pos) const
+Vector_View Vector_View::sub_view(const int start_pos, const int end_pos) const
 {
   REQUIRE(start_pos < end_pos, "start position should be smaller than end position");
   REQUIRE(end_pos <= this->_dimension, "end position should be smaller or equal to dimension");
 
-  const auto start_index = start_pos * this->_inc;
-  const auto count       = (end_pos - start_pos - 1) * this->_inc + 1;
+  const auto num_values = end_pos - start_pos - 1; // [start_pos, end_pos)
 
-  const auto sub_values = this->_values_view.subspan(start_index, count);
-  return {sub_values, this->_inc};
+  const auto start_index     = start_pos * this->_inc;
+  const auto value_count     = 1 + this->_inc * num_values;
+  const auto sub_values_view = this->_values_view.subspan(start_index, value_count);
+
+  const auto result = Vector_View(sub_values_view, this->_inc);
+  return result;
+}
+
+Vector_View Vector_View::sub_view(const int start_position, const int inc, const int num_values) const
+{
+  REQUIRE(0 <= start_position, "start position should not be negative number");
+  REQUIRE(0 < inc, "increment should be positive number");
+  REQUIRE(0 < num_values, "number of values should be positive number");
+
+  const auto new_inc = this->_inc * inc;
+
+  const auto start_index     = start_position * this->_inc;
+  const auto value_count     = 1 + new_inc * (num_values - 1);
+  const auto sub_values_view = this->_values_view.subspan(start_index, value_count);
+
+  const auto result = Vector_View(sub_values_view, new_inc);
+  return result;
 }
 
 std::string Vector_View::to_string(void) const
@@ -286,7 +305,7 @@ std::vector<double> Vector_View::to_vector(void) const
 }
 
 template <>
-Vector<3> Vector_View::cross_product<2>(const Vector_View& other) const
+Vector<3> Vector_View::cross_product<2>(const Vector_View other) const
 {
   Vector<3> result;
   result[2] = (*this)[0] * other[1] - (*this)[1] * other[0];
@@ -295,7 +314,7 @@ Vector<3> Vector_View::cross_product<2>(const Vector_View& other) const
 }
 
 template <>
-Vector<3> Vector_View::cross_product<3>(const Vector_View& other) const
+Vector<3> Vector_View::cross_product<3>(const Vector_View other) const
 {
   Vector<3> result;
   result[0] = (*this)[1] * other[2] - (*this)[2] * other[1];
@@ -397,7 +416,49 @@ void Vector_Wrap::normalize(void)
   *this *= 1.0 / this->L2_norm();
 }
 
-//
+Vector_Wrap Vector_Wrap::sub_wrap(const int start_position, const int end_position) const
+{
+  REQUIRE(start_position < end_position, "start position should be smaller than end position");
+  REQUIRE(end_position <= this->_dimension, "end position should be smaller or equal to dimension");
+
+  const auto num_values = end_position - start_position - 1; // [start_position, end_pos)
+
+  const auto start_index     = start_position * this->_inc;
+  const auto value_count     = 1 + this->_inc * num_values;
+  const auto sub_values_wrap = this->_values_wrap.subspan(start_index, value_count);
+
+  auto result = Vector_Wrap(sub_values_wrap, this->_inc);
+  return result;
+}
+
+Vector_Wrap Vector_Wrap::sub_wrap(const int start_position, const int inc, const int num_values) const
+{
+  REQUIRE(0 <= start_position, "start position should not be negative number");
+  REQUIRE(0 < inc, "increment should be positive number");
+  REQUIRE(0 < num_values, "number of values should be positive number");
+
+  const auto new_inc = this->_inc * inc;
+
+  const auto start_index     = start_position * this->_inc;
+  const auto value_count     = 1 + new_inc * (num_values - 1);
+  const auto sub_values_wrap = this->_values_wrap.subspan(start_index, value_count);
+
+  auto result = Vector_Wrap(sub_values_wrap, new_inc);
+  return result;
+}
+
+/*
+
+
+
+
+
+
+
+
+
+
+*/
 
 Vector<0>::Vector(const int dimension)
     : _coordinates(dimension)

@@ -4,7 +4,7 @@
 
 namespace matrix_test_API
 {
-inline void compare_considering_4ULP(const ms::math::Matrix_Const_Wrapper& cmw1, const ms::math::Matrix_Const_Wrapper& cmw2)
+inline void compare_considering_4ULP(const ms::math::Matrix_View cmw1, const ms::math::Matrix_View cmw2)
 {
   const auto [num_rows, num_columns] = cmw1.size();
 
@@ -17,7 +17,7 @@ inline void compare_considering_4ULP(const ms::math::Matrix_Const_Wrapper& cmw1,
   }
 }
 
-inline void compare_considering_epsilon(const ms::math::Matrix_Const_Wrapper& cmw1, const ms::math::Matrix_Const_Wrapper& cmw2, const double epsilon)
+inline void compare_considering_epsilon(const ms::math::Matrix_View cmw1, const ms::math::Matrix_View cmw2, const double epsilon)
 {
   const auto [num_rows, num_columns] = cmw1.size();
 

@@ -208,7 +208,7 @@ Grid_Data Gmsh_Reader::read(const std::string_view file_path) const
     }
   }
 
-  return this->convert(std::move(node_data),std::move(element_data), physical_data);
+  return this->convert(std::move(node_data), std::move(element_data), physical_data);
 }
 
 Grid_Data Gmsh_Reader::convert(Gmsh_Node_Data&& node_data, Gmsh_Element_Data&& elem_data, const Gmsh_Physical_Data& phys_data) const
@@ -285,7 +285,7 @@ void Gmsh_Reader::read_node_data(std::ifstream& file, Gmsh_Node_Data& data) cons
 {
   constexpr auto delimiter = ' ';
 
-  data.type         = Coordinate_Type::BLOCK;
+  data.type         = Coordinate_Type::NODAL;
   auto& num_nodes   = data.num_nodes;
   auto& coordinates = data.coordinates;
 
@@ -304,12 +304,11 @@ void Gmsh_Reader::read_node_data(std::ifstream& file, Gmsh_Node_Data& data) cons
     // parsed_strs[2]  : y coordinate
     // parsed_strs[3]  : z coordinate
 
-    // save coordinates as block style
+    // save coordinates as nodal style
+    auto start_index = i * this->_dimension;
     for (int j = 0; j < this->_dimension; ++j)
     {
-      auto index = j * num_nodes + i;
-
-      coordinates[index] = ms::string::str_to_value<double>(parsed_strs[j + 1]);
+      coordinates[start_index + j] = ms::string::str_to_value<double>(parsed_strs[j + 1]);
     }
   }
 }

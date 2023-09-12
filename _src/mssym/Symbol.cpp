@@ -41,6 +41,11 @@ double Powered_Term::operator()(const std::pair<const double*, int>& input) cons
   return std::pow((*this->base_ptr_)(input), this->exponent_);
 }
 
+double Powered_Term::operator()(const ms::math::Vector_View input) const
+{
+  return std::pow((*this->base_ptr_)(input), this->exponent_);
+}
+
 Multiplied_Term Powered_Term::get_differentiate(const int var_index) const
 {
   if (this->is_constant())
@@ -94,14 +99,14 @@ bool Powered_Term::is_constant(void) const
 
 Multiplied_Term::Multiplied_Term(const double constant, Powered_Term&& pterm)
 {
-  this->constant_ = constant;
+  this->_constant = constant;
   pterms_.push_back(std::move(pterm));
   this->num_term_++;
 }
 
 Multiplied_Term::Multiplied_Term(Powered_Term&& powered_term)
 {
-  this->constant_ = 1.0;
+  this->_constant = 1.0;
   pterms_.push_back(std::move(powered_term));
   this->num_term_++;
 }
@@ -114,7 +119,7 @@ void Multiplied_Term::operator*=(const double constant)
   }
   else
   {
-    this->constant_ *= constant;
+    this->_constant *= constant;
   }
 }
 
@@ -122,11 +127,11 @@ void Multiplied_Term::operator*=(const Multiplied_Term& other)
 {
   if (other.is_constant())
   {
-    this->constant_ *= other.to_constant();
+    this->_constant *= other.to_constant();
   }
   else
   {
-    this->constant_ *= other.constant_;
+    this->_constant *= other._constant;
 
     this->num_term_ += other.num_term_;
     this->pterms_.reserve(this->num_term_);
@@ -139,7 +144,7 @@ void Multiplied_Term::multiply_assign_powred_term(const Powered_Term& pterm)
 {
   if (pterm.is_constant())
   {
-    this->constant_ *= pterm.to_constant();
+    this->_constant *= pterm.to_constant();
   }
   else
   {
@@ -152,7 +157,7 @@ void Multiplied_Term::multiply_assign_powred_term(Powered_Term&& pterm)
 {
   if (pterm.is_constant())
   {
-    this->constant_ *= pterm.to_constant();
+    this->_constant *= pterm.to_constant();
   }
   else
   {
@@ -182,7 +187,7 @@ Multiplied_Term Multiplied_Term::operator*(const Multiplied_Term& other) const
 
 double Multiplied_Term::operator()(const double* input) const
 {
-  double result = this->constant_;
+  double result = this->_constant;
   for (auto& term : this->pterms_)
   {
     result *= term(input);
@@ -193,7 +198,18 @@ double Multiplied_Term::operator()(const double* input) const
 
 double Multiplied_Term::operator()(const std::pair<const double*, int>& input) const
 {
-  double result = this->constant_;
+  double result = this->_constant;
+  for (auto& term : this->pterms_)
+  {
+    result *= term(input);
+  }
+
+  return result;
+}
+
+double Multiplied_Term::operator()(const ms::math::Vector_View input) const
+{
+  double result = this->_constant;
   for (auto& term : this->pterms_)
   {
     result *= term(input);
@@ -218,7 +234,7 @@ Symbol Multiplied_Term::get_differentiate(const int variable_index) const
 
     auto derivative = pterm.get_differentiate(variable_index);
 
-    derivative *= this->constant_;
+    derivative *= this->_constant;
 
     for (int j = 0; j < this->num_term_; ++j)
     {
@@ -236,7 +252,7 @@ Symbol Multiplied_Term::get_differentiate(const int variable_index) const
 
 double Multiplied_Term::to_constant(void) const
 {
-  auto result = this->constant_;
+  auto result = this->_constant;
   for (const auto& term : this->pterms_)
   {
     result *= term.to_constant();
@@ -249,9 +265,9 @@ std::string Multiplied_Term::to_string(void) const
 {
   std::string result;
 
-  if (this->constant_ != 1.0)
+  if (this->_constant != 1.0)
   {
-    result += std::to_string(constant_) + " * ";
+    result += std::to_string(_constant) + " * ";
   }
 
   for (const auto& pterm : this->pterms_)
@@ -281,7 +297,7 @@ Symbol::Symbol(const Sym_Base& base_ptr)
 {
   if (base_ptr->is_constant())
   {
-    this->constant_ = base_ptr->to_constant();
+    this->_constant = base_ptr->to_constant();
     return;
   }
 
@@ -294,7 +310,7 @@ Symbol::Symbol(Powered_Term&& pterm)
 {
   if (pterm.is_constant())
   {
-    this->constant_ = pterm.to_constant();
+    this->_constant = pterm.to_constant();
   }
   else
   {
@@ -309,7 +325,7 @@ Sym_Base Symbol::copy(void) const
 
 double Symbol::operator()(const double* input) const
 {
-  auto result = this->constant_;
+  auto result = this->_constant;
 
   for (const auto& term : this->mterms_)
   {
@@ -328,7 +344,26 @@ double Symbol::operator()(const double* input) const
 
 double Symbol::operator()(const std::pair<const double*, int>& input) const
 {
-  auto result = this->constant_;
+  auto result = this->_constant;
+
+  for (const auto& term : this->mterms_)
+  {
+    result += term(input);
+  }
+
+  if (this->is_absolute_)
+  {
+    return std::abs(result);
+  }
+  else
+  {
+    return result;
+  }
+}
+
+double Symbol::operator()(const ms::math::Vector_View input) const
+{
+  auto result = this->_constant;
 
   for (const auto& term : this->mterms_)
   {
@@ -350,18 +385,18 @@ Sym_Base Symbol::get_differentiate(const int var_index) const
   return std::make_unique<Symbol>(this->get_diff_symbol(var_index));
 }
 
-double Symbol::to_constant(void) const { return this->constant_; }
+double Symbol::to_constant(void) const { return this->_constant; }
 
 std::string Symbol::to_string(void) const
 {
   if (this->is_constant())
-    return std::to_string(this->constant_);
+    return std::to_string(this->_constant);
 
   std::string result;
 
-  if (this->constant_ != 0.0)
+  if (this->_constant != 0.0)
   {
-    result += std::to_string(this->constant_) + " + ";
+    result += std::to_string(this->_constant) + " + ";
   }
 
   for (const auto& mterm : this->mterms_)
@@ -386,18 +421,18 @@ bool Symbol::is_zero(void) const
       return false;
   }
 
-  return this->constant_ == 0.0;
+  return this->_constant == 0.0;
 }
 
 void Symbol::operator+=(const Symbol& other)
 {
   if (other.is_constant())
   {
-    this->constant_ += other.to_constant();
+    this->_constant += other.to_constant();
   }
   else
   {
-    this->constant_ += other.constant_;
+    this->_constant += other._constant;
 
     for (const auto& mterm : other.mterms_)
     {
@@ -410,11 +445,11 @@ void Symbol::operator-=(const Symbol& other)
 {
   if (other.is_constant())
   {
-    this->constant_ -= other.to_constant();
+    this->_constant -= other.to_constant();
   }
   else
   {
-    this->constant_ -= other.constant_;
+    this->_constant -= other._constant;
 
     for (const auto& mterm : other.mterms_)
     {
@@ -431,7 +466,7 @@ void Symbol::operator*=(const double constant)
   }
   else
   {
-    this->constant_ *= constant;
+    this->_constant *= constant;
 
     for (auto& mterm : this->mterms_)
     {
@@ -447,7 +482,7 @@ void Symbol::pow(const double exponent)
 
   if (this->is_constant())
   {
-    this->constant_ = std::pow(this->constant_, exponent);
+    this->_constant = std::pow(this->_constant, exponent);
     return;
   }
 
@@ -459,7 +494,7 @@ void Symbol::add_assign_mterm(const Multiplied_Term& mterm)
 {
   if (mterm.is_constant())
   {
-    this->constant_ += mterm.to_constant();
+    this->_constant += mterm.to_constant();
   }
   else
   {
@@ -471,7 +506,7 @@ void Symbol::add_assign_mterm(Multiplied_Term&& mterm)
 {
   if (mterm.is_constant())
   {
-    this->constant_ += mterm.to_constant();
+    this->_constant += mterm.to_constant();
   }
   else
   {
@@ -483,7 +518,7 @@ void Symbol::minus_assign_mterm(const Multiplied_Term& mterm)
 {
   if (mterm.is_constant())
   {
-    this->constant_ -= mterm.to_constant();
+    this->_constant -= mterm.to_constant();
   }
   else
   {
@@ -523,7 +558,7 @@ Symbol Symbol::operator*(const Symbol& other) const
     return result;
   }
 
-  Symbol result = this->constant_ * other.constant_;
+  Symbol result = this->_constant * other._constant;
 
   const auto num_this_term = this->mterms_.size();
   const auto num_oter_term = other.mterms_.size();
@@ -536,19 +571,19 @@ Symbol Symbol::operator*(const Symbol& other) const
     }
   }
 
-  if (this->constant_ != 0)
+  if (this->_constant != 0)
   {
     for (int i = 0; i < num_oter_term; ++i)
     {
-      result.add_assign_mterm(this->constant_ * other.mterms_[i]);
+      result.add_assign_mterm(this->_constant * other.mterms_[i]);
     }
   }
 
-  if (other.constant_ != 0)
+  if (other._constant != 0)
   {
     for (int i = 0; i < num_this_term; ++i)
     {
-      result.add_assign_mterm(other.constant_ * this->mterms_[i]);
+      result.add_assign_mterm(other._constant * this->mterms_[i]);
     }
   }
 

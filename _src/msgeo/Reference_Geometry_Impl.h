@@ -27,10 +27,10 @@ class Reference_Point : public Reference_Geometry
   // overriding methods from Reference_Geometry
 public:
   ms::sym::Polynomials          cal_normal_functions(const ms::sym::Polynomials& parametric_functions) const override;
-  ms::sym::Polynomials          cal_parametric_functions(const std::vector<Node_Const_Wrapper>& consisting_nodes) const override;
+  ms::sym::Polynomials          cal_parametric_functions(const std::vector<Node_View>& consisting_nodes) const override;
   int                           cal_parameter_order(const int num_points) const override;
   ms::sym::Symbol               cal_scale_function(const ms::sym::Polynomials& parametric_functions) const override;
-  Node_Const_Wrapper            center_point(void) const override;
+  Node_View            center_point(void) const override;
   int                           dimension(void) const override;
   Figure                        face_figure(const int face_index) const override;
   std::vector<std::vector<int>> face_index_to_face_vnode_indexes(void) const override;
@@ -42,7 +42,7 @@ public:
   std::vector<int>              node_indexes(const int parameter_order) const override;
   int                           num_faces(void) const override;
   int                           num_vertices(void) const override;
-  Nodes_Const_Wrapper           quadrature_points(const int integrand_degree) const override;
+  Nodes_View           quadrature_points(const int integrand_degree) const override;
 
 private:
   static constexpr std::array<double, 1> _center_coords = {0.0};
@@ -60,11 +60,11 @@ class Reference_Geometry_Common : public Reference_Geometry
 {
   // overriding methods from Reference_Geometry
 public:
-  ms::sym::Polynomials       cal_parametric_functions(const std::vector<Node_Const_Wrapper>& consisting_nodes) const override;
+  ms::sym::Polynomials       cal_parametric_functions(const std::vector<Node_View>& consisting_nodes) const override;
   const std::vector<double>& get_quadrature_weights(const int integrand_degree) const override;
   const Partition_Data&      get_partition_data(const int partition_order) const override;
   bool                       is_point(void) const override;
-  Nodes_Const_Wrapper        quadrature_points(const int integrand_degree) const override;
+  Nodes_View        quadrature_points(const int integrand_degree) const override;
 
 protected:
   virtual int                  cal_quadrature_rule_tag(const int integrand_degree) const        = 0;
@@ -94,7 +94,7 @@ class Reference_Line : public Reference_Geometry_Common
 {
   // overriding methods from Reference_Geometry
 public:
-  Node_Const_Wrapper            center_point(void) const override;
+  Node_View            center_point(void) const override;
   ms::sym::Polynomials          cal_normal_functions(const ms::sym::Polynomials& curve) const override;
   int                           cal_parameter_order(const int num_points) const override;
   ms::sym::Symbol               cal_scale_function(const ms::sym::Polynomials& parametric_functions) const override;

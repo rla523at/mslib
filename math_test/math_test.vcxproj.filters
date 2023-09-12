@@ -14,10 +14,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Matrix.cpp">
+    <ClCompile Include="test_Matrix.cpp">
       <Filter>TEST</Filter>
     </ClCompile>
-    <ClCompile Include="Matrix_Wrapper.cpp">
+    <ClCompile Include="test_Matrix_Wrap.cpp">
       <Filter>TEST</Filter>
     </ClCompile>
     <ClCompile Include="BLAS.cpp">
@@ -29,16 +29,16 @@
     <ClCompile Include="BLAS_MKL.cpp">
       <Filter>TEST</Filter>
     </ClCompile>
-    <ClCompile Include="Vector.cpp">
+    <ClCompile Include="test_Vector.cpp">
       <Filter>TEST</Filter>
     </ClCompile>
-    <ClCompile Include="Vector_Wrapper.cpp">
+    <ClCompile Include="test_Vector_Wrapper.cpp">
       <Filter>TEST</Filter>
     </ClCompile>
-    <ClCompile Include="Matrix_Const_Wrapper.cpp">
+    <ClCompile Include="test_Matrix_View.cpp">
       <Filter>TEST</Filter>
     </ClCompile>
-    <ClCompile Include="Vector_View.cpp">
+    <ClCompile Include="test_Vector_View.cpp">
       <Filter>TEST</Filter>
     </ClCompile>
   </ItemGroup>

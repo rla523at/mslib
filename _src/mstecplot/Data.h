@@ -11,7 +11,8 @@ enum class Variable_Location
   CELL_CENTER
 };
 
-// 1. coordinates_ptr format :  dimension X num nodes  (x1,...,xn,y1,...,yn,z1,...,zn)
+// 1. coordinates_ptr format : Block
+//    dimension X num nodes  (x1,...,xn,y1,...,yn,z1,...,zn)
 // 2. connectivities start from 1
 struct Grid_Data
 {

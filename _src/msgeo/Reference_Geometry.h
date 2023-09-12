@@ -9,7 +9,7 @@ namespace ms::geo
 {
 struct Partition_Data
 {
-  Nodes                         nodes = Nodes::Null_Nodes();
+  Nodes                         nodes;
   std::vector<std::vector<int>> connectivities;
 };
 } // namespace ms::geo
@@ -22,10 +22,10 @@ class Reference_Geometry
 {
 public:
   virtual ms::sym::Polynomials          cal_normal_functions(const ms::sym::Polynomials& parametric_functions) const            = 0;
-  virtual ms::sym::Polynomials          cal_parametric_functions(const std::vector<Node_Const_Wrapper>& consisting_nodes) const = 0;
+  virtual ms::sym::Polynomials          cal_parametric_functions(const std::vector<Node_View>& consisting_nodes) const = 0;
   virtual int                           cal_parameter_order(const int num_nodes) const                                          = 0;
   virtual ms::sym::Symbol               cal_scale_function(const ms::sym::Polynomials& parametric_functions) const              = 0;
-  virtual Node_Const_Wrapper            center_point(void) const                                                                = 0;
+  virtual Node_View            center_point(void) const                                                                = 0;
   virtual int                           dimension(void) const                                                                   = 0;
   virtual Figure                        face_figure(const int face_index) const                                                 = 0;
   virtual std::vector<std::vector<int>> face_index_to_face_vnode_indexes(void) const                                            = 0;
@@ -37,7 +37,7 @@ public:
   virtual std::vector<int>              node_indexes(const int parameter_order) const                                           = 0;
   virtual int                           num_faces(void) const                                                                   = 0;
   virtual int                           num_vertices(void) const                                                                = 0;
-  virtual Nodes_Const_Wrapper           quadrature_points(const int integrand_degree) const                                     = 0;
+  virtual Nodes_View           quadrature_points(const int integrand_degree) const                                     = 0;
 
 protected:
   virtual ~Reference_Geometry(void) = default;

@@ -16,12 +16,12 @@ ms::sym::Polynomials Reference_Point::cal_normal_functions(const ms::sym::Polyno
   return result;
 }
 
-ms::sym::Polynomials Reference_Point::cal_parametric_functions(const std::vector<Node_Const_Wrapper>& consisting_node_wraps) const
+ms::sym::Polynomials Reference_Point::cal_parametric_functions(const std::vector<Node_View>& consisting_node_wraps) const
 {
   REQUIRE(consisting_node_wraps.size() == 1, "Point must consist of only one single point.");
 
   const auto& node_cwrap = consisting_node_wraps.front();
-  const auto  dimension = node_cwrap.dimension();
+  const auto  dimension  = node_cwrap.dimension();
 
   ms::sym::Polynomials result(dimension);
   for (int i = 0; i < dimension; ++i)
@@ -43,9 +43,10 @@ ms::sym::Symbol Reference_Point::cal_scale_function(const ms::sym::Polynomials& 
   return {};
 }
 
-Node_Const_Wrapper Reference_Point::center_point(void) const
+Node_View Reference_Point::center_point(void) const
 {
-  return {1, this->_center_coords.data()};
+  auto result = Node_View(this->_center_coords);
+  return result;
 }
 
 int Reference_Point::dimension(void) const
@@ -96,10 +97,10 @@ int Reference_Point::num_vertices(void) const
   return 1;
 }
 
-Nodes_Const_Wrapper Reference_Point::quadrature_points(const int integrand_degree) const
+Nodes_View Reference_Point::quadrature_points(const int integrand_degree) const
 {
   EXCEPTION("Integration is not possible over a point.");
-  return {Coordinates_Type::NOT_SUPPROTED, -1, -1, nullptr};
+  return {};
 }
 
 const std::vector<double>& Reference_Point::get_quadrature_weights(const int integrand_degree) const
@@ -111,10 +112,10 @@ const std::vector<double>& Reference_Point::get_quadrature_weights(const int int
 const Partition_Data& Reference_Point::get_partition_data(const int partition_order) const
 {
   EXCEPTION("Partition is not possible over a point.");
-  return {Nodes{Coordinates_Type::NOT_SUPPROTED, -1, -1}, {}};
+  return {};
 }
 
-ms::sym::Polynomials Reference_Geometry_Common::cal_parametric_functions(const std::vector<Node_Const_Wrapper>& consisting_nodes) const
+ms::sym::Polynomials Reference_Geometry_Common::cal_parametric_functions(const std::vector<Node_View>& consisting_nodes) const
 {
   const auto  num_nodes       = static_cast<int>(consisting_nodes.size());
   const auto  param_order     = this->cal_parameter_order(num_nodes);
@@ -140,7 +141,7 @@ bool Reference_Geometry_Common::is_point(void) const
   return false;
 }
 
-Nodes_Const_Wrapper Reference_Geometry_Common::quadrature_points(const int integrand_degree) const
+Nodes_View Reference_Geometry_Common::quadrature_points(const int integrand_degree) const
 {
   REQUIRE(0 <= integrand_degree, "integrand degree should be positive");
 
@@ -188,12 +189,10 @@ const ms::sym::Polynomials& Reference_Geometry_Common::get_shape_functions(const
 
 ms::sym::Polynomials Reference_Geometry_Common::make_shape_functions(const int parameter_order) const
 {
-  constexpr auto coordinate_type = Coordinates_Type::NODAL;
-
-  const auto          num_ref_points = this->num_parametric_function_reference_points(parameter_order);
-  const auto          dim            = this->dimension();
-  const auto          coords         = this->make_parametric_functions_reference_coords(parameter_order);
-  Nodes_Const_Wrapper ref_points(coordinate_type, num_ref_points, dim, coords.data());
+  const auto num_ref_points = this->num_parametric_function_reference_points(parameter_order);
+  const auto dim            = this->dimension();
+  const auto coords         = this->make_parametric_functions_reference_coords(parameter_order);
+  Nodes_View ref_points(coords, num_ref_points, dim);
 
   const auto bases     = this->make_parametric_function_bases(parameter_order);
   const auto num_bases = bases.size();
@@ -210,11 +209,11 @@ ms::sym::Polynomials Reference_Geometry_Common::make_shape_functions(const int p
     {
       const auto& point = ref_points[j];
 
-      coefficients.at(i, j) = basis(point);
+      coefficients.at(i, j) = basis(point.to_vector_view());
     }
   }
 
-  coefficients.inverse();
+  coefficients.be_inverse();
 
   ms::sym::Polynomials shape_functions(n);
   for (int i = 0; i < n; ++i)
@@ -228,9 +227,10 @@ ms::sym::Polynomials Reference_Geometry_Common::make_shape_functions(const int p
   return shape_functions;
 }
 
-Node_Const_Wrapper Reference_Line::center_point(void) const
+Node_View Reference_Line::center_point(void) const
 {
-  return Node_Const_Wrapper(this->dimension(), this->center_coords_.data());
+  auto result = Node_View(this->center_coords_);
+  return result;
 };
 
 ms::sym::Polynomials Reference_Line::cal_normal_functions(const ms::sym::Polynomials& curve) const
@@ -349,7 +349,7 @@ void Reference_Line::create_and_store_partition_data(const int partition_order) 
   const auto num_consisting_nodes    = partition_order + 2;
   const auto num_consisting_elements = partition_order + 1;
 
-  Nodes consisting_nodes(Coordinates_Type::NODAL, num_consisting_nodes, dimension);
+  Nodes consisting_nodes(num_consisting_nodes, dimension);
 
   const auto delta = 2.0 / num_consisting_elements;
 
@@ -422,11 +422,10 @@ void Reference_Line::create_and_store_quadrature_points(const int tag) const
     break;
   }
 
-  constexpr auto type      = Coordinates_Type::NODAL;
   const auto     num_nodes = tag + 1;
   constexpr auto dimension = 1;
 
-  this->_tag_to_quadrature_points.emplace(tag, Nodes(type, num_nodes, dimension, std::move(coordinates)));
+  this->_tag_to_quadrature_points.emplace(tag, Nodes(num_nodes, dimension, std::move(coordinates)));
 }
 
 void Reference_Line::create_and_store_quadrature_weights(const int tag) const
