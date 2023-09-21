@@ -1,4 +1,4 @@
-#include "BLAS.h"
+#include "msmath/BLAS.h"
 
 #include "mkl/mkl.h"
 #include "msexception/Exception.h"

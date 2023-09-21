@@ -26,13 +26,13 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\_src\mstecplot\Binary_File.h">
+    <ClInclude Include="..\_header\mstecplot\Binary_File.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
-    <ClInclude Include="..\_src\mstecplot\Data.h">
+    <ClInclude Include="..\_header\mstecplot\Data.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
-    <ClInclude Include="..\_src\mstecplot\Writer.h">
+    <ClInclude Include="..\_header\mstecplot\Writer.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
   </ItemGroup>

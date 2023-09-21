@@ -15,10 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\_src\msconfig\Data.h">
+    <ClInclude Include="..\_header\msconfig\Data.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
-    <ClInclude Include="..\_src\msconfig\Reader.h">
+    <ClInclude Include="..\_header\msconfig\Reader.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
   </ItemGroup>

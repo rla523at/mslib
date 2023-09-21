@@ -12,7 +12,7 @@ namespace ms::tecplot
 
 void Writer::set_configuration(Configuration&& configuration)
 {
-  REQUIRE(ms::path::is_folder_path(configuration.folder_path), "folder path in configuration file is not valid");
+  REQUIRE(ms::filesystem::is_folder_path(configuration.folder_path), "folder path in configuration file is not valid");
 
   THIS::_configuration                   = std::move(configuration);
   THIS::_is_configuration_setup_complete = true;
@@ -30,10 +30,10 @@ void Writer::write_grid_file(const Grid_Data& data)
   THIS::save_part_of_grid_data(data);
 
   const auto grid_folder_path = THIS::_configuration.folder_path + THIS::_configuration.title + "/";
-  if (!ms::path::is_exist_folder(grid_folder_path))
+  if (!ms::filesystem::is_exist_folder(grid_folder_path))
   {
     std::cout << "msTecplot :: Given folder path is not exist! \n";
-    ms::path::make_folder(grid_folder_path);
+    ms::filesystem::make_folder(grid_folder_path);
     std::cout << "msTecplot :: " << grid_folder_path << " is created! \n";
   }
 
@@ -71,10 +71,10 @@ void Writer::write_solution_file(const Solution_Data& info)
   REQUIRE(THIS::_is_grid_data_saved, "Grid file data is not saved. Please call the write grid file function first.");
 
   const auto solution_folder_path = THIS::_configuration.folder_path + THIS::_configuration.title + "/";
-  if (!ms::path::is_exist_folder(solution_folder_path))
+  if (!ms::filesystem::is_exist_folder(solution_folder_path))
   {
     std::cout << "msTecplot :: Given folder path is not exist! \n";
-    ms::path::make_folder(solution_folder_path);
+    ms::filesystem::make_folder(solution_folder_path);
     std::cout << "msTecplot :: " << solution_folder_path << " is created! \n";
   }
 

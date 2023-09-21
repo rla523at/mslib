@@ -205,7 +205,7 @@ TEST(Matrix_Wrap, row_vector_wrapper_1)
   std::vector<double> ref_val = {1, 2, 3, 2, 5, 6, 3, 8, 9};
   EXPECT_EQ(val, ref_val);
 }
-TEST(Matrix_Wrap, part_1)
+TEST(Matrix_Wrap, sub_1)
 {
   constexpr auto      num_row    = 2;
   constexpr auto      num_column = 4;
@@ -225,7 +225,7 @@ TEST(Matrix_Wrap, part_1)
 
   EXPECT_EQ(val, ref_val);
 }
-TEST(Matrix_Wrap, part_2)
+TEST(Matrix_Wrap, sub_2)
 {
   constexpr auto      num_rows    = 2;
   constexpr auto      num_columns = 4;
@@ -245,7 +245,7 @@ TEST(Matrix_Wrap, part_2)
   std::vector<double> ref_vals = {-1, -2, -3, 4, -5, -6, -7, 8};
   EXPECT_EQ(vals, ref_vals);
 }
-TEST(Matrix_Wrap, part_3)
+TEST(Matrix_Wrap, sub_3)
 {
   constexpr auto      num_rows    = 2;
   constexpr auto      num_columns = 4;
@@ -269,7 +269,7 @@ TEST(Matrix_Wrap, part_3)
   std::vector<double> ref_vals = {1, -2, -3, 4, 5, -6, -7, 8};
   EXPECT_EQ(vals, ref_vals);
 }
-TEST(Matrix_Wrap, part_4)
+TEST(Matrix_Wrap, sub_4)
 {
   constexpr auto      num_rows    = 2;
   constexpr auto      num_columns = 4;
@@ -293,7 +293,7 @@ TEST(Matrix_Wrap, part_4)
   std::vector<double> ref_vals = {1, -2, -3, -4, 5, -6, -7, -8};
   EXPECT_EQ(vals, ref_vals);
 }
-TEST(Matrix_Wrap, part_5)
+TEST(Matrix_Wrap, sub_5)
 {
   constexpr auto      num_rows          = 3;
   constexpr auto      num_columns       = 4;
@@ -318,7 +318,7 @@ TEST(Matrix_Wrap, part_5)
   std::vector<double> ref_vals = {1, 2, 3, 4, 5, -6, -7, -8, 9, 10, -11, -12, -13, 14, 15};
   EXPECT_EQ(vals, ref_vals);
 }
-TEST(Matrix_Wrap, part_6)
+TEST(Matrix_Wrap, sub_6)
 {
   constexpr auto      num_rows          = 3;
   constexpr auto      num_columns       = 4;

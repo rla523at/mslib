@@ -884,7 +884,7 @@ TEST(Matrix_View, row_vector_view_3)
   std::vector<double> ref = {2, 5, 8};
   EXPECT_EQ(result, ref);
 }
-TEST(Matrix_View, part_view_1)
+TEST(Matrix_View, sub_view_1)
 {
   constexpr auto      num_row    = 2;
   constexpr auto      num_column = 4;
@@ -906,7 +906,7 @@ TEST(Matrix_View, part_view_1)
 
   EXPECT_EQ(result, ref);
 }
-TEST(Matrix_View, part_view_2)
+TEST(Matrix_View, sub_view_2)
 {
   constexpr auto      num_row    = 2;
   constexpr auto      num_column = 4;
@@ -928,7 +928,7 @@ TEST(Matrix_View, part_view_2)
 
   EXPECT_EQ(result, ref);
 }
-TEST(Matrix_View, part_view_2_1)
+TEST(Matrix_View, sub_view_2_1)
 {
   constexpr auto      num_row    = 2;
   constexpr auto      num_column = 4;
@@ -950,7 +950,7 @@ TEST(Matrix_View, part_view_2_1)
 
   EXPECT_EQ(result, ref);
 }
-TEST(Matrix_View, part_view_3)
+TEST(Matrix_View, sub_view_3)
 {
   constexpr auto      num_row    = 2;
   constexpr auto      num_column = 4;
@@ -976,7 +976,7 @@ TEST(Matrix_View, part_view_3)
 
   EXPECT_EQ(result, ref);
 }
-TEST(Matrix_View, part_view_4)
+TEST(Matrix_View, sub_view_4)
 {
   constexpr auto      num_row    = 2;
   constexpr auto      num_column = 4;
@@ -1002,7 +1002,7 @@ TEST(Matrix_View, part_view_4)
 
   EXPECT_EQ(result, ref);
 }
-TEST(Matrix_View, part_view_5)
+TEST(Matrix_View, sub_view_5)
 {
   constexpr auto      num_row           = 3;
   constexpr auto      num_column        = 4;
@@ -1029,7 +1029,7 @@ TEST(Matrix_View, part_view_5)
 
   EXPECT_EQ(result, ref);
 }
-TEST(Matrix_View, part_view_6)
+TEST(Matrix_View, sub_view_6)
 {
   constexpr auto      num_row           = 3;
   constexpr auto      num_column        = 4;

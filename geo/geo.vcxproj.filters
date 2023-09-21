@@ -32,22 +32,22 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\_src\msgeo\Node.h">
+    <ClInclude Include="..\_header\msgeo\Node.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
-    <ClInclude Include="..\_src\msgeo\Reference_Geometry.h">
+    <ClInclude Include="..\_header\msgeo\Reference_Geometry.h">
       <Filter>소스 파일\Reference Geometry</Filter>
     </ClInclude>
-    <ClInclude Include="..\_src\msgeo\Reference_Geometry_Container.h">
+    <ClInclude Include="..\_header\msgeo\Reference_Geometry_Container.h">
       <Filter>소스 파일\Reference Geometry</Filter>
     </ClInclude>
-    <ClInclude Include="..\_src\msgeo\Reference_Geometry_Impl.h">
+    <ClInclude Include="..\_header\msgeo\Reference_Geometry_Impl.h">
       <Filter>소스 파일\Reference Geometry</Filter>
     </ClInclude>
-    <ClInclude Include="..\_src\msgeo\Geometry.h">
+    <ClInclude Include="..\_header\msgeo\Geometry.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
-    <ClInclude Include="..\_src\msgeo\Figure.h">
+    <ClInclude Include="..\_header\msgeo\Figure.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
   </ItemGroup>

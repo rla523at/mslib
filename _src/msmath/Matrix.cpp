@@ -1,8 +1,7 @@
-#include "Matrix.h"
-
-#include "BLAS.h"
+#include "msmath/Matrix.h"
 
 #include "msexception/Exception.h"
+#include "msmath/BLAS.h"
 #include <iomanip>
 
 namespace ms::math
@@ -443,9 +442,9 @@ int Matrix_View::index_to_position(const int row_index, const int column_index) 
 
 std::span<const double> Matrix_View::values_part_view(const int start_row_index, const int end_row_index, const int start_column_index, const int end_column_index) const
 {
-  const auto start_pos        = this->index_to_position(start_row_index, start_column_index);
-  const auto end_pos          = this->index_to_position(end_row_index-1, end_column_index-1);
-  const auto num_values       = end_pos - start_pos + 1;
+  const auto start_pos  = this->index_to_position(start_row_index, start_column_index);
+  const auto end_pos    = this->index_to_position(end_row_index - 1, end_column_index - 1);
+  const auto num_values = end_pos - start_pos + 1;
   return this->_values_view.subspan(start_pos, num_values);
 }
 
@@ -597,7 +596,7 @@ void Matrix_Wrap::change_value(const Matrix_View other)
 }
 
 Vector_Wrap Matrix_Wrap::column_vector_wrap(const int index)
-{ 
+{
   const auto values_part_wrap = this->values_part_wrap(0, this->num_rows(), index, index + 1);
 
   if (this->_is_transposed)
@@ -925,4 +924,3 @@ void cmv(Vector_Wrap result, const double c, const Matrix_View m, const Vector_V
 }
 
 } // namespace ms::math::blas
-  

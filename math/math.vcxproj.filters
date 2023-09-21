@@ -26,13 +26,13 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\_src\msmath\BLAS.h">
+    <ClInclude Include="..\_header\msmath\BLAS.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
-    <ClInclude Include="..\_src\msmath\Matrix.h">
+    <ClInclude Include="..\_header\msmath\Matrix.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
-    <ClInclude Include="..\_src\msmath\Vector.h">
+    <ClInclude Include="..\_header\msmath\Vector.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
   </ItemGroup>

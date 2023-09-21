@@ -1,8 +1,7 @@
-#include "Vector.h"
-
-#include "BLAS.h"
+#include "msmath/Vector.h"
 
 #include "msexception/Exception.h"
+#include "msmath/BLAS.h"
 #include <cmath>
 #include <iomanip>
 #include <sstream>

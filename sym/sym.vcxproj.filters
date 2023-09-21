@@ -23,13 +23,13 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\_src\mssym\Polynomial.h">
+    <ClInclude Include="..\_header\mssym\Polynomial.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
-    <ClInclude Include="..\_src\mssym\Symbol.h">
+    <ClInclude Include="..\_header\mssym\Symbol.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
-    <ClInclude Include="..\_src\mssym\Symbol_Base.h">
+    <ClInclude Include="..\_header\mssym\Symbol_Base.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
   </ItemGroup>

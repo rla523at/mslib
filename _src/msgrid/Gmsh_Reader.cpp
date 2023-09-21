@@ -164,7 +164,7 @@ namespace ms::grid
 
 Grid_Data Gmsh_Reader::read(const std::string_view file_path) const
 {
-  REQUIRE(path::is_exist_file(file_path), "grid file should be exist");
+  REQUIRE(filesystem::is_exist_file(file_path), "grid file should be exist");
 
   std::ifstream file(file_path.data());
   REQUIRE(file.is_open(), "grid file should be open");

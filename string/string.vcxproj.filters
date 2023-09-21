@@ -20,7 +20,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\_src\msstring\string.h">
+    <ClInclude Include="..\_header\msstring\string.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
   </ItemGroup>

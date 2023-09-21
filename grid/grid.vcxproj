@@ -26,12 +26,12 @@
     <ClCompile Include="..\_src\msgrid\Grid_Reader_Factory.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\_src\msgrid\Data.h" />
-    <ClInclude Include="..\_src\msgrid\Element.h" />
-    <ClInclude Include="..\_src\msgrid\Gmsh_Reader.h" />
-    <ClInclude Include="..\_src\msgrid\Grid.h" />
-    <ClInclude Include="..\_src\msgrid\Grid_Reader_Factory.h" />
-    <ClInclude Include="..\_src\msgrid\Reader.h" />
+    <ClInclude Include="..\_header\msgrid\Data.h" />
+    <ClInclude Include="..\_header\msgrid\Element.h" />
+    <ClInclude Include="..\_header\msgrid\Gmsh_Reader.h" />
+    <ClInclude Include="..\_header\msgrid\Grid.h" />
+    <ClInclude Include="..\_header\msgrid\Grid_Reader_Factory.h" />
+    <ClInclude Include="..\_header\msgrid\Reader.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
