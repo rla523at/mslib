@@ -1,4 +1,4 @@
-#include "../_src/msstring/string.h"
+#include "msstring/string.h"
 #include "gtest/gtest.h"
 
 #include <functional>

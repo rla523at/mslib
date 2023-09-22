@@ -14,6 +14,7 @@ std::string              extract_folder_path(const std::string_view file_path);
 std::vector<std::string> file_names_in_folder(const std::string_view folder_path);
 std::vector<std::string> folder_names_in_folder(const std::string_view folder_path);
 std::vector<std::string> file_paths_in_folder(const std::string& path);
+bool                     has_this_extension(const std::string_view file_path, const std::string_view extension);
 bool                     is_folder_path(const std::string_view folder_path);
 bool                     is_exist_folder(const std::string_view folder_path);
 bool                     is_exist_file(const std::string_view file_path);
@@ -24,5 +25,4 @@ void                     remove_folder(const std::string_view folder_path);
 void                     replace_file_content(const std::string_view file_path, const std::string_view old_content, const std::string_view new_contnet);
 void                     remove_file(const std::string_view file_path);
 
-
-} // namespace ms::path
+} // namespace ms::filesystem

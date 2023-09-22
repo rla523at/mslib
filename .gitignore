@@ -5,7 +5,7 @@
 
 # User define
 math_test/lib/
-_lib/
+*.idb
 
 # User-specific files
 *.rsuser
@@ -390,3 +390,7 @@ FodyWeavers.xsd
 # JetBrains Rider
 .idea/
 *.sln.iml
+
+
+# exception
+!packages/**

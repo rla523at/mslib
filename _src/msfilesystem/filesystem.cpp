@@ -81,6 +81,12 @@ std::vector<std::string> file_paths_in_folder(const std::string& folder_path)
   return file_name_text;
 }
 
+bool has_this_extension(const std::string_view file_path, const std::string_view extension)
+{
+  REQUIRE(extension.front() == '.', std::string(extension) + "is not extension format. extension should be start with .");
+  return file_path.ends_with(extension);
+}
+
 bool is_exist_folder(const std::string_view folder_path)
 {
   REQUIRE(is_folder_path(folder_path), "folder_path should be end with /");
