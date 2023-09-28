@@ -1,16 +1,18 @@
 #pragma once
+#include <initializer_list>
 #include <span>
 #include <string>
 #include <vector>
 
+#include "msmath/BLAS.h"
 #include "msmath/Vector.h"
+
+// NODAL coords format : (X1,Y1,Z1) ... (Xn,Yn, Zn)
+// BLOCK coords format : (X1,...,Xn) ... (Z1,...,Zn)
 
 // miscellaneous definitions
 namespace ms::geo
 {
-
-// NODAL coords format : (X1,Y1,Z1) ... (Xn,Yn, Zn)
-// BLOCK coords format : (X1,...,Xn) ... (Z1,...,Zn)
 
 template <typename T>
 concept const_span = requires(const T& t) { std::span<const double>(t); };
@@ -56,6 +58,7 @@ public:
 public:
   double                at(const int index) const;
   int                   dimension(void) const;
+  double                distance(const Node_View other) const;
   void                  other_to_this_vector(const Node_View& other, ms::math::Vector_Wrap vector_wrap) const;
   int                   size(void) const; // When a point is viewed as tuple, return a size of tuple
   std::string           to_string(void) const;
@@ -140,16 +143,55 @@ namespace ms::geo
 class Node : public Node_Wrap
 {
 public:
-  Node(const int dim);
-  Node(std::vector<double>&& coordinates);
+  explicit Node(const int dim);
+  Node(std::initializer_list<double> coordinates);
   Node(const Node& other);
   Node(Node&& other) noexcept;
+
+  template <const_span T>
+  Node(const T& coordinates);
 
 private:
   void reallocate_coordinates(void);
 
 private:
-  std::vector<double> _coordinates;
+  std::array<double, 3> _coordinates = {0.0};
+};
+
+} // namespace ms::geo
+
+/*
+
+
+
+
+
+
+
+
+
+
+*/
+
+namespace ms::geo
+{
+
+struct Numbered_Node_View
+{
+  Node_View node_view;
+  int       number;
+};
+
+struct Numbered_Node
+{
+  Node node;
+  int  number;
+};
+
+// return ture if lhs < rhs
+struct Node_Compare
+{
+  bool operator()(Node_View lhs, Node_View rhs) const;
 };
 
 } // namespace ms::geo
@@ -183,6 +225,7 @@ public:
 
 public:
   Node_View              at(const int index) const;
+  ms::math::Vector_View  axis_coordinates_vector_view(const int axis_index) const;
   void                   copy_coordinates(double* dest) const;
   int                    dimension(void) const;
   int                    num_coordinates(void) const;
@@ -328,5 +371,19 @@ inline Nodes_View::Nodes_View(const T& coordinates, const int num_nodes, const i
   REQUIRE(0 < this->_dimension, "dimension should be natural number");
   REQUIRE(this->_coordinates_view.size() == this->_num_nodes * this->_dimension, "Given coordinates size should be matched with given size");
 };
+
+template <const_span T>
+Node::Node(const T& coordinates)
+{
+  std::span<const double> cooridnates_view = coordinates;
+
+  this->_dimension = static_cast<int>(cooridnates_view.size());
+  this->_inc       = 1;
+  REQUIRE(0 < this->_dimension, "dimension should be natural number");
+  REQUIRE(this->_dimension <= 3, "dimension can't not excced 3");
+
+  ms::math::blas::copy(this->_coordinates.data(), cooridnates_view.data(), this->_dimension);
+  this->reallocate_coordinates();
+}
 
 } // namespace ms::geo

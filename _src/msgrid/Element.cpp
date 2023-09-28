@@ -1,4 +1,4 @@
-#include "Element.h"
+#include "msgrid/Element.h"
 
 #include "msexception/Exception.h"
 #include "msmath/Vector.h"
@@ -31,91 +31,87 @@ void Element::reordering_nodes(const std::vector<int>& new_ordered_node_indexes)
   }
 }
 
-void Element::accumulate_discrete_partition_data(ms::geo::Partition_Data& total_partition_data, const int partition_order) const
+void Element::accumulate_discrete_node_info(ms::geo::Geometry_Consisting_Nodes_Info& discrete_node_info, const int partition_order) const
 {
   REQUIRE(0 <= partition_order, "partition order should not be negative");
 
-  auto&      nodes_in_total_partition_data          = total_partition_data.nodes;
-  auto&      connectivities_of_total_connectivities = total_partition_data.connectivities;
-  const auto start_node_number                      = nodes_in_total_partition_data.num_nodes();
-  const auto num_connectivity                       = connectivities_of_total_connectivities.size();
+  auto&      nodes             = discrete_node_info.nodes;
+  auto&      connectivities    = discrete_node_info.connectivities;
+  const auto start_node_number = nodes.num_nodes();
+  const auto num_connectivity  = connectivities.size();
 
-  auto       partition_data              = this->get_geometry().make_partition_data(partition_order);
-  auto&      nodes_in_partition          = partition_data.nodes;
-  auto&      connectivities_of_partition = partition_data.connectivities;
-  const auto num_new_connectivity        = connectivities_of_partition.size();
+  auto       partition_geometry_node_info         = this->get_geometry().make_partitioned_geometry_node_info(partition_order);
+  auto&      nodes_in_partition_geometry          = partition_geometry_node_info.nodes;
+  auto&      connectivities_of_partition_geometry = partition_geometry_node_info.connectivities;
+  const auto num_new_connectivity                 = connectivities_of_partition_geometry.size();
 
   // accumulate nodes in partition
-  nodes_in_total_partition_data.add_nodes(std::move(nodes_in_partition));
+  nodes.add_nodes(std::move(nodes_in_partition_geometry));
 
   // acumulate connectivities of partitions
-  connectivities_of_total_connectivities.reserve(num_connectivity + num_new_connectivity);
+  connectivities.reserve(num_connectivity + num_new_connectivity);
 
   std::vector<int> new_connectivity;
   for (int i = 0; i < num_new_connectivity; ++i)
   {
-    const auto& ref_connectivity = connectivities_of_partition[i];
+    const auto& ref_connectivity = connectivities_of_partition_geometry[i];
 
     for (const auto node_index : ref_connectivity)
     {
       const auto node_number = start_node_number + node_index;
       new_connectivity.push_back(node_number);
     }
-    connectivities_of_total_connectivities.push_back(std::move(new_connectivity));
+    connectivities.push_back(std::move(new_connectivity));
   }
 }
 
-void Element::accumulate_partition_data(ms::geo::Partition_Data& total_partition_data, const int partition_order) const
+void Element::accumulate_node_info(ms::geo::Geometry_Consisting_Nodes_Info& node_info, const int partition_order) const
 {
-  struct Near
+  //geometry에서 만든 partitioned geometry node info에 알맞은 connectivity를 주는 과정
+  auto        pg_node_info         = this->_geometry.make_partitioned_geometry_node_info(partition_order);
+  const auto& numbered_nodes_in_pg = pg_node_info.numbered_nodes;
+  auto&       connectivities_of_pg = pg_node_info.connectivities;
+
+  int temp_node_number = -1;
+  for (const auto& numbered_node_in_pg : numbered_nodes_in_pg)
   {
-  public:
-    bool operator==(const ms::geo::Node_View other) const
+    const auto& node_in_pg           = numbered_node_in_pg.node;
+    const auto  number_of_node_in_pg = numbered_node_in_pg.number;
+
+    for (const auto& numbered_node_in_elem : this->_numbered_node_views)
     {
       constexpr auto epsilon = 1.0e-10;
 
-      for (int i = 0; i < node.dimension(); ++i)
+      const auto& node_in_elem           = numbered_node_in_elem.node_view;
+      const auto  number_of_node_in_elem = numbered_node_in_elem.number;
+
+      if (node_in_pg.distance(node_in_elem) <= epsilon)
       {
-        if (epsilon < std::abs(node[i] - other[i])) return false;
+        for (auto& connectivity : connectivities_of_pg)
+        {
+          connectivity.change_number(number_of_node_in_pg, number_of_node_in_elem);
+        }
       }
-
-      return true;
+      else
+      {
+        for (auto& connectivity : connectivities_of_pg)
+        {
+          connectivity.change_number(number_of_node_in_pg, temp_node_number);
+        }
+        temp_node_number--;
+      }
     }
+  }
 
-  public:
-    ms::geo::Node_View node;
-  };
-
-  /*
-
-
-
-
-
-  */
-
-  auto&       nodes_in_total_partition        = total_partition_data.nodes;
-  auto&       connectivity_of_total_partition = total_partition_data.connectivities;
-  const auto& nodes_in_elem                   = this->_numbered_nodes.nodes;
-
-  auto        partition_data              = this->get_geometry().make_partition_data(partition_order);
-  const auto& nodes_in_partition          = partition_data.nodes;
-  auto&       connectivities_of_partition = partition_data.connectivities;
-
-  const auto num_nodes_in_partition = nodes_in_partition.num_nodes();
-
-  std::map<int, int> index_to_node_number;
-
-  for (int i = 0; i < num_nodes_in_partition; ++i)
+  for (int i = 0; i < num_nodes_in_pg; ++i)
   {
-    const auto node_in_partition = nodes_in_partition[i];
-
-    const auto iter = std::find(nodes_in_elem.begin(), nodes_in_elem.end(), Near(node_in_partition));
+    const auto node_in_pg = numbered_nodes_in_pg[i];
+    const auto iter       = std::find(nodes_in_elem.begin(), nodes_in_elem.end(), Near(node_in_pg));
 
     if (iter == nodes_in_elem.end())
     {
-      nodes_in_total_partition.add_node(node_in_partition);
-      const auto node_number = nodes_in_total_partition.num_nodes();
+      nodes.add_node(node_in_pg);
+      const auto node_number = nodes.num_nodes();
 
       index_to_node_number.emplace(i, node_number);
     }
@@ -128,7 +124,72 @@ void Element::accumulate_partition_data(ms::geo::Partition_Data& total_partition
     }
   }
 
-  for (auto& connectivity : connectivities_of_partition)
+  ////
+
+  struct Near
+  {
+  public:
+    bool operator==(const ms::geo::Node_View other) const
+    {
+      constexpr auto epsilon = 1.0e-10;
+      return node.distance(other) <= epsilon;
+    }
+
+  public:
+    ms::geo::Node_View node;
+  };
+
+  /*
+
+
+
+
+
+
+
+
+
+
+  */
+
+  auto&       nodes          = node_info.nodes;
+  auto&       connectivities = node_info.connectivities;
+  const auto& nodes_in_elem  = this->_numbered_nodes.nodes;
+
+  auto        pg_node_info         = this->_geometry.make_partitioned_geometry_node_info(partition_order);
+  const auto& numbered_nodes_in_pg = pg_node_info.numbered_nodes;
+  auto&       connectivities_of_pg = pg_node_info.connectivities;
+
+  const auto num_nodes_in_pg = numbered_nodes_in_pg.num_nodes();
+
+  // nodes in pg에 적절한 number를 주는 과정이구나.
+  // numbered nodes.
+  // connectivity를 numberd nodes와 엮어보자. 의미가 명확해진다!
+  // nodeinfo에 nodes가 아니라 numbered nodes와 connectivity로 보자.
+  std::map<int, int> index_to_node_number;
+
+  for (int i = 0; i < num_nodes_in_pg; ++i)
+  {
+    const auto node_in_pg = numbered_nodes_in_pg[i];
+    const auto iter       = std::find(nodes_in_elem.begin(), nodes_in_elem.end(), Near(node_in_pg));
+
+    if (iter == nodes_in_elem.end())
+    {
+      nodes.add_node(node_in_pg);
+      const auto node_number = nodes.num_nodes();
+
+      index_to_node_number.emplace(i, node_number);
+    }
+    else
+    {
+      const auto elme_index  = iter - nodes_in_elem.begin();
+      const auto node_number = this->_numbered_nodes.numbers[elme_index];
+
+      index_to_node_number.emplace(i, node_number);
+    }
+  }
+
+  for (auto& connectivity : connectivities_of_pg)
   {
     for (auto& index : connectivity)
     {
@@ -136,7 +197,7 @@ void Element::accumulate_partition_data(ms::geo::Partition_Data& total_partition
     }
   }
 
-  connectivity_of_total_partition.insert(connectivity_of_total_partition.end(), connectivities_of_partition.begin(), connectivities_of_partition.end());
+  connectivities.insert(connectivities.end(), connectivities_of_pg.begin(), connectivities_of_pg.end());
 }
 
 int Element::dimension(void) const
@@ -353,14 +414,14 @@ int Element::num_nodes(void) const
   return static_cast<int>(this->_numbered_nodes.nodes.size());
 }
 
-void Element::node_numbers(int* node_numbers) const
+void Element::node_numberss(int* node_numberss) const
 {
   const auto  num_nodes = this->num_nodes();
   const auto& numbers   = this->_numbered_nodes.numbers;
 
   for (int i = 0; i < num_nodes; ++i)
   {
-    node_numbers[i] = numbers[i];
+    node_numberss[i] = numbers[i];
   }
 }
 

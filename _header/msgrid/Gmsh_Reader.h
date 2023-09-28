@@ -8,8 +8,8 @@
 // forward declaration
 namespace ms::grid
 {
-struct Gmsh_Node_Data;
-struct Gmsh_Element_Data;
+struct Gmsh_Nodes_Data;
+struct Gmsh_Elements_Data;
 struct Gmsh_Physical_Data;
 } // namespace ms::grid
 
@@ -33,9 +33,9 @@ public:
   Grid_Data read(const std::string_view file_path) const override;
 
 private:
-  Grid_Data convert(Gmsh_Node_Data&& node_data, Gmsh_Element_Data&& elem_data, const Gmsh_Physical_Data& phys_data) const;
-  void read_node_data(std::ifstream& file, Gmsh_Node_Data& data) const;
-  void read_elem_data(std::ifstream& file, Gmsh_Element_Data& data) const;
+  Grid_Data convert(Gmsh_Nodes_Data&& node_data, Gmsh_Elements_Data&& elem_data, const Gmsh_Physical_Data& phys_data) const;
+  void read_node_data(std::ifstream& file, Gmsh_Nodes_Data& data) const;
+  void read_elem_data(std::ifstream& file, Gmsh_Elements_Data& data) const;
   void read_phys_data(std::ifstream& file, Gmsh_Physical_Data& data) const;
 
 //private:

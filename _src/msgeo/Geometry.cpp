@@ -1,8 +1,7 @@
-#include "Geometry.h"
-
-#include "Reference_Geometry_Container.h"
+#include "msgeo/Geometry.h"
 
 #include "msexception/Exception.h"
+#include "msgeo/Reference_Geometry_Container.h"
 #include "msmath/Vector.h"
 
 namespace ms::geo
@@ -28,14 +27,14 @@ void Geometry::change_nodes(std::vector<Node_View>&& new_nodes)
 
   this->_consisting_nodes     = std::move(new_nodes);
   this->_parametric_functions = this->_reference_geometry.cal_parametric_functions(this->_consisting_nodes);
-  
+
   if (this->_is_scale_function_initialized)
   {
     this->_scale_function = this->_reference_geometry.cal_scale_function(this->_parametric_functions);
   }
   if (this->_is_normal_functions_initialized)
   {
-    this->_normal_functions                = this->_reference_geometry.cal_normal_functions(this->_parametric_functions);
+    this->_normal_functions = this->_reference_geometry.cal_normal_functions(this->_parametric_functions);
   }
 }
 
@@ -203,29 +202,45 @@ bool Geometry::is_line(void) const
   return this->_reference_geometry.is_line();
 }
 
-Partition_Data Geometry::make_partition_data(const int partition_order) const
+Geometry_Consisting_Nodes_Info Geometry::make_partitioned_geometry_node_info(const int partition_order) const
 {
   REQUIRE(0 <= partition_order, "partition order should not be negative");
 
-  const auto& ref_partition_data   = this->_reference_geometry.get_partition_data(partition_order);
-  const auto& ref_nodes            = ref_partition_data.nodes;
-  const auto& ref_connectivities   = ref_partition_data.connectivities;
-  const auto  num_new_connectivity = ref_connectivities.size();
+  const auto& ref_pg_nodes_info = this->_reference_geometry.get_partition_geometry_nodes_info(partition_order);
+  const auto& ref_nodes         = ref_pg_nodes_info.nodes;
 
-  const auto num_new_nodes = ref_nodes.num_nodes();
-  const auto dim           = ref_nodes.dimension();
+  auto  pg_nodes_info = ref_pg_nodes_info;
+  auto& nodes         = pg_nodes_info.nodes;
 
-  Nodes new_nodes(num_new_nodes, dim);
-  for (int i = 0; i < num_new_nodes; ++i)
+  const auto num_nodes = ref_nodes.num_nodes();
+
+  for (int i = 0; i < num_nodes; ++i)
   {
-    auto new_node_wrap = new_nodes[i].to_vector_wrap();
-    auto ref_node_wrap = ref_nodes[i].to_vector_view();
+    auto       node_wrap            = nodes[i];
+    const auto ref_node_view        = ref_nodes[i];
+    auto       node_vector_wrap     = node_wrap.to_vector_wrap();
+    const auto ref_node_vector_view = ref_node_view.to_vector_view();
 
-    this->_parametric_functions.calculate(new_node_wrap, ref_node_wrap);
+    this->_parametric_functions.calculate(node_vector_wrap, ref_node_vector_view);
   }
 
-  Partition_Data result(std::move(new_nodes), std::move(ref_connectivities));
-  return result;
+  // const auto& ref_numbered_nodes = ref_pg_nodes_info.numbered_nodes;
+
+  // const auto num_new_nodes = ref_numbered_nodes.size();
+
+  // auto partition_geometry_nodes_info = ref_pg_nodes_info;
+
+  // for (int i = 0; i < num_new_nodes; ++i)
+  //{
+  //   auto&       node          = partition_geometry_nodes_info.numbered_nodes[i].node;
+  //   const auto& ref_node      = ref_numbered_nodes[i].node;
+  //   auto        new_node_wrap = node.to_vector_wrap();
+  //   const auto  ref_node_view = ref_node.to_vector_view();
+
+  //  this->_parametric_functions.calculate(new_node_wrap, ref_node_view);
+  //}
+
+  return pg_nodes_info;
 }
 
 int Geometry::num_faces(void) const
@@ -309,7 +324,7 @@ void Geometry::create_and_store_quadrature_rule(const int integrand_degree) cons
 {
   if (!this->_is_scale_function_initialized)
   {
-    this->_scale_function = this->_reference_geometry.cal_scale_function(this->_parametric_functions);
+    this->_scale_function                = this->_reference_geometry.cal_scale_function(this->_parametric_functions);
     this->_is_scale_function_initialized = true;
   }
 

@@ -1,9 +1,8 @@
-#include "Grid.h"
-
-#include "Data.h"
+#include "msgrid/Grid.h"
 
 #include "msexception/Exception.h"
 #include "msgeo/Figure.h"
+#include "msgrid/Data.h"
 #include "msmath/Vector.h"
 #include <algorithm>
 #include <functional>
@@ -14,20 +13,6 @@
 // anonymous function definition
 namespace
 {
-ms::geo::Coordinates_Type convert(const ms::grid::Coordinate_Type type)
-{
-  switch (type)
-  {
-  case ms::grid::Coordinate_Type::NODAL:
-    return ms::geo::Coordinates_Type::NODAL;
-  case ms::grid::Coordinate_Type::BLOCK:
-    return ms::geo::Coordinates_Type::BLOCK;
-  default:
-    EXCEPTION("unsupported coordinate type");
-    return ms::geo::Coordinates_Type::NOT_SUPPROTED;
-    break;
-  }
-}
 
 ms::geo::Figure convert(const ms::grid::Figure type)
 {
@@ -137,8 +122,8 @@ namespace ms::grid
 {
 
 Grid::Grid(Grid_Data&& data)
-    : _grid_nodes(convert(data.nodes_data.type), data.nodes_data.num_nodes, data.nodes_data.dimension, std::move(data.nodes_data.coordinates))
 {
+  this->make_grid_nodes(std::move(data.nodes_data));
   this->make_cell_and_boundary_elements(std::move(data.element_datas));
   this->make_periodic_boundary_elements(std::move(data.periodic_datas));
   this->make_inter_cell_face_elements();
@@ -353,29 +338,100 @@ int Grid::num_cells(void) const
   return static_cast<int>(this->_cell_elements.size());
 }
 
-ms::geo::Partition_Data Grid::make_discrete_partition_data(const int partition_order) const
+ms::geo::Geometry_Consisting_Nodes_Info Grid::make_discrete_partition_grid_nodes_info(const int partition_order) const
 {
-  ms::geo::Partition_Data discrete_partition_data;
+  auto  discrete_partition_grid_nodes_info = ms::geo::Geometry_Consisting_Nodes_Info();
+  auto& pgrid_nodes                        = discrete_partition_grid_nodes_info.nodes;
+  auto& pgrid_connectivites                = discrete_partition_grid_nodes_info.connectivities;
 
+  auto connectivity_start_number = 0;
   for (const auto& cell_elem : _cell_elements)
   {
-    cell_elem.accumulate_discrete_partition_data(discrete_partition_data, partition_order);
+    const auto& geometry        = cell_elem.get_geometry();
+    auto        pgeo_nodes_info = geometry.make_partitioned_geometry_node_info(partition_order);
+
+    auto& pgeo_nodes         = pgeo_nodes_info.nodes;
+    auto& pgeo_connectivites = pgeo_nodes_info.connectivities;
+
+    pgrid_nodes.add_nodes(std::move(pgeo_nodes));
+
+    for (auto& connectivity : pgeo_connectivites)
+    {
+      connectivity.add_number(connectivity_start_number);
+    }
+    pgrid_connectivites.insert(pgrid_connectivites.end(), pgeo_connectivites.begin(), pgeo_connectivites.end());
+
+    connectivity_start_number += pgrid_nodes.num_nodes();
   }
 
-  return discrete_partition_data;
+  return discrete_partition_grid_nodes_info;
 }
 
-ms::geo::Partition_Data Grid::make_partition_data(const int partition_order) const
+ms::geo::Geometry_Consisting_Nodes_Info Grid::make_partition_grid_nodes_info(const int partition_order) const
 {
-  ms::geo::Partition_Data partition_data;
-  partition_data.nodes = this->_grid_nodes;
+  auto  discrete_partition_grid_nodes_info = ms::geo::Geometry_Consisting_Nodes_Info();
+  auto& pgrid_nodes                        = discrete_partition_grid_nodes_info.nodes;
+  auto& pgrid_connectivites                = discrete_partition_grid_nodes_info.connectivities;
 
-  for (const auto& cell_elem : this->_cell_elements)
+  std::unordered_map<int, std::map<ms::geo::Node_View, int, ms::geo::Node_Compare>> cell_number_to_something;
+  std::map<ms::geo::Node_View, int, ms::geo::Node_Compare>                          node_to_index;
+
+  auto connectivity_start_number = 0;
+  for (const auto& cell_elem : _cell_elements)
   {
-    cell_elem.accumulate_partition_data(partition_data, partition_order);
+    const auto& geometry        = cell_elem.get_geometry();
+    auto        pgeo_nodes_info = geometry.make_partitioned_geometry_node_info(partition_order);
+
+    auto& pgeo_nodes         = pgeo_nodes_info.nodes;
+    auto& pgeo_connectivites = pgeo_nodes_info.connectivities;
+
+    // redundancy check
+    // face sharing element 중 확인해야 되는 element 선별
+    // element check
+    
+    const auto num_pgeo_nodes = pgeo_nodes.num_nodes();
+    for (int i = 0; i < num_pgeo_nodes; ++i)
+    {
+      const auto pgeo_node_wrap = pgeo_nodes[i];
+
+    }
+
+    pgrid_nodes.add_nodes(std::move(pgeo_nodes));
+
+    for (auto& connectivity : pgeo_connectivites)
+    {
+      connectivity.add_number(connectivity_start_number);
+    }
+    pgrid_connectivites.insert(pgrid_connectivites.end(), pgeo_connectivites.begin(), pgeo_connectivites.end());
+
+    connectivity_start_number += pgrid_nodes.num_nodes();
   }
 
-  return partition_data;
+  return discrete_partition_grid_nodes_info;
+
+  // ms::geo::Geometry_Consisting_Nodes_Info node_info;
+  // node_info.nodes = this->_grid_nodes;
+
+  // for (const auto& cell_elem : this->_cell_elements)
+  //{
+  //   cell_elem.accumulate_node_info(node_info, partition_order);
+  // }
+
+  // return node_info;
+}
+
+void Grid::make_grid_nodes(Grid_Nodes_Data&& nodes_data)
+{
+  this->_grid_nodes = std::move(nodes_data.nodes);
+
+  const auto num_nodes = this->_grid_nodes.num_nodes();
+  this->_node_number_to_index.reserve(num_nodes);
+
+  for (int i = 0; i < num_nodes; ++i)
+  {
+    const auto node_number = nodes_data.numbers[i];
+    this->_node_number_to_index.emplace(node_number, i);
+  }
 }
 
 void Grid::make_cell_and_boundary_elements(std::vector<Grid_Element_Data>&& element_datas)
@@ -384,26 +440,40 @@ void Grid::make_cell_and_boundary_elements(std::vector<Grid_Element_Data>&& elem
   this->_cell_elements.reserve(num_element_datas);
   this->_boundary_elements.reserve(num_element_datas);
 
-  Numbered_Nodes element_numbered_nodes;
-  auto& [numbers, element_nodes] = element_numbered_nodes;
+  std::vector<ms::geo::Node_View>          node_views;
+  std::vector<ms::geo::Numbered_Node_View> numbered_node_views;
 
-  for (auto& [element_type, figure, node_numbers] : element_datas)
+  for (auto& [element_type, figure, node_numberss] : element_datas)
   {
-    numbers = std::move(node_numbers);
-    this->_grid_nodes.nodes_at_indexes(element_nodes, numbers);
-
     const auto geo_figure = convert(figure);
-    auto       geometry   = ms::geo::Geometry(geo_figure, element_nodes);
 
-    auto element = Element(element_type, std::move(element_numbered_nodes), std::move(geometry));
+    const auto num_nodes = node_numberss.size();
+    node_views.resize(num_nodes);
+    numbered_node_views.resize(num_nodes);
+
+    for (int i = 0; i < num_nodes; ++i)
+    {
+      auto& node_view          = node_views[i];
+      auto& numbered_node_view = numbered_node_views[i];
+
+      const auto node_number = node_numberss[i];
+      const auto index       = this->_node_number_to_index.at(node_number);
+
+      node_view                    = this->_grid_nodes[index];
+      numbered_node_view.node_view = this->_grid_nodes[index];
+      numbered_node_view.number    = node_number;
+    }
+
+    auto geometry = ms::geo::Geometry(geo_figure, std::move(node_views));
+    auto element  = Element(element_type, std::move(numbered_node_views), std::move(geometry));
 
     if (element_type == Element_Type::CELL)
     {
-      this->_cell_elements.push_back(element);
+      this->_cell_elements.push_back(std::move(element));
     }
     else
     {
-      this->_boundary_elements.push_back(element);
+      this->_boundary_elements.push_back(std::move(element));
     }
   }
 
@@ -420,29 +490,43 @@ void Grid::make_periodic_boundary_elements(std::vector<Grid_Peridoic_Data>&& per
   // sort by direction
   std::map<std::vector<double>, std::vector<Element>> direction_to_periodic_elements;
 
-  Numbered_Nodes consisting_numbered_nodes;
-  auto& [numbers, element_consisting_nodes] = consisting_numbered_nodes;
+  std::vector<ms::geo::Node_View>          node_views;
+  std::vector<ms::geo::Numbered_Node_View> numbered_node_views;
 
   for (auto& [element_data, periodic_direction] : periodic_datas)
   {
     // make element from element data
-    auto& [element_type, figure, node_numbers] = element_data;
-
-    numbers = std::move(node_numbers);
-    this->_grid_nodes.nodes_at_indexes(element_consisting_nodes, numbers);
+    auto& [element_type, figure, node_numberss] = element_data;
 
     const auto geo_figure = convert(figure);
-    auto       geometry   = ms::geo::Geometry(geo_figure, element_consisting_nodes);
 
-    auto element = Element(element_type, std::move(consisting_numbered_nodes), std::move(geometry));
+    const auto num_nodes = node_numberss.size();
+    node_views.resize(num_nodes);
+    numbered_node_views.resize(num_nodes);
+
+    for (int i = 0; i < num_nodes; ++i)
+    {
+      auto& node_view          = node_views[i];
+      auto& numbered_node_view = numbered_node_views[i];
+
+      const auto node_number = node_numberss[i];
+      const auto index       = this->_node_number_to_index.at(node_number);
+
+      node_view                    = this->_grid_nodes[index];
+      numbered_node_view.node_view = this->_grid_nodes[index];
+      numbered_node_view.number    = node_number;
+    }
+
+    auto geometry = ms::geo::Geometry(geo_figure, std::move(node_views));
+    auto element  = Element(element_type, std::move(numbered_node_views), std::move(geometry));
 
     // sorting
     bool       is_new_direction  = true;
-    const auto direction_vector1 = ms::math::Vector_Const_Wrapper(periodic_direction);
+    const auto direction_vector1 = ms::math::Vector_View(periodic_direction);
 
     for (auto& [periodic_direction2, elements] : direction_to_periodic_elements)
     {
-      const auto direction_vector2 = ms::math::Vector_Const_Wrapper(periodic_direction2);
+      const auto direction_vector2 = ms::math::Vector_View(periodic_direction2);
 
       if (direction_vector1.is_parallel(direction_vector2))
       {
@@ -509,7 +593,7 @@ void Grid::make_inter_cell_face_elements(void)
       const auto num_nodes = boundray_element.num_nodes();
 
       vnode_numbers.resize(num_nodes);
-      boundray_element.node_numbers(vnode_numbers.data());
+      boundray_element.node_numberss(vnode_numbers.data());
     }
     else
     {
@@ -532,11 +616,11 @@ void Grid::make_inter_cell_face_elements(void)
       const auto num_nodes = pbdry_elem1.num_nodes();
 
       vnode_numbers.resize(num_nodes);
-      pbdry_elem1.node_numbers(vnode_numbers.data());
+      pbdry_elem1.node_numberss(vnode_numbers.data());
       constructed_face_vnode_numbers_set.insert(std::move(vnode_numbers));
 
       vnode_numbers.resize(num_nodes);
-      pbdry_elem2.node_numbers(vnode_numbers.data());
+      pbdry_elem2.node_numberss(vnode_numbers.data());
       constructed_face_vnode_numbers_set.insert(std::move(vnode_numbers));
     }
     else

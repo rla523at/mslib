@@ -23,9 +23,9 @@
     <ClCompile Include="..\_src\mssym\Symbol.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\_src\mssym\Polynomial.h" />
-    <ClInclude Include="..\_src\mssym\Symbol.h" />
-    <ClInclude Include="..\_src\mssym\Symbol_Base.h" />
+    <ClInclude Include="..\_header\mssym\Polynomial.h" />
+    <ClInclude Include="..\_header\mssym\Symbol.h" />
+    <ClInclude Include="..\_header\mssym\Symbol_Base.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

@@ -1,4 +1,4 @@
-#include "Node.h"
+#include "msgeo/Node.h"
 
 #include "msexception/Exception.h"
 #include "msmath/BLAS.h"
@@ -48,6 +48,19 @@ int Node_View::dimension(void) const
   return this->_dimension;
 }
 
+double Node_View::distance(const Node_View other) const
+{
+  double result = 0.0;
+
+  for (int i = 0; i < this->_dimension; ++i)
+  {
+    const auto diff = (*this)[i] - other[i];
+    result += diff * diff;
+  }
+
+  return std::sqrt(result);
+}
+
 void Node_View::other_to_this_vector(const Node_View& other, ms::math::Vector_Wrap vector_wrap) const
 {
   REQUIRE(vector_wrap.dimension() == this->_dimension, "vector wrap dimension should be equal to dimension");
@@ -85,7 +98,7 @@ const double* Node_View::data(void) const
   return this->_coordinates_view.data();
 }
 
-}; // namespace ms::geo
+} // namespace ms::geo
 
 /*
 
@@ -139,22 +152,24 @@ namespace ms::geo
 {
 
 Node::Node(const int dim)
-    : _coordinates(dim)
 {
-  this->_dimension = static_cast<int>(this->_coordinates.size());
+  REQUIRE(0 < dim, "dimension should be natural number");
+  REQUIRE(dim <= 3, "dimension can't not excced 3");
+
+  this->_dimension = dim;
   this->_inc       = 1;
-  REQUIRE(0 < this->_dimension, "dimension should be natural number");
 
   this->reallocate_coordinates();
 }
 
-Node::Node(std::vector<double>&& coordinates)
-    : _coordinates(std::move(coordinates))
+Node::Node(std::initializer_list<double> coordinates)
 {
-  this->_dimension = static_cast<int>(this->_coordinates.size());
+  this->_dimension = static_cast<int>(coordinates.size());
   this->_inc       = 1;
   REQUIRE(0 < this->_dimension, "dimension should be natural number");
+  REQUIRE(this->_dimension <= 3, "dimension can't not excced 3");
 
+  ms::math::blas::copy(this->_coordinates.data(), std::data(coordinates), this->_dimension);
   this->reallocate_coordinates();
 }
 
@@ -167,7 +182,7 @@ Node::Node(const Node& other)
 }
 
 Node::Node(Node&& other) noexcept
-    : _coordinates(std::move(other._coordinates))
+    : _coordinates(other._coordinates)
 {
   this->_dimension = other._dimension;
   this->_inc       = other._inc;
@@ -185,7 +200,32 @@ void Node::reallocate_coordinates(void)
 
 } // namespace ms::geo
 
-/*
+namespace ms::geo
+{
+
+bool Node_Compare::operator()(Node_View lhs, Node_View rhs) const
+{
+  const auto dim = lhs.dimension();
+  REQUIRE(dim == rhs.dimension(), "dimension should be matched");
+
+  constexpr auto epsilon = 1.0e-10;
+
+  for (int i = 0; i < dim; ++i)
+  {
+    if (std::abs(rhs[i] - lhs[i]) <= epsilon)
+    {
+      continue;
+    }
+
+    return lhs[i] < rhs[i];
+  }
+
+  return false;
+}
+
+} // namespace ms::geo
+
+/*```
 
 
 
@@ -215,6 +255,17 @@ Node_View Nodes_View::at(const int index) const
   const auto num             = this->_dimension;
   const auto sub_coordinates = this->_coordinates_view.subspan(start_index, num);
   const auto result          = Node_View(sub_coordinates);
+  return result;
+}
+
+ms::math::Vector_View Nodes_View::axis_coordinates_vector_view(const int axis_index) const
+{
+  REQUIRE(axis_index < this->_dimension, "axis index can not exceed dimension");
+
+  const auto start_index          = axis_index;
+  const auto sub_coordinates_view = this->_coordinates_view.subspan(start_index);
+
+  const auto result = ms::math::Vector_View(sub_coordinates_view, this->_num_nodes);
   return result;
 }
 

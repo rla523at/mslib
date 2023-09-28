@@ -1,6 +1,4 @@
-#include "Reference_Geometry_Container.h"
-
-#include "Figure.h"
+#include "msgeo/Reference_Geometry_Container.h"
 
 #include "msexception/Exception.h"
 

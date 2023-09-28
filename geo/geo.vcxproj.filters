@@ -32,6 +32,12 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\_header\msgeo\Figure.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\_header\msgeo\Geometry.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
     <ClInclude Include="..\_header\msgeo\Node.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
@@ -43,12 +49,6 @@
     </ClInclude>
     <ClInclude Include="..\_header\msgeo\Reference_Geometry_Impl.h">
       <Filter>소스 파일\Reference Geometry</Filter>
-    </ClInclude>
-    <ClInclude Include="..\_header\msgeo\Geometry.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="..\_header\msgeo\Figure.h">
-      <Filter>소스 파일</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,4 +1,4 @@
-#include "Polynomial.h"
+#include "mssym/Polynomial.h"
 
 #include "msexception/Exception.h"
 #include <algorithm>

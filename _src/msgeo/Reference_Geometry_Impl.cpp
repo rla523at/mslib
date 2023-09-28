@@ -1,10 +1,41 @@
-#include "Reference_Geometry_Impl.h"
-
-#include "Figure.h"
-#include "Node.h"
+#include "msgeo/Reference_Geometry_Impl.h"
 
 #include "msexception/Exception.h"
+#include "msgeo/Figure.h"
+#include "msgeo/Node.h"
 #include "msmath/Matrix.h"
+#include <algorithm>
+
+namespace ms::geo
+{
+
+void Connectivity::add_number(const int number)
+{
+  for (auto& node_number : node_numberss)
+  {
+    node_number += number;
+  }
+}
+
+void Connectivity::change_number(const int old_number, const int new_number)
+{
+  std::replace(node_numberss.begin(), node_numberss.end(), old_number, new_number);
+}
+
+} // namespace ms::geo
+
+/*
+
+
+
+
+
+
+
+
+
+
+*/
 
 namespace ms::geo
 {
@@ -109,11 +140,29 @@ const std::vector<double>& Reference_Point::get_quadrature_weights(const int int
   return {};
 }
 
-const Partition_Data& Reference_Point::get_partition_data(const int partition_order) const
+const Geometry_Consisting_Nodes_Info& Reference_Point::get_partition_geometry_nodes_info(const int partition_order) const
 {
   EXCEPTION("Partition is not possible over a point.");
   return {};
 }
+
+} // namespace ms::geo
+
+/*
+
+
+
+
+
+
+
+
+
+
+*/
+
+namespace ms::geo
+{
 
 ms::sym::Polynomials Reference_Geometry_Common::cal_parametric_functions(const std::vector<Node_View>& consisting_nodes) const
 {
@@ -167,14 +216,14 @@ const std::vector<double>& Reference_Geometry_Common::get_quadrature_weights(con
   return this->_tag_to_quadrature_weights.at(tag);
 }
 
-const Partition_Data& Reference_Geometry_Common::get_partition_data(const int partition_order) const
+const Geometry_Consisting_Nodes_Info& Reference_Geometry_Common::get_partition_geometry_nodes_info(const int partition_order) const
 {
-  if (!this->_order_to_partition_data.contains(partition_order))
+  if (!this->_order_to_partition_geometry.contains(partition_order))
   {
-    this->create_and_store_partition_data(partition_order);
+    this->create_and_store_partition_geometry(partition_order);
   }
 
-  return this->_order_to_partition_data.at(partition_order);
+  return this->_order_to_partition_geometry.at(partition_order);
 }
 
 const ms::sym::Polynomials& Reference_Geometry_Common::get_shape_functions(const int porder) const
@@ -189,9 +238,9 @@ const ms::sym::Polynomials& Reference_Geometry_Common::get_shape_functions(const
 
 ms::sym::Polynomials Reference_Geometry_Common::make_shape_functions(const int parameter_order) const
 {
+  const auto coords         = this->make_parametric_functions_reference_coords(parameter_order);
   const auto num_ref_points = this->num_parametric_function_reference_points(parameter_order);
   const auto dim            = this->dimension();
-  const auto coords         = this->make_parametric_functions_reference_coords(parameter_order);
   Nodes_View ref_points(coords, num_ref_points, dim);
 
   const auto bases     = this->make_parametric_function_bases(parameter_order);
@@ -226,6 +275,24 @@ ms::sym::Polynomials Reference_Geometry_Common::make_shape_functions(const int p
 
   return shape_functions;
 }
+
+} // namespace ms::geo
+
+/*
+
+
+
+
+
+
+
+
+
+
+*/
+
+namespace ms::geo
+{
 
 Node_View Reference_Line::center_point(void) const
 {
@@ -341,38 +408,49 @@ int Reference_Line::cal_quadrature_rule_tag(const int integrand_degree) const
   return integrand_degree / 2;
 }
 
-void Reference_Line::create_and_store_partition_data(const int partition_order) const
+void Reference_Line::create_and_store_partition_geometry(const int partition_order) const
 {
   constexpr auto dimension      = 1;
   constexpr auto X0_start_coord = -1.0;
 
-  const auto num_consisting_nodes    = partition_order + 2;
-  const auto num_consisting_elements = partition_order + 1;
+  const auto num_nodes    = partition_order + 2;
+  const auto num_elements = partition_order + 1;
+  const auto delta        = 2.0 / num_elements;
 
-  Nodes consisting_nodes(num_consisting_nodes, dimension);
+  Nodes nodes(num_nodes, dimension);
 
-  const auto delta = 2.0 / num_consisting_elements;
-
-  for (int i = 0; i < num_consisting_nodes; ++i)
+  for (int i = 0; i < num_nodes; ++i)
   {
-    auto node_wrap = consisting_nodes[i];
-
-    const auto X0_coord = X0_start_coord + delta * i;
-    node_wrap[0]        = X0_coord;
+    auto       node_wrap = nodes[i];
+    const auto X0_coord  = X0_start_coord + delta * i;
+    node_wrap[0]         = X0_coord;
   }
 
-  std::vector<std::vector<int>> connectivities(num_consisting_elements);
+  // std::vector<Numbered_Node> consisting_nodes;
+  // consisting_nodes.reserve(num_consisting_nodes);
 
-  for (int i = 0; i < num_consisting_elements; i++)
+  // const auto delta = 2.0 / num_consisting_elements;
+
+  // for (int i = 0; i < num_consisting_nodes; ++i)
+  //{
+  //   const auto    X0_coord      = X0_start_coord + delta * i;
+  //   Node          node          = {X0_coord};
+  //   Numbered_Node numbered_node = {node, i};
+  //   consisting_nodes.push_back(std::move(numbered_node));
+  // }
+
+  std::vector<Connectivity> connectivities(num_elements);
+
+  for (int i = 0; i < num_elements; i++)
   {
     auto& connectivity = connectivities[i];
 
     //   i 式式式式 i+1
-    connectivity = {i, i + 1};
+    connectivity.node_numberss = {i, i + 1};
   }
 
-  Partition_Data data(std::move(consisting_nodes), std::move(connectivities));
-  this->_order_to_partition_data.emplace(partition_order, std::move(data));
+  Geometry_Consisting_Nodes_Info data(std::move(nodes), std::move(connectivities));
+  this->_order_to_partition_geometry.emplace(partition_order, std::move(data));
 }
 
 void Reference_Line::create_and_store_quadrature_points(const int tag) const
@@ -522,6 +600,19 @@ ms::sym::Polynomials Reference_Line::make_parametric_function_bases(const int ta
 }
 
 } // namespace ms::geo
+
+/*
+
+
+
+
+
+
+
+
+
+
+*/
 
 namespace ms::geo
 {

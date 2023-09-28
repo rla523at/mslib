@@ -14,7 +14,7 @@ void is_equal(const ms::grid::Grid_Nodes_Data& data1, const ms::grid::Grid_Nodes
 
 void is_equal(const ms::grid::Grid_Element_Data& data1, const ms::grid::Grid_Element_Data& data2)
 {
-  EXPECT_EQ(data1.node_numbers, data2.node_numbers);
+  EXPECT_EQ(data1.node_numberss, data2.node_numberss);
   EXPECT_EQ(data1.figure, data2.figure);
   EXPECT_EQ(data1.element_type, data2.element_type);
 }
@@ -59,7 +59,7 @@ TEST(Gmsh_Reader, read2)
   Grid_Element_Data ref_elem_data;
   ref_elem_data.figure       = Figure::QUADRILATERAL;
   ref_elem_data.element_type = Element_Type::CELL;
-  ref_elem_data.node_numbers = {42, 43, 144, 143}; // 1¾¿ »©¼­ ÀÐÀ½
+  ref_elem_data.node_numberss = {42, 43, 144, 143}; // 1¾¿ »©¼­ ÀÐÀ½
 
   GFR_TEST_API::is_equal(ref_elem_data, elem_data);
 }

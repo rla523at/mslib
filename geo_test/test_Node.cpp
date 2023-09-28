@@ -16,7 +16,41 @@ std::ostream& operator<<(std::ostream& os, const ms::geo::Node_Wrap& node)
   return os << node.to_string();
 }
 
-TEST(Nodes_View, Block_Nodes)
+TEST(Node_Compare, compare1)
+{
+  ms::geo::Node node1({1, 2});
+  ms::geo::Node node2({1, 2});
+
+  ms::geo::Node_Compare compare;
+  EXPECT_FALSE(compare(node1, node2));
+}
+TEST(Node_Compare, compare2)
+{
+  ms::geo::Node node1({1, 2});
+  ms::geo::Node node2({1.1, 2});
+
+  ms::geo::Node_Compare compare;
+  EXPECT_TRUE(compare(node1, node2));
+}
+TEST(Node_Compare, compare3)
+{
+  constexpr auto epsilon = 1.0e-13;
+  ms::geo::Node node1({1, 2});
+  ms::geo::Node node2({1+epsilon, 2-epsilon});
+
+  ms::geo::Node_Compare compare;
+  EXPECT_FALSE(compare(node1, node2));
+}
+TEST(Node_Compare, compare4)
+{
+  ms::geo::Node node1({1, 2});
+  ms::geo::Node node2({0.9, 2});
+
+  ms::geo::Node_Compare compare;
+  EXPECT_FALSE(compare(node1, node2));
+}
+
+TEST(Nodes_View, construct)
 {
   const auto          num_nodes   = 3;
   const auto          dimension   = 2;
@@ -63,12 +97,30 @@ TEST(Nodes_View, conversion1)
   constexpr auto ref2 = 2 * 2 + 4 + 4 * 6;
   EXPECT_EQ(val2, ref2);
 }
+TEST(Nodes_View, axis_coordinates1)
+{
+  std::vector<double> coordinates = {1, 3, 5, 2, 4, 6, 1, 4, 3};
+  constexpr auto      dimension   = 3;
+  constexpr auto      num_nodes   = 3;
+  ms::geo::Nodes_View nodes(coordinates, num_nodes, dimension);
+
+  const auto result0 = nodes.axis_coordinates_vector_view(0);
+  const auto result1 = nodes.axis_coordinates_vector_view(1);
+  const auto result2 = nodes.axis_coordinates_vector_view(2);
+
+  std::vector<double> ref0 = {1, 2, 1};
+  std::vector<double> ref1 = {3, 4, 4};
+  std::vector<double> ref2 = {5, 6, 3};
+  EXPECT_EQ(result0, ref0);
+  EXPECT_EQ(result1, ref1);
+  EXPECT_EQ(result2, ref2);
+}
 
 TEST(Nodes, add_node1)
 {
   ms::geo::Nodes nodes;
 
-  ms::geo::Node node1({1, 2});
+  ms::geo::Node node1 = {1, 2};
   ms::geo::Node node2({3, 4});
   ms::geo::Node node3({5, 6});
 
@@ -135,7 +187,7 @@ TEST(Nodes, move_test1)
   }
 
   auto other_nodes = std::move(nodes);
-    
-  //EXPECT_ANY_THROW(nodes[2]); // access moved value is undefined behavior
+
+  // EXPECT_ANY_THROW(nodes[2]); // access moved value is undefined behavior
 }
 #endif

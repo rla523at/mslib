@@ -17,6 +17,7 @@ IndentRequires: false
 
 AccessModifierOffset: -2
 AllowAllConstructorInitializersOnNextLine : false
+AllowShortLambdasOnASingleLine : All
 AllowShortIfStatementsOnASingleLine: OnlyFirstIf
 AllowShortCaseLabelsOnASingleLine: true
 AllowShortEnumsOnASingleLine: true

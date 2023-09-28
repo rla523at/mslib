@@ -7,12 +7,42 @@
 
 namespace ms::geo
 {
-struct Partition_Data
+struct Connectivity
 {
-  Nodes                         nodes;
-  std::vector<std::vector<int>> connectivities;
+public:
+  void add_number(const int number);
+  void change_number(const int old_number, const int new_number);
+
+public:
+  std::vector<int> node_numberss;
 };
+
+// struct Geometry_Consisting_Nodes_Info
+//{
+//   std::vector<Numbered_Node> numbered_nodes;
+//   std::vector<Connectivity>  connectivities;
+// };
+
+struct Geometry_Consisting_Nodes_Info
+{
+  Nodes                     nodes;
+  std::vector<Connectivity> connectivities;
+};
+
 } // namespace ms::geo
+
+/*
+
+
+
+
+
+
+
+
+
+
+*/
 
 // class declaration
 namespace ms::geo
@@ -21,23 +51,23 @@ namespace ms::geo
 class Reference_Geometry
 {
 public:
-  virtual ms::sym::Polynomials          cal_normal_functions(const ms::sym::Polynomials& parametric_functions) const            = 0;
-  virtual ms::sym::Polynomials          cal_parametric_functions(const std::vector<Node_View>& consisting_nodes) const = 0;
-  virtual int                           cal_parameter_order(const int num_nodes) const                                          = 0;
-  virtual ms::sym::Symbol               cal_scale_function(const ms::sym::Polynomials& parametric_functions) const              = 0;
-  virtual Node_View            center_point(void) const                                                                = 0;
-  virtual int                           dimension(void) const                                                                   = 0;
-  virtual Figure                        face_figure(const int face_index) const                                                 = 0;
-  virtual std::vector<std::vector<int>> face_index_to_face_vnode_indexes(void) const                                            = 0;
-  virtual const Partition_Data&         get_partition_data(const int partition_order) const                                     = 0;
-  virtual const std::vector<double>&    get_quadrature_weights(const int integrand_degree) const                                = 0;
-  virtual bool                          is_valid_num_points(const int num_points) const                                         = 0;
-  virtual bool                          is_point(void) const                                                                    = 0;
-  virtual bool                          is_line(void) const                                                                     = 0;
-  virtual std::vector<int>              node_indexes(const int parameter_order) const                                           = 0;
-  virtual int                           num_faces(void) const                                                                   = 0;
-  virtual int                           num_vertices(void) const                                                                = 0;
-  virtual Nodes_View           quadrature_points(const int integrand_degree) const                                     = 0;
+  virtual ms::sym::Polynomials                  cal_normal_functions(const ms::sym::Polynomials& parametric_functions) const   = 0;
+  virtual ms::sym::Polynomials                  cal_parametric_functions(const std::vector<Node_View>& consisting_nodes) const = 0;
+  virtual int                                   cal_parameter_order(const int num_nodes) const                                 = 0;
+  virtual ms::sym::Symbol                       cal_scale_function(const ms::sym::Polynomials& parametric_functions) const     = 0;
+  virtual Node_View                             center_point(void) const                                                       = 0;
+  virtual int                                   dimension(void) const                                                          = 0;
+  virtual Figure                                face_figure(const int face_index) const                                        = 0;
+  virtual std::vector<std::vector<int>>         face_index_to_face_vnode_indexes(void) const                                   = 0;
+  virtual const Geometry_Consisting_Nodes_Info& get_partition_geometry_nodes_info(const int partition_order) const             = 0;
+  virtual const std::vector<double>&            get_quadrature_weights(const int integrand_degree) const                       = 0;
+  virtual bool                                  is_valid_num_points(const int num_points) const                                = 0;
+  virtual bool                                  is_point(void) const                                                           = 0;
+  virtual bool                                  is_line(void) const                                                            = 0;
+  virtual std::vector<int>                      node_indexes(const int parameter_order) const                                  = 0;
+  virtual int                                   num_faces(void) const                                                          = 0;
+  virtual int                                   num_vertices(void) const                                                       = 0;
+  virtual Nodes_View                            quadrature_points(const int integrand_degree) const                            = 0;
 
 protected:
   virtual ~Reference_Geometry(void) = default;
@@ -46,6 +76,11 @@ protected:
 } // namespace ms::geo
 
 /*
+
+
+
+
+
 
 
 

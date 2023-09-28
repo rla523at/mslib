@@ -1,14 +1,10 @@
 #pragma once
 #include <vector>
 
+#include "msgeo/Node.h"
+
 namespace ms::grid
 {
-
-enum class Coordinate_Type
-{
-  NODAL,
-  BLOCK
-};
 
 enum class Element_Type
 {
@@ -36,23 +32,31 @@ enum class Figure
   NOT_IN_LIST = -1
 };
 
+// struct Grid_Nodes_Data
+//{
+// public:
+//   const double* coordinates_ptr(const int node_index) const;
+//   int           stride(void) const;
+//
+// public:
+//   int                 dimension;
+//   int                 num_nodes;
+//   std::vector<double> coordinates;
+// };
+
 struct Grid_Nodes_Data
 {
-public:
-  const double* coordinates_ptr(const int node_index) const;
-  int           stride(void) const;
-
-public:
-  Coordinate_Type     type;
-  int                 dimension;
-  int                 num_nodes;
-  std::vector<double> coordinates;
+  ms::geo::Nodes   nodes;
+  std::vector<int> numbers;
 };
 
-// 1.node numbers start with 0
+// 1.node numbers start from 0
+// 2.node numbers에는 vertex node number가 먼저 나온다.
+//  2-1. vertex node number는 vertex를 반시계 방향으로 도는 순서대로 나온다.
 struct Grid_Element_Data
 {
-  Element_Type     element_type;
+  int              number;
+  Element_Type     type;
   Figure           figure;
   std::vector<int> node_numbers;
 };

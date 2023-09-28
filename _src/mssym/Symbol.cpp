@@ -1,8 +1,7 @@
-#include "Symbol.h"
-
-#include "Polynomial.h"
+#include "mssym/Symbol.h"
 
 #include "msexception/Exception.h"
+#include "mssym/Polynomial.h"
 #include <iomanip>
 
 namespace ms::sym
