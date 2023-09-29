@@ -136,26 +136,28 @@ Grid::Grid(Grid_Data&& data)
     const auto vnode_numbers = this->_cell_elements[i].vertex_node_numbers();
     for (const auto vnode_number : vnode_numbers)
     {
-      if (!this->_vnode_number_to_share_cell_number_set_ignore_pbdry.contains(vnode_number))
+      const auto node_index = this->_node_number_to_index.at(vnode_number);
+
+      if (!this->_node_index_to_share_cell_index_set_ignore_pbdry.contains(node_index))
       {
-        this->_vnode_number_to_share_cell_number_set_ignore_pbdry.emplace(vnode_number, std::set<int>());
+        this->_node_index_to_share_cell_index_set_ignore_pbdry.emplace(node_index, std::set<int>());
       }
 
-      this->_vnode_number_to_share_cell_number_set_ignore_pbdry.at(vnode_number).insert(i);
+      this->_node_index_to_share_cell_index_set_ignore_pbdry.at(node_index).insert(i);
     }
   }
 
   // precalculate _vnode_number_to_share_cell_number_set_consider_pbdry
-  this->_vnode_number_to_share_cell_number_set_consider_pbdry = this->_vnode_number_to_share_cell_number_set_ignore_pbdry;
+  this->_node_index_to_share_cell_index_set_consider_pbdry = this->_node_index_to_share_cell_index_set_ignore_pbdry;
 
-  const auto pbdry_vnode_number_to_matched_vnode_number_set = this->peridoic_boundary_vertex_node_number_to_matched_vertex_node_number_set();
+  const auto pbdry_vnode_number_to_matched_vnode_number_set = this->peridoic_boundary_vertex_node_index_to_matched_vertex_node_index_set();
 
   for (const auto& [pbdry_vnode_number, matched_vnode_number_set] : pbdry_vnode_number_to_matched_vnode_number_set)
   {
     for (const auto matched_vnode_number : matched_vnode_number_set)
     {
-      auto&       i_set = this->_vnode_number_to_share_cell_number_set_consider_pbdry.at(pbdry_vnode_number);
-      const auto& j_set = this->_vnode_number_to_share_cell_number_set_consider_pbdry.at(matched_vnode_number);
+      auto&       i_set = this->_node_index_to_share_cell_index_set_consider_pbdry.at(pbdry_vnode_number);
+      const auto& j_set = this->_node_index_to_share_cell_index_set_consider_pbdry.at(matched_vnode_number);
 
       const auto difference = set_difference(j_set, i_set);
 
@@ -388,12 +390,11 @@ ms::geo::Geometry_Consisting_Nodes_Info Grid::make_partition_grid_nodes_info(con
     // redundancy check
     // face sharing element 중 확인해야 되는 element 선별
     // element check
-    
+
     const auto num_pgeo_nodes = pgeo_nodes.num_nodes();
     for (int i = 0; i < num_pgeo_nodes; ++i)
     {
       const auto pgeo_node_wrap = pgeo_nodes[i];
-
     }
 
     pgrid_nodes.add_nodes(std::move(pgeo_nodes));
@@ -443,11 +444,11 @@ void Grid::make_cell_and_boundary_elements(std::vector<Grid_Element_Data>&& elem
   std::vector<ms::geo::Node_View>          node_views;
   std::vector<ms::geo::Numbered_Node_View> numbered_node_views;
 
-  for (auto& [element_type, figure, node_numberss] : element_datas)
+  for (auto& [number, type, figure, node_numbers] : element_datas)
   {
     const auto geo_figure = convert(figure);
 
-    const auto num_nodes = node_numberss.size();
+    const auto num_nodes = node_numbers.size();
     node_views.resize(num_nodes);
     numbered_node_views.resize(num_nodes);
 
@@ -456,7 +457,7 @@ void Grid::make_cell_and_boundary_elements(std::vector<Grid_Element_Data>&& elem
       auto& node_view          = node_views[i];
       auto& numbered_node_view = numbered_node_views[i];
 
-      const auto node_number = node_numberss[i];
+      const auto node_number = node_numbers[i];
       const auto index       = this->_node_number_to_index.at(node_number);
 
       node_view                    = this->_grid_nodes[index];
@@ -465,11 +466,12 @@ void Grid::make_cell_and_boundary_elements(std::vector<Grid_Element_Data>&& elem
     }
 
     auto geometry = ms::geo::Geometry(geo_figure, std::move(node_views));
-    auto element  = Element(element_type, std::move(numbered_node_views), std::move(geometry));
+    auto element  = Element(type, std::move(numbered_node_views), std::move(geometry));
 
-    if (element_type == Element_Type::CELL)
+    if (type == Element_Type::CELL)
     {
       this->_cell_elements.push_back(std::move(element));
+      //this->_cell_number_to_index.emplace(number, this->_cell_elements.size() - 1);
     }
     else
     {
@@ -496,7 +498,7 @@ void Grid::make_periodic_boundary_elements(std::vector<Grid_Peridoic_Data>&& per
   for (auto& [element_data, periodic_direction] : periodic_datas)
   {
     // make element from element data
-    auto& [element_type, figure, node_numberss] = element_data;
+    auto& [number, type, figure, node_numberss] = element_data;
 
     const auto geo_figure = convert(figure);
 
@@ -518,7 +520,7 @@ void Grid::make_periodic_boundary_elements(std::vector<Grid_Peridoic_Data>&& per
     }
 
     auto geometry = ms::geo::Geometry(geo_figure, std::move(node_views));
-    auto element  = Element(element_type, std::move(numbered_node_views), std::move(geometry));
+    auto element  = Element(type, std::move(numbered_node_views), std::move(geometry));
 
     // sorting
     bool       is_new_direction  = true;
@@ -562,12 +564,12 @@ void Grid::make_periodic_boundary_elements(std::vector<Grid_Peridoic_Data>&& per
         if (matched_index_set.contains(j)) continue;
 
         auto& j_element            = periodic_elements[j];
-        auto  matched_node_indexes = j_element.find_periodic_matched_node_indexes(direction, i_element);
+        auto  matched_node_numbers = j_element.find_periodic_matched_node_numbers(direction, i_element);
 
-        if (matched_node_indexes.empty()) continue;
+        if (matched_node_numbers.empty()) continue;
 
         // Reordering is necessary for the quadrature points of the two elements to match
-        j_element.reordering_nodes(matched_node_indexes);
+        j_element.reordering_nodes(matched_node_numbers);
 
         this->_periodic_boundary_element_pairs.push_back(std::make_pair(std::move(i_element), std::move(j_element)));
         matched_index_set.insert(i);
@@ -677,16 +679,17 @@ std::vector<int> Grid::find_cell_numbers_have_these_vertex_nodes_ignore_pbdry(co
 
   for (int i = 0; i < num_vnode; ++i)
   {
-    share_cell_index_set_ptrs.push_back(&this->_vnode_number_to_share_cell_number_set_ignore_pbdry.at(vnode_numbers[i]));
+    share_cell_index_set_ptrs.push_back(&this->_node_index_to_share_cell_index_set_ignore_pbdry.at(vnode_numbers[i]));
   }
 
   return set_intersection(share_cell_index_set_ptrs);
 }
 
-std::unordered_map<int, std::set<int>> Grid::peridoic_boundary_vertex_node_number_to_matched_vertex_node_number_set(void) const
+std::unordered_map<int, std::set<int>> Grid::peridoic_boundary_vertex_node_index_to_matched_vertex_node_index_set(void) const
 {
-  std::unordered_map<int, std::set<int>> pbdry_vnode_number_to_matched_vnode_number_set;
+  std::unordered_map<int, std::set<int>> pbdry_vnode_index_to_matched_vnode_index_set;
 
+  // Grid::make_periodic_boundary_elements에서 periodic boundary element pair를 만들 때, vertex node끼리 정렬되게 만들었음을 가정한다.
   for (const auto& [oc_side_element, nc_side_element] : this->_periodic_boundary_element_pairs)
   {
     const auto oc_side_vnode_numbers = oc_side_element.vertex_node_numbers();
@@ -695,21 +698,23 @@ std::unordered_map<int, std::set<int>> Grid::peridoic_boundary_vertex_node_numbe
     const auto num_vnode = oc_side_vnode_numbers.size();
     for (int i = 0; i < num_vnode; ++i)
     {
-      const auto i_vnode_index = oc_side_vnode_numbers[i];
-      const auto j_vnode_index = nc_side_vnode_numbers[i];
+      const auto i_vnode_number = oc_side_vnode_numbers[i];
+      const auto j_vnode_number = nc_side_vnode_numbers[i];
+      const auto i_vnode_index  = this->_node_number_to_index.at(i_vnode_number);
+      const auto j_vnode_index  = this->_node_number_to_index.at(j_vnode_number);
 
-      if (!pbdry_vnode_number_to_matched_vnode_number_set.contains(i_vnode_index))
+      if (!pbdry_vnode_index_to_matched_vnode_index_set.contains(i_vnode_index))
       {
-        pbdry_vnode_number_to_matched_vnode_number_set.emplace(i_vnode_index, std::set<int>());
+        pbdry_vnode_index_to_matched_vnode_index_set.emplace(i_vnode_index, std::set<int>());
       }
 
-      if (!pbdry_vnode_number_to_matched_vnode_number_set.contains(j_vnode_index))
+      if (!pbdry_vnode_index_to_matched_vnode_index_set.contains(j_vnode_index))
       {
-        pbdry_vnode_number_to_matched_vnode_number_set.emplace(j_vnode_index, std::set<int>());
+        pbdry_vnode_index_to_matched_vnode_index_set.emplace(j_vnode_index, std::set<int>());
       }
 
-      pbdry_vnode_number_to_matched_vnode_number_set.at(i_vnode_index).insert(j_vnode_index);
-      pbdry_vnode_number_to_matched_vnode_number_set.at(j_vnode_index).insert(i_vnode_index);
+      pbdry_vnode_index_to_matched_vnode_index_set.at(i_vnode_index).insert(j_vnode_index);
+      pbdry_vnode_index_to_matched_vnode_index_set.at(j_vnode_index).insert(i_vnode_index);
     }
   }
 
@@ -717,34 +722,27 @@ std::unordered_map<int, std::set<int>> Grid::peridoic_boundary_vertex_node_numbe
   const auto dim = this->dimension();
   for (int i = 0; i < dim - 1; ++i)
   {
-    for (auto& [pbdry_vnode_number, matched_vnode_number_set] : pbdry_vnode_number_to_matched_vnode_number_set)
+    for (auto& [pbdry_vnode_index, matched_vnode_index_set] : pbdry_vnode_index_to_matched_vnode_index_set)
     {
-      if (matched_vnode_number_set.size() == 1)
+      if (matched_vnode_index_set.size() == 1) continue;
+
+      for (const auto matched_vnode_index : matched_vnode_index_set)
       {
-        continue;
-      }
+        const auto& other_matched_vnode_index_set = pbdry_vnode_index_to_matched_vnode_index_set.at(matched_vnode_index);
 
-      for (const auto matched_vnode_index : matched_vnode_number_set)
-      {
-        const auto& other_matched_vnode_index_set = pbdry_vnode_number_to_matched_vnode_number_set.at(matched_vnode_index);
+        auto&       i_set      = matched_vnode_index_set;
+        const auto& j_set      = other_matched_vnode_index_set;
+        const auto  difference = set_difference(j_set, i_set);
 
-        auto&       i_set = matched_vnode_number_set;
-        const auto& j_set = other_matched_vnode_index_set;
-
-        const auto difference = set_difference(j_set, i_set);
-
-        if (difference.empty())
-        {
-          continue;
-        }
+        if (difference.empty()) continue;
 
         i_set.insert(difference.begin(), difference.end());
-        i_set.erase(pbdry_vnode_number);
+        i_set.erase(pbdry_vnode_index);
       }
     }
   }
 
-  return pbdry_vnode_number_to_matched_vnode_number_set;
+  return pbdry_vnode_index_to_matched_vnode_index_set;
 }
 
 } // namespace ms::grid

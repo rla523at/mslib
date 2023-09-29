@@ -12,8 +12,8 @@ namespace ms::grid
 class Element
 {
 public:
-  Element(const Element_Type element_type, std::vector<ms::geo::Numbered_Node_View>&& numbered_node_views, ms::geo::Geometry&& geometry)
-      : _type(element_type),
+  Element(const Element_Type type, std::vector<ms::geo::Numbered_Node_View>&& numbered_node_views, ms::geo::Geometry&& geometry)
+      : _type(type),
         _numbered_node_views(std::move(numbered_node_views)),
         _geometry(std::move(geometry)){};
 
@@ -24,7 +24,7 @@ public:
   void                          accumulate_discrete_node_info(ms::geo::Geometry_Consisting_Nodes_Info& partition_data, const int partition_order) const;
   void                          accumulate_node_info(ms::geo::Geometry_Consisting_Nodes_Info& partition_data, const int partition_order) const;
   int                           dimension(void) const;
-  std::vector<int>              find_periodic_matched_node_indexes(const ms::math::Vector_View direction_vector, const Element& other) const;
+  std::vector<int>              find_periodic_matched_node_numbers(const ms::math::Vector_View direction_vector, const Element& other) const;
   std::vector<std::vector<int>> face_index_to_face_vertex_node_numbers(void) const;
   void                          face_index_to_face_vertex_node_numbers(std::vector<int>* face_index_to_face_vnode_numbers) const;
   const ms::geo::Geometry&      get_geometry(void) const;

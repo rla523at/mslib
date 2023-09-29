@@ -18,7 +18,7 @@ struct Gmsh_Nodes_Data
 
 struct Gmsh_Elements_Data
 {
-  std::unordered_map<int, int>  index_to_elem_number;
+  std::vector<int>              elem_numbers;
   std::vector<int>              figure_type_numbers;
   std::vector<int>              physical_group_numbers;
   std::vector<std::vector<int>> node_numbers_s;
@@ -228,38 +228,38 @@ Grid_Data Gmsh_Reader::convert(Gmsh_Nodes_Data&& node_data, Gmsh_Elements_Data&&
   auto& grid_element_datas  = grid_data.element_datas;
   auto& grid_periodic_datas = grid_data.periodic_datas;
 
-  const auto& index_to_elem_number          = elem_data.index_to_elem_number;
+  const auto& elem_numbers                  = elem_data.elem_numbers;
   const auto& figure_type_numbers           = elem_data.figure_type_numbers;
   auto&       node_numbers_s                = elem_data.node_numbers_s;
   const auto& physical_group_numbers        = elem_data.physical_group_numbers;
   const auto& physical_group_number_to_name = phys_data.physical_group_number_to_name;
 
-  const auto num_elements = index_to_elem_number.size();
+  const auto num_elements = elem_numbers.size();
   grid_element_datas.reserve(num_elements);
   grid_periodic_datas.reserve(num_elements);
 
   for (int i = 0; i < num_elements; ++i)
   {
-    const auto  elem_number           = index_to_elem_number.at(i);
+    const auto  elem_number           = elem_numbers[i];
     const auto  physical_group_number = physical_group_numbers[i];
     const auto& name                  = physical_group_number_to_name.at(physical_group_number);
-    const auto  type                  = str_to_element_type(name);
+    const auto  elem_type             = str_to_element_type(name);
 
     Grid_Element_Data elem_data;
     elem_data.number       = elem_number;
-    elem_data.type         = type;
+    elem_data.type         = elem_type;
     elem_data.figure       = ms::grid::index_to_figure_type(figure_type_numbers[i]);
     elem_data.node_numbers = std::move(node_numbers_s[i]);
 
-    //이 부분 테스트하기!
+    // 이 부분 테스트하기!
     //// The node numbers in the Grid_Element_Data start from 0.
     //// Since Gmsh's node numbering starts from 1, subtract 1 from it.
-    //for (auto& node_number : elem_data.node_numbers)
+    // for (auto& node_number : elem_data.node_numbers)
     //{
-    //  node_number--;
-    //}
+    //   node_number--;
+    // }
 
-    if (type == Element_Type::PERIODIC)
+    if (elem_type == Element_Type::PERIODIC)
     {
       const auto parsed_strs = ms::string::parse_by(name, comma);
 
@@ -325,7 +325,7 @@ void Gmsh_Reader::read_elem_data(std::ifstream& file, Gmsh_Elements_Data& data) 
   constexpr auto space            = ' ';
   constexpr auto num_type_indexes = 5;
 
-  auto& index_to_elem_number   = data.index_to_elem_number;
+  auto& elem_numbers           = data.elem_numbers;
   auto& figure_type_numbers    = data.figure_type_numbers;
   auto& node_numbers_s         = data.node_numbers_s;
   auto& physical_group_numbers = data.physical_group_numbers;
@@ -334,9 +334,10 @@ void Gmsh_Reader::read_elem_data(std::ifstream& file, Gmsh_Elements_Data& data) 
   std::getline(file, str);
   const auto num_elements = ms::string::str_to_value<int>(str);
 
+  elem_numbers.resize(num_elements);
   figure_type_numbers.resize(num_elements);
-  node_numbers_s.resize(num_elements);
   physical_group_numbers.resize(num_elements);
+  node_numbers_s.resize(num_elements);
 
   for (int i = 0; i < num_elements; ++i)
   {
@@ -349,8 +350,8 @@ void Gmsh_Reader::read_elem_data(std::ifstream& file, Gmsh_Elements_Data& data) 
     // parsed_strs[3]  : physical group number
     // parsed_strs[4]  : element group number
     // parsed_strs[5-] : node numbers composing element
-    index_to_elem_number.insert(i, ms::string::str_to_value<int>(parsed_strs[0]));
 
+    elem_numbers[i]           = ms::string::str_to_value<int>(parsed_strs[0]);
     figure_type_numbers[i]    = ms::string::str_to_value<int>(parsed_strs[1]);
     physical_group_numbers[i] = ms::string::str_to_value<int>(parsed_strs[3]);
 

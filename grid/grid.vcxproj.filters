@@ -35,23 +35,23 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\_src\msgrid\Gmsh_Reader.h">
-      <Filter>소스 파일\Reader</Filter>
+    <ClInclude Include="..\_header\msgrid\Data.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="..\_src\msgrid\Grid_Reader_Factory.h">
-      <Filter>소스 파일\Reader</Filter>
+    <ClInclude Include="..\_header\msgrid\Element.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="..\_src\msgrid\Reader.h">
-      <Filter>소스 파일\Reader</Filter>
+    <ClInclude Include="..\_header\msgrid\Gmsh_Reader.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="..\_src\msgrid\Data.h">
-      <Filter>소스 파일</Filter>
+    <ClInclude Include="..\_header\msgrid\Grid.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="..\_src\msgrid\Element.h">
-      <Filter>소스 파일</Filter>
+    <ClInclude Include="..\_header\msgrid\Grid_Reader_Factory.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="..\_src\msgrid\Grid.h">
-      <Filter>소스 파일</Filter>
+    <ClInclude Include="..\_header\msgrid\Reader.h">
+      <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -9,21 +9,21 @@
 namespace ms::grid
 {
 
-void Element::reordering_nodes(const std::vector<int>& new_ordered_node_indexes)
+void Element::reordering_nodes(const std::vector<int>& new_ordered_node_numbers)
 {
-  auto& [numbers, nodes]    = this->_numbered_nodes;
-  const auto begin          = new_ordered_node_indexes.begin();
-  const auto end            = new_ordered_node_indexes.end();
-  const auto original_nodes = nodes;
+  const auto begin = new_ordered_node_numbers.begin();
+  const auto end   = new_ordered_node_numbers.end();
 
-  const auto num_nodes = nodes.size();
+  const auto original_numbered_node_views = this->_numbered_node_views;
+
+  const auto num_nodes = this->_numbered_node_views.size();
 
   for (int i = 0; i < num_nodes; ++i)
   {
-    const auto index         = numbers[i];
-    const auto original_node = original_nodes[i];
+    const auto& original_numbered_node_view = original_numbered_node_views[i];
+    const auto  number                      = original_numbered_node_view.number;
 
-    const auto iter = std::find(begin, end, index);
+    const auto iter = std::find(begin, end, number);
     REQUIRE(iter != end, "For the new face_node_numbers to be valid, they must include all the preceding face_node_numbers");
 
     const auto new_pos = iter - begin;
@@ -67,7 +67,7 @@ void Element::accumulate_discrete_node_info(ms::geo::Geometry_Consisting_Nodes_I
 
 void Element::accumulate_node_info(ms::geo::Geometry_Consisting_Nodes_Info& node_info, const int partition_order) const
 {
-  //geometry에서 만든 partitioned geometry node info에 알맞은 connectivity를 주는 과정
+  // geometry에서 만든 partitioned geometry node info에 알맞은 connectivity를 주는 과정
   auto        pg_node_info         = this->_geometry.make_partitioned_geometry_node_info(partition_order);
   const auto& numbered_nodes_in_pg = pg_node_info.numbered_nodes;
   auto&       connectivities_of_pg = pg_node_info.connectivities;
@@ -205,7 +205,7 @@ int Element::dimension(void) const
   return this->_numbered_nodes.nodes.front().dimension();
 }
 
-std::vector<int> Element::find_periodic_matched_node_indexes(const ms::math::Vector_Const_Wrapper& direction_vector, const Element& other) const
+std::vector<int> Element::find_periodic_matched_node_numbers(const ms::math::Vector_View direction_vector, const Element& other) const
 {
   // It returns the node indices in "this element" that match the nodes of the "other element".
 
@@ -219,40 +219,39 @@ std::vector<int> Element::find_periodic_matched_node_indexes(const ms::math::Vec
     return {};
   }
 
-  std::unordered_set<int> matched_vnode_index_set;
-  matched_vnode_index_set.reserve(other_num_nodes);
+  std::unordered_set<int> matched_vnode_number_set;
+  matched_vnode_number_set.reserve(other_num_nodes);
 
-  std::vector<int> matched_periodic_node_indexes(this_num_nodes);
-
-  const auto& [this_indexes, this_nodes]   = this->_numbered_nodes;
-  const auto& [other_indexes, other_nodes] = other._numbered_nodes;
+  std::vector<int> matched_node_numbers(this_num_nodes);
 
   const auto       dimension = this->dimension();
   ms::math::Vector node_to_node_vector(dimension);
 
   for (int i = 0; i < other_num_nodes; ++i)
   {
-    const auto  other_node_index = other_indexes[i];
-    const auto& other_node       = other_nodes[i];
+    const auto& other_numbered_node_view = other._numbered_node_views[i];
+    const auto  other_node_number        = other_numbered_node_view.number;
+    const auto& other_node_view          = other_numbered_node_view.node_view;
 
     bool not_find_pair = true;
 
     for (int j = 0; j < this_num_nodes; ++j)
     {
-      const auto  this_node_index = this_indexes[j];
-      const auto& this_node       = this_nodes[j];
+      const auto& this_numbered_node_view = this->_numbered_node_views[j];
+      const auto  this_node_number        = this_numbered_node_view.number;
+      const auto& this_node_view          = this_numbered_node_view.node_view;
 
-      if (matched_vnode_index_set.contains(this_node_index))
+      if (matched_vnode_number_set.contains(this_node_number))
       {
         continue;
       }
 
-      this_node.other_to_this_vector(other_node, node_to_node_vector);
+      this_node_view.other_to_this_vector(other_node_view, node_to_node_vector);
 
       if (direction_vector.is_parallel(node_to_node_vector))
       {
-        matched_periodic_node_indexes[i] = this_node_index;
-        matched_vnode_index_set.insert(this_node_index);
+        matched_node_numbers[i] = this_node_number;
+        matched_vnode_number_set.insert(this_node_number);
         not_find_pair = false;
         break;
       }
@@ -264,7 +263,7 @@ std::vector<int> Element::find_periodic_matched_node_indexes(const ms::math::Vec
     }
   }
 
-  return matched_periodic_node_indexes;
+  return matched_node_numbers;
 }
 
 std::vector<std::vector<int>> Element::face_index_to_face_vertex_node_numbers(void) const

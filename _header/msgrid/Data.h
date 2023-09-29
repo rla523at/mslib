@@ -50,7 +50,6 @@ struct Grid_Nodes_Data
   std::vector<int> numbers;
 };
 
-// 1.node numbers start from 0
 // 2.node numbers에는 vertex node number가 먼저 나온다.
 //  2-1. vertex node number는 vertex를 반시계 방향으로 도는 순서대로 나온다.
 struct Grid_Element_Data

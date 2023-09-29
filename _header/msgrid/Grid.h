@@ -43,7 +43,7 @@ private:
 
 private:
   std::vector<int>                       find_cell_numbers_have_these_vertex_nodes_ignore_pbdry(const std::vector<int>& vnode_numbers) const;
-  std::unordered_map<int, std::set<int>> peridoic_boundary_vertex_node_number_to_matched_vertex_node_number_set(void) const;
+  std::unordered_map<int, std::set<int>> peridoic_boundary_vertex_node_index_to_matched_vertex_node_index_set(void) const;
 
 private:
   ms::geo::Nodes                           _grid_nodes;
@@ -52,10 +52,15 @@ private:
   std::vector<Element>                     _inter_cell_face_elements;
   std::vector<std::pair<Element, Element>> _periodic_boundary_element_pairs;
   std::unordered_map<int, int>             _node_number_to_index;
-  std::unordered_map<int, int>             _cell_number_to_index;
- 
-  std::unordered_map<int, std::set<int>> _vnode_number_to_share_cell_number_set_ignore_pbdry;
-  std::unordered_map<int, std::set<int>> _vnode_number_to_share_cell_number_set_consider_pbdry;
+
+  //이것들이 필요한지 잘 모르겠네..
+  //std::unordered_map<int, int>             _cell_number_to_index;
+  //std::unordered_map<int, int>             _boundary_number_to_index;
+  //std::unordered_map<int, int>             _inter_cell_face_number_to_index;
+  //std::unordered_map<int, int>             _periodic_boundary_number_to_index;
+
+  std::unordered_map<int, std::set<int>> _node_index_to_share_cell_index_set_ignore_pbdry;
+  std::unordered_map<int, std::set<int>> _node_index_to_share_cell_index_set_consider_pbdry;
 };
 
 } // namespace ms::grid

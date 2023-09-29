@@ -19,10 +19,16 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\_src\msgrid\Data.cpp" />
-    <ClCompile Include="..\_src\msgrid\Element.cpp" />
+    <ClCompile Include="..\_src\msgrid\Data.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\_src\msgrid\Element.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\_src\msgrid\Gmsh_Reader.cpp" />
-    <ClCompile Include="..\_src\msgrid\Grid.cpp" />
+    <ClCompile Include="..\_src\msgrid\Grid.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\_src\msgrid\Grid_Reader_Factory.cpp" />
   </ItemGroup>
   <ItemGroup>
