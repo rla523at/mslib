@@ -31,23 +31,23 @@ class Reference_Point : public Reference_Geometry
 {
   // overriding methods from Reference_Geometry
 public:
-  ms::sym::Polynomials          cal_normal_functions(const ms::sym::Polynomials& parametric_functions) const override;
-  ms::sym::Polynomials          cal_parametric_functions(const std::vector<Node_View>& consisting_nodes) const override;
-  int                           cal_parameter_order(const int num_points) const override;
-  ms::sym::Symbol               cal_scale_function(const ms::sym::Polynomials& parametric_functions) const override;
-  Node_View                     center_point(void) const override;
-  int                           dimension(void) const override;
-  Figure                        face_figure(const int face_index) const override;
-  std::vector<std::vector<int>> face_index_to_face_vnode_indexes(void) const override;
-  const std::vector<double>&    get_quadrature_weights(const int integrand_degree) const override;
-  const Geometry_Consisting_Nodes_Info&             get_partition_geometry_nodes_info(const int partition_order) const override;
-  bool                          is_valid_num_points(const int num_points) const override;
-  bool                          is_point(void) const override;
-  bool                          is_line(void) const override;
-  std::vector<int>              node_indexes(const int parameter_order) const override;
-  int                           num_faces(void) const override;
-  int                           num_vertices(void) const override;
-  Nodes_View                    quadrature_points(const int integrand_degree) const override;
+  ms::sym::Polynomials                  cal_normal_functions(const ms::sym::Polynomials& parametric_functions) const override;
+  ms::sym::Polynomials                  cal_parametric_functions(const std::vector<Node_View>& consisting_nodes) const override;
+  int                                   cal_parameter_order(const int num_points) const override;
+  ms::sym::Symbol                       cal_scale_function(const ms::sym::Polynomials& parametric_functions) const override;
+  Node_View                             center_point(void) const override;
+  int                                   dimension(void) const override;
+  Figure                                face_figure(const int face_index) const override;
+  const std::vector<std::vector<int>>&  get_face_vnode_indexes_s(void) const override;
+  const std::vector<double>&            get_quadrature_weights(const int integrand_degree) const override;
+  const Geometry_Consisting_Nodes_Info& get_partition_geometry_nodes_info(const int partition_order) const override;
+  bool                                  is_valid_num_points(const int num_points) const override;
+  bool                                  is_point(void) const override;
+  bool                                  is_line(void) const override;
+  std::vector<int>                      node_indexes(const int parameter_order) const override;
+  int                                   num_faces(void) const override;
+  int                                   num_vertices(void) const override;
+  Nodes_View                            quadrature_points(const int integrand_degree) const override;
 
 private:
   static constexpr std::array<double, 1> _center_coords = {0.0};
@@ -78,11 +78,13 @@ class Reference_Geometry_Common : public Reference_Geometry
 {
   // overriding methods from Reference_Geometry
 public:
-  ms::sym::Polynomials       cal_parametric_functions(const std::vector<Node_View>& consisting_nodes) const override;
-  const std::vector<double>& get_quadrature_weights(const int integrand_degree) const override;
-  const Geometry_Consisting_Nodes_Info&          get_partition_geometry_nodes_info(const int partition_order) const override;
-  bool                       is_point(void) const override;
-  Nodes_View                 quadrature_points(const int integrand_degree) const override;
+  ms::sym::Polynomials                  cal_parametric_functions(const std::vector<Node_View>& consisting_nodes) const override;
+  Node_View                             center_point(void) const override;
+  const std::vector<std::vector<int>>&  get_face_vnode_indexes_s(void) const override;
+  const std::vector<double>&            get_quadrature_weights(const int integrand_degree) const override;
+  const Geometry_Consisting_Nodes_Info& get_partition_geometry_nodes_info(const int partition_order) const override;
+  bool                                  is_point(void) const override;
+  Nodes_View                            quadrature_points(const int integrand_degree) const override;
 
 protected:
   virtual int                  cal_quadrature_rule_tag(const int integrand_degree) const            = 0;
@@ -99,10 +101,13 @@ private:
   ms::sym::Polynomials        make_shape_functions(const int parameter_order) const;
 
 protected:
-  mutable std::map<int, Geometry_Consisting_Nodes_Info>           _order_to_partition_geometry;
-  mutable std::map<int, Nodes>                _tag_to_quadrature_points;
-  mutable std::map<int, std::vector<double>>  _tag_to_quadrature_weights;
-  mutable std::map<int, ms::sym::Polynomials> _parameter_order_to_shape_functions;
+  std::vector<double>           _center_coords;
+  std::vector<std::vector<int>> _face_vnode_indexes_s;
+
+  mutable std::map<int, Geometry_Consisting_Nodes_Info> _order_to_partition_geometry;
+  mutable std::map<int, Nodes>                          _tag_to_quadrature_points;
+  mutable std::map<int, std::vector<double>>            _tag_to_quadrature_weights;
+  mutable std::map<int, ms::sym::Polynomials>           _parameter_order_to_shape_functions;
 
 protected:
   virtual ~Reference_Geometry_Common(void) = default;
@@ -123,20 +128,21 @@ protected:
 
 class Reference_Line : public Reference_Geometry_Common
 {
+public:
+  Reference_Line(void);
+
   // overriding methods from Reference_Geometry
 public:
-  Node_View                     center_point(void) const override;
-  ms::sym::Polynomials          cal_normal_functions(const ms::sym::Polynomials& curve) const override;
-  int                           cal_parameter_order(const int num_points) const override;
-  ms::sym::Symbol               cal_scale_function(const ms::sym::Polynomials& parametric_functions) const override;
-  int                           dimension(void) const override;
-  Figure                        face_figure(const int face_index) const override;
-  std::vector<std::vector<int>> face_index_to_face_vnode_indexes(void) const override;
-  bool                          is_valid_num_points(const int num_points) const override;
-  bool                          is_line(void) const override;
-  std::vector<int>              node_indexes(const int parameter_order) const override;
-  int                           num_faces(void) const override;
-  int                           num_vertices(void) const override;
+  ms::sym::Polynomials cal_normal_functions(const ms::sym::Polynomials& curve) const override;
+  int                  cal_parameter_order(const int num_points) const override;
+  ms::sym::Symbol      cal_scale_function(const ms::sym::Polynomials& parametric_functions) const override;
+  int                  dimension(void) const override;
+  Figure               face_figure(const int face_index) const override;
+  bool                 is_valid_num_points(const int num_points) const override;
+  bool                 is_line(void) const override;
+  std::vector<int>     node_indexes(const int parameter_order) const override;
+  int                  num_faces(void) const override;
+  int                  num_vertices(void) const override;
 
   // overriding methods from Reference_Geometry_Common
 protected:
@@ -148,17 +154,6 @@ protected:
   int                  num_parametric_function_reference_points(const int param_order) const override;
   ms::sym::Polynomials make_parametric_function_bases(const int tag) const override;
   std::vector<double>  make_parametric_functions_reference_coords(const int tag) const override;
-
-private:
-  static constexpr std::array<double, 1> center_coords_ = {0.0};
-
-private:
-  friend Reference_Geometry_Container;
-
-private:
-  // All Reference Geometry objects are created only once in the Container class.
-  // To prevent unnecessary creation, acess to the constructor has been blocked
-  Reference_Line(void) = default;
 };
 
 } // namespace ms::geo

@@ -16,18 +16,17 @@ void Element::reordering_nodes(const std::vector<int>& new_ordered_node_numbers)
 
   const auto original_numbered_node_views = this->_numbered_node_views;
 
-  const auto num_nodes = this->_numbered_node_views.size();
-
-  for (int i = 0; i < num_nodes; ++i)
+  for (const auto& original_numbered_node_view : original_numbered_node_views)
   {
-    const auto& original_numbered_node_view = original_numbered_node_views[i];
-    const auto  number                      = original_numbered_node_view.number;
+    const auto node_number = original_numbered_node_view.number;
 
-    const auto iter = std::find(begin, end, number);
-    REQUIRE(iter != end, "For the new face_node_numbers to be valid, they must include all the preceding face_node_numbers");
+    const auto iter = std::find(begin, end, node_number);
+    REQUIRE(iter != end, "Fail to find node which match with node number");
 
-    const auto new_pos = iter - begin;
-    nodes[new_pos]     = original_node;
+    const auto new_pos                  = iter - begin;
+    this->_numbered_node_views[new_pos] = original_numbered_node_view;
+
+    // geometry도 다시 만들어야 되지 않나?
   }
 }
 
@@ -266,11 +265,11 @@ std::vector<int> Element::find_periodic_matched_node_numbers(const ms::math::Vec
   return matched_node_numbers;
 }
 
-std::vector<std::vector<int>> Element::face_index_to_face_vertex_node_numbers(void) const
+std::vector<std::vector<int>> Element::face_vertex_node_numbers_s(void) const
 {
   const auto& numbers = this->_numbered_nodes.numbers;
 
-  const auto face_index_to_face_vnode_indexes = this->_geometry.face_index_to_face_vnode_indexes();
+  const auto face_index_to_face_vnode_indexes = this->_geometry.face_vnode_indexes_s();
   const auto num_faces                        = face_index_to_face_vnode_indexes.size();
 
   std::vector<std::vector<int>> face_index_to_face_vnode_numbers(num_faces);
@@ -293,25 +292,23 @@ std::vector<std::vector<int>> Element::face_index_to_face_vertex_node_numbers(vo
   return face_index_to_face_vnode_numbers;
 }
 
-void Element::face_index_to_face_vertex_node_numbers(std::vector<int>* face_index_to_face_vnode_numbers) const
+void Element::face_vertex_node_numbers_s(std::vector<int>* face_vnode_numbers_s) const
 {
-  const auto face_index_to_face_vnode_indexes = this->_geometry.face_index_to_face_vnode_indexes();
-  const auto num_faces                        = face_index_to_face_vnode_indexes.size();
-
-  const auto& numbers = this->_numbered_nodes.numbers;
+  const auto& face_vnode_indexes_s = this->_geometry.get_face_vnode_indexes_s();
+  const auto  num_faces            = face_vnode_indexes_s.size();
 
   for (int i = 0; i < num_faces; ++i)
   {
-    const auto& face_vnode_indexes = face_index_to_face_vnode_indexes[i];
-    auto&       face_vnode_numbers = face_index_to_face_vnode_numbers[i];
+    const auto& face_vnode_indexes = face_vnode_indexes_s[i];
+    const auto  num_face_vnode     = face_vnode_indexes.size();
 
-    const auto num_face_vnode = face_vnode_indexes.size();
+    auto& face_vnode_numbers = face_vnode_numbers_s[i];
     face_vnode_numbers.resize(num_face_vnode);
 
     for (int j = 0; j < num_face_vnode; ++j)
     {
       const auto index      = face_vnode_indexes[j];
-      face_vnode_numbers[j] = numbers[index];
+      face_vnode_numbers[j] = this->_numbered_node_views[index].number;
     }
   }
 }
@@ -319,6 +316,11 @@ void Element::face_index_to_face_vertex_node_numbers(std::vector<int>* face_inde
 const ms::geo::Geometry& Element::get_geometry(void) const
 {
   return this->_geometry;
+}
+
+std::span<const int> Element::node_numbers(void) const
+{
+  return this->_node_numbers;
 }
 
 bool Element::is_outward_face(const Element& face_element) const
@@ -332,7 +334,7 @@ bool Element::is_outward_face(const Element& face_element) const
   if (face_geometry.is_point()) return true;
 
   const auto bdry_vnode_numbers               = face_element.vertex_node_numbers();
-  const auto face_index_to_face_vnode_numbers = this->face_index_to_face_vertex_node_numbers();
+  const auto face_index_to_face_vnode_numbers = this->face_vertex_node_numbers_s();
 
   if (face_geometry.is_line())
   {
@@ -408,46 +410,16 @@ Element Element::make_face_element(const int face_index) const
   return Element(Element_Type::FACE, std::move(face_numbered_nodes), std::move(face_geometry));
 }
 
-int Element::num_nodes(void) const
-{
-  return static_cast<int>(this->_numbered_nodes.nodes.size());
-}
-
-void Element::node_numberss(int* node_numberss) const
-{
-  const auto  num_nodes = this->num_nodes();
-  const auto& numbers   = this->_numbered_nodes.numbers;
-
-  for (int i = 0; i < num_nodes; ++i)
-  {
-    node_numberss[i] = numbers[i];
-  }
-}
-
 Element_Type Element::type(void) const
 {
   return this->_type;
 }
 
-std::vector<int> Element::vertex_node_numbers(void) const
+std::span<const int> Element::vertex_node_numbers(void) const
 {
-  const auto& numbers      = this->_numbered_nodes.numbers;
-  const auto  num_vertices = this->_geometry.num_vertices();
-
-  // Assuming that the nodes that compose the vertices of the Element are listed first.
-  return {numbers.begin(), numbers.begin() + num_vertices};
-}
-
-void Element::vertex_node_numbers(int* vertex_node_numbers) const
-{
-  const auto& numbers      = this->_numbered_nodes.numbers;
-  const auto  num_vertices = this->_geometry.num_vertices();
-
-  for (int i = 0; i < num_vertices; ++i)
-  {
-    // Assuming that the nodes that compose the vertices of the Element are listed first.
-    vertex_node_numbers[i] = numbers[i];
-  }
+  const auto num_vertices = this->_geometry.num_vertices();
+  const auto result       = std::span<const int>(this->_node_numbers.begin(), num_vertices); // convention
+  return result;
 }
 
 } // namespace ms::grid

@@ -36,10 +36,11 @@ public:
   ms::geo::Geometry_Consisting_Nodes_Info make_partition_grid_nodes_info(const int partition_order) const;
 
 private:
-  void make_grid_nodes(Grid_Nodes_Data&& nodes_data);
-  void make_cell_and_boundary_elements(std::vector<Grid_Element_Data>&& element_datas);
-  void make_periodic_boundary_elements(std::vector<Grid_Peridoic_Data>&& periodic_datas);
-  void make_inter_cell_face_elements(void);
+  void    make_grid_nodes(Grid_Nodes_Data&& nodes_data);
+  void    make_cell_and_boundary_elements(std::vector<Grid_Element_Data>&& element_datas);
+  void    make_periodic_boundary_elements(std::vector<Grid_Peridoic_Data>&& periodic_datas);
+  void    make_inter_cell_face_elements(void);
+  Element make_element(const Grid_Element_Data& element_data) const;
 
 private:
   std::vector<int>                       find_cell_numbers_have_these_vertex_nodes_ignore_pbdry(const std::vector<int>& vnode_numbers) const;
@@ -53,11 +54,11 @@ private:
   std::vector<std::pair<Element, Element>> _periodic_boundary_element_pairs;
   std::unordered_map<int, int>             _node_number_to_index;
 
-  //이것들이 필요한지 잘 모르겠네..
-  //std::unordered_map<int, int>             _cell_number_to_index;
-  //std::unordered_map<int, int>             _boundary_number_to_index;
-  //std::unordered_map<int, int>             _inter_cell_face_number_to_index;
-  //std::unordered_map<int, int>             _periodic_boundary_number_to_index;
+  // 이것들이 필요한지 잘 모르겠네..
+  // std::unordered_map<int, int>             _cell_number_to_index;
+  // std::unordered_map<int, int>             _boundary_number_to_index;
+  // std::unordered_map<int, int>             _inter_cell_face_number_to_index;
+  // std::unordered_map<int, int>             _periodic_boundary_number_to_index;
 
   std::unordered_map<int, std::set<int>> _node_index_to_share_cell_index_set_ignore_pbdry;
   std::unordered_map<int, std::set<int>> _node_index_to_share_cell_index_set_consider_pbdry;

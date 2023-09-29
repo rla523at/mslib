@@ -58,7 +58,7 @@ public:
   virtual Node_View                             center_point(void) const                                                       = 0;
   virtual int                                   dimension(void) const                                                          = 0;
   virtual Figure                                face_figure(const int face_index) const                                        = 0;
-  virtual std::vector<std::vector<int>>         face_index_to_face_vnode_indexes(void) const                                   = 0;
+  virtual const std::vector<std::vector<int>>&  get_face_vnode_indexes_s(void) const                                           = 0;
   virtual const Geometry_Consisting_Nodes_Info& get_partition_geometry_nodes_info(const int partition_order) const             = 0;
   virtual const std::vector<double>&            get_quadrature_weights(const int integrand_degree) const                       = 0;
   virtual bool                                  is_valid_num_points(const int num_points) const                                = 0;

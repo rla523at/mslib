@@ -441,37 +441,14 @@ void Grid::make_cell_and_boundary_elements(std::vector<Grid_Element_Data>&& elem
   this->_cell_elements.reserve(num_element_datas);
   this->_boundary_elements.reserve(num_element_datas);
 
-  std::vector<ms::geo::Node_View>          node_views;
-  std::vector<ms::geo::Numbered_Node_View> numbered_node_views;
-
-  for (auto& [number, type, figure, node_numbers] : element_datas)
+  for (const auto& element_data : element_datas)
   {
-    const auto geo_figure = convert(figure);
+    auto element = this->make_element(element_data);
 
-    const auto num_nodes = node_numbers.size();
-    node_views.resize(num_nodes);
-    numbered_node_views.resize(num_nodes);
-
-    for (int i = 0; i < num_nodes; ++i)
-    {
-      auto& node_view          = node_views[i];
-      auto& numbered_node_view = numbered_node_views[i];
-
-      const auto node_number = node_numbers[i];
-      const auto index       = this->_node_number_to_index.at(node_number);
-
-      node_view                    = this->_grid_nodes[index];
-      numbered_node_view.node_view = this->_grid_nodes[index];
-      numbered_node_view.number    = node_number;
-    }
-
-    auto geometry = ms::geo::Geometry(geo_figure, std::move(node_views));
-    auto element  = Element(type, std::move(numbered_node_views), std::move(geometry));
-
-    if (type == Element_Type::CELL)
+    if (element_data.type == Element_Type::CELL)
     {
       this->_cell_elements.push_back(std::move(element));
-      //this->_cell_number_to_index.emplace(number, this->_cell_elements.size() - 1);
+      // this->_cell_number_to_index.emplace(number, this->_cell_elements.size() - 1);
     }
     else
     {
@@ -489,40 +466,13 @@ void Grid::make_periodic_boundary_elements(std::vector<Grid_Peridoic_Data>&& per
   const auto num_periodic_element_pairs = num_peridoic_datas / 2;
   this->_periodic_boundary_element_pairs.reserve(num_periodic_element_pairs);
 
-  // sort by direction
   std::map<std::vector<double>, std::vector<Element>> direction_to_periodic_elements;
 
-  std::vector<ms::geo::Node_View>          node_views;
-  std::vector<ms::geo::Numbered_Node_View> numbered_node_views;
-
+  // make element and sort by direction
   for (auto& [element_data, periodic_direction] : periodic_datas)
   {
-    // make element from element data
-    auto& [number, type, figure, node_numberss] = element_data;
+    auto element = this->make_element(element_data);
 
-    const auto geo_figure = convert(figure);
-
-    const auto num_nodes = node_numberss.size();
-    node_views.resize(num_nodes);
-    numbered_node_views.resize(num_nodes);
-
-    for (int i = 0; i < num_nodes; ++i)
-    {
-      auto& node_view          = node_views[i];
-      auto& numbered_node_view = numbered_node_views[i];
-
-      const auto node_number = node_numberss[i];
-      const auto index       = this->_node_number_to_index.at(node_number);
-
-      node_view                    = this->_grid_nodes[index];
-      numbered_node_view.node_view = this->_grid_nodes[index];
-      numbered_node_view.number    = node_number;
-    }
-
-    auto geometry = ms::geo::Geometry(geo_figure, std::move(node_views));
-    auto element  = Element(type, std::move(numbered_node_views), std::move(geometry));
-
-    // sorting
     bool       is_new_direction  = true;
     const auto direction_vector1 = ms::math::Vector_View(periodic_direction);
 
@@ -541,7 +491,7 @@ void Grid::make_periodic_boundary_elements(std::vector<Grid_Peridoic_Data>&& per
     if (is_new_direction)
     {
       direction_to_periodic_elements.emplace(periodic_direction, std::vector<Element>());
-      direction_to_periodic_elements[periodic_direction].push_back(std::move(element));
+      direction_to_periodic_elements.at(periodic_direction).push_back(std::move(element));
     }
   }
 
@@ -592,10 +542,10 @@ void Grid::make_inter_cell_face_elements(void)
 
     if (geometry.is_point())
     {
-      const auto num_nodes = boundray_element.num_nodes();
+      const auto num_nodes = geometry.num_nodes();
 
       vnode_numbers.resize(num_nodes);
-      boundray_element.node_numberss(vnode_numbers.data());
+      boundray_element.node_numbers(vnode_numbers.data());
     }
     else
     {
@@ -603,7 +553,7 @@ void Grid::make_inter_cell_face_elements(void)
 
       vnode_numbers.resize(num_vertices);
       boundray_element.vertex_node_numbers(vnode_numbers.data());
-      std::sort(vnode_numbers.begin(), vnode_numbers.end()); // to ignore index order
+      std::sort(vnode_numbers.begin(), vnode_numbers.end()); // to ignore order
     }
 
     constructed_face_vnode_numbers_set.insert(std::move(vnode_numbers));
@@ -615,14 +565,14 @@ void Grid::make_inter_cell_face_elements(void)
 
     if (geometry.is_point())
     {
-      const auto num_nodes = pbdry_elem1.num_nodes();
+      const auto num_nodes = geometry.num_nodes();
 
       vnode_numbers.resize(num_nodes);
-      pbdry_elem1.node_numberss(vnode_numbers.data());
+      pbdry_elem1.node_numbers(vnode_numbers.data());
       constructed_face_vnode_numbers_set.insert(std::move(vnode_numbers));
 
       vnode_numbers.resize(num_nodes);
-      pbdry_elem2.node_numberss(vnode_numbers.data());
+      pbdry_elem2.node_numbers(vnode_numbers.data());
       constructed_face_vnode_numbers_set.insert(std::move(vnode_numbers));
     }
     else
@@ -643,18 +593,18 @@ void Grid::make_inter_cell_face_elements(void)
 
   // construct intercell face
 
-  std::vector<std::vector<int>> face_index_to_face_vnode_numbers;
+  std::vector<std::vector<int>> face_vnode_numbers_s;
   for (const auto& cell_element : this->_cell_elements)
   {
     const auto& geometry = cell_element.get_geometry();
 
     const auto num_faces = geometry.num_faces();
-    face_index_to_face_vnode_numbers.resize(num_faces);
-    cell_element.face_index_to_face_vertex_node_numbers(face_index_to_face_vnode_numbers.data());
+    face_vnode_numbers_s.resize(num_faces);
+    cell_element.face_vertex_node_numbers_s(face_vnode_numbers_s.data());
 
     for (int i = 0; i < num_faces; ++i)
     {
-      auto& face_vnode_numbers = face_index_to_face_vnode_numbers[i];
+      auto& face_vnode_numbers = face_vnode_numbers_s[i];
       std::sort(face_vnode_numbers.begin(), face_vnode_numbers.end()); // to ignore index order
 
       if (constructed_face_vnode_numbers_set.contains(face_vnode_numbers))
@@ -668,6 +618,38 @@ void Grid::make_inter_cell_face_elements(void)
       }
     }
   }
+}
+
+Element Grid::make_element(const Grid_Element_Data& element_data) const
+{
+  const auto& [number, type, figure, node_numbers] = element_data;
+
+  const auto geo_figure = convert(figure);
+
+  const auto num_nodes = node_numbers.size();
+
+  std::vector<ms::geo::Node_View>          node_views;
+  std::vector<ms::geo::Numbered_Node_View> numbered_node_views;
+
+  node_views.resize(num_nodes);
+  numbered_node_views.resize(num_nodes);
+
+  for (int i = 0; i < num_nodes; ++i)
+  {
+    auto& node_view          = node_views[i];
+    auto& numbered_node_view = numbered_node_views[i];
+
+    const auto node_number = node_numbers[i];
+    const auto index       = this->_node_number_to_index.at(node_number);
+
+    node_view                    = this->_grid_nodes[index];
+    numbered_node_view.node_view = this->_grid_nodes[index];
+    numbered_node_view.number    = node_number;
+  }
+
+  auto geometry = ms::geo::Geometry(geo_figure, std::move(node_views));
+  auto element  = Element(type, std::move(numbered_node_views), std::move(geometry));
+  return element;
 }
 
 std::vector<int> Grid::find_cell_numbers_have_these_vertex_nodes_ignore_pbdry(const std::vector<int>& vnode_numbers) const

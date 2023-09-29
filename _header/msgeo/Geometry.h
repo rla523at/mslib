@@ -21,6 +21,7 @@ namespace ms::geo
 class Geometry
 {
 public:
+  // consisting nodes는 각 figure마다 gmsh convention에 따라서 정렬되어 있어야 한다.
   Geometry(const Figure figure, const std::vector<Node_View>& consisting_nodes);
   Geometry(const Figure figure, std::vector<Node_View>&& consisting_nodes);
 
@@ -28,28 +29,29 @@ public:
   void change_nodes(std::vector<Node_View>&& new_nodes);
 
 public:
-  void                           cal_normal(double* normal, const Node_View node) const;
-  void                           cal_projected_volumes(double* projected_volumes) const;
-  double                         cal_volume(const int expected_scale_function_order = 0) const;
-  Node                           center(void) const;
-  void                           center(double* coordinates) const;
-  int                            dimension(void) const;
-  Figure                         face_figure(const int face_index) const;
-  std::vector<std::vector<int>>  face_index_to_face_vnode_indexes(void) const;
-  std::vector<int>               face_node_indexes(const int face_index) const;
-  const Quadrature_Rule&         get_quadrature_rule(const int integrand_degree) const;
-  bool                           is_point(void) const;
-  bool                           is_line(void) const;
-  Geometry_Consisting_Nodes_Info make_partitioned_geometry_node_info(const int partition_order) const;
-  int                            num_faces(void) const;
-  int                            num_vertices(void) const;
+  void                                 cal_normal(double* normal, const Node_View node) const;
+  void                                 cal_projected_volumes(double* projected_volumes) const;
+  double                               cal_volume(const int expected_scale_function_order = 0) const;
+  Node                                 center(void) const;
+  void                                 center(double* coordinates) const;
+  int                                  dimension(void) const;
+  Figure                               face_figure(const int face_index) const;
+  std::vector<int>                     face_node_indexes(const int face_index) const;
+  const std::vector<std::vector<int>>& get_face_vnode_indexes_s(void) const;
+  const Quadrature_Rule&               get_quadrature_rule(const int integrand_degree) const;
+  bool                                 is_point(void) const;
+  bool                                 is_line(void) const;
+  Geometry_Consisting_Nodes_Info       make_partitioned_geometry_node_info(const int partition_order) const;
+  int                                  num_faces(void) const;
+  int                                  num_nodes(void) const;
+  int                                  num_vertices(void) const;
 
 private:
   void create_and_store_quadrature_rule(const int integrand_degree) const;
 
 private:
   const Reference_Geometry& _reference_geometry;
-  std::vector<Node_View>    _consisting_nodes;
+  std::vector<Node_View>    _nodes;
   ms::sym::Polynomials      _parametric_functions;
 
   mutable bool                           _is_scale_function_initialized = false;

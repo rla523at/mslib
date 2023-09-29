@@ -32,18 +32,6 @@ enum class Figure
   NOT_IN_LIST = -1
 };
 
-// struct Grid_Nodes_Data
-//{
-// public:
-//   const double* coordinates_ptr(const int node_index) const;
-//   int           stride(void) const;
-//
-// public:
-//   int                 dimension;
-//   int                 num_nodes;
-//   std::vector<double> coordinates;
-// };
-
 struct Grid_Nodes_Data
 {
   ms::geo::Nodes   nodes;

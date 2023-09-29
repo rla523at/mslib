@@ -91,7 +91,7 @@ Figure Reference_Point::face_figure(const int face_index) const
   return Figure::NOT_FIGURE;
 }
 
-std::vector<std::vector<int>> Reference_Point::face_index_to_face_vnode_indexes(void) const
+std::vector<std::vector<int>> Reference_Point::face_vnode_indexes_s(void) const
 {
   EXCEPTION("Point doesn't have any faces");
   return {};
@@ -183,6 +183,17 @@ ms::sym::Polynomials Reference_Geometry_Common::cal_parametric_functions(const s
   }
 
   return parametric_functions;
+}
+
+Node_View geo::Reference_Geometry_Common::center_point(void) const
+{
+  auto result = Node_View(this->_center_coords);
+  return result;
+}
+
+const std::vector<std::vector<int>>& geo::Reference_Geometry_Common::get_face_vnode_indexes_s(void) const
+{
+  return this->_face_vnode_indexes_s;
 }
 
 bool Reference_Geometry_Common::is_point(void) const
@@ -294,11 +305,19 @@ ms::sym::Polynomials Reference_Geometry_Common::make_shape_functions(const int p
 namespace ms::geo
 {
 
-Node_View Reference_Line::center_point(void) const
+Reference_Line::Reference_Line(void)
 {
-  auto result = Node_View(this->center_coords_);
-  return result;
-};
+  this->_center_coords = {0.0};
+
+  // 0 式式式式 1
+  this->_face_vnode_indexes_s = {{0}, {1}};
+}
+
+// Node_View Reference_Line::center_point(void) const
+//{
+//   auto result = Node_View(this->_center_coords);
+//   return result;
+// };
 
 ms::sym::Polynomials Reference_Line::cal_normal_functions(const ms::sym::Polynomials& curve) const
 {
@@ -325,18 +344,6 @@ Figure Reference_Line::face_figure(const int face_index) const
   REQUIRE(face_index < this->num_faces(), "face index can't exceed num face");
 
   return Figure::POINT;
-}
-
-std::vector<std::vector<int>> Reference_Line::face_index_to_face_vnode_indexes(void) const
-{
-  // 0 式式式式 1
-  constexpr auto num_faces = 2;
-
-  std::vector<std::vector<int>> result(num_faces);
-  result[0] = {0};
-  result[1] = {1};
-
-  return result;
 }
 
 bool Reference_Line::is_valid_num_points(const int num_points) const

@@ -12,34 +12,31 @@ namespace ms::grid
 class Element
 {
 public:
-  Element(const Element_Type type, std::vector<ms::geo::Numbered_Node_View>&& numbered_node_views, ms::geo::Geometry&& geometry)
+  // node_numbers는 geometry의 node_views와 일치해야한다.
+  Element(const Element_Type type, std::vector<int>&& node_numbers, ms::geo::Geometry&& geometry)
       : _type(type),
-        _numbered_node_views(std::move(numbered_node_views)),
+        _node_numbers(std::move(node_numbers)),
         _geometry(std::move(geometry)){};
 
 public:
   void reordering_nodes(const std::vector<int>& new_ordered_node_indexes);
 
 public:
-  void                          accumulate_discrete_node_info(ms::geo::Geometry_Consisting_Nodes_Info& partition_data, const int partition_order) const;
-  void                          accumulate_node_info(ms::geo::Geometry_Consisting_Nodes_Info& partition_data, const int partition_order) const;
   int                           dimension(void) const;
   std::vector<int>              find_periodic_matched_node_numbers(const ms::math::Vector_View direction_vector, const Element& other) const;
-  std::vector<std::vector<int>> face_index_to_face_vertex_node_numbers(void) const;
-  void                          face_index_to_face_vertex_node_numbers(std::vector<int>* face_index_to_face_vnode_numbers) const;
+  std::vector<std::vector<int>> face_vertex_node_numbers_s(void) const;
+  void                          face_vertex_node_numbers_s(std::vector<int>* face_index_to_face_vnode_numbers) const;
   const ms::geo::Geometry&      get_geometry(void) const;
+  std::span<const int>          node_numbers(void) const;
   bool                          is_outward_face(const Element& face_element) const;
   Element                       make_face_element(const int face_index) const;
-  int                           num_nodes(void) const;
-  void                          node_numberss(int* node_numberss) const;
   Element_Type                  type(void) const;
-  std::vector<int>              vertex_node_numbers(void) const;
-  void                          vertex_node_numbers(int* vertex_node_numbers) const;
+  std::span<const int>          vertex_node_numbers(void) const;
 
 private:
-  Element_Type                             _type;
-  std::vector<ms::geo::Numbered_Node_View> _numbered_node_views;
-  ms::geo::Geometry                        _geometry;
+  Element_Type      _type;
+  std::vector<int>  _node_numbers;
+  ms::geo::Geometry _geometry;
 };
 
 } // namespace ms::grid

@@ -9,24 +9,24 @@ namespace ms::geo
 
 Geometry::Geometry(const Figure figure, const std::vector<Node_View>& consisting_nodes)
     : _reference_geometry(Reference_Geometry_Container::get(figure)),
-      _consisting_nodes(consisting_nodes)
+      _nodes(consisting_nodes)
 {
-  this->_parametric_functions = this->_reference_geometry.cal_parametric_functions(this->_consisting_nodes);
+  this->_parametric_functions = this->_reference_geometry.cal_parametric_functions(this->_nodes);
 }
 
 Geometry::Geometry(const Figure figure, std::vector<Node_View>&& consisting_nodes)
     : _reference_geometry(Reference_Geometry_Container::get(figure)),
-      _consisting_nodes(std::move(consisting_nodes))
+      _nodes(std::move(consisting_nodes))
 {
-  this->_parametric_functions = this->_reference_geometry.cal_parametric_functions(this->_consisting_nodes);
+  this->_parametric_functions = this->_reference_geometry.cal_parametric_functions(this->_nodes);
 }
 
 void Geometry::change_nodes(std::vector<Node_View>&& new_nodes)
 {
   REQUIRE(this->_reference_geometry.is_valid_num_points(static_cast<int>(new_nodes.size())), "The number of nodes is not valid for the current reference geometry.");
 
-  this->_consisting_nodes     = std::move(new_nodes);
-  this->_parametric_functions = this->_reference_geometry.cal_parametric_functions(this->_consisting_nodes);
+  this->_nodes                = std::move(new_nodes);
+  this->_parametric_functions = this->_reference_geometry.cal_parametric_functions(this->_nodes);
 
   if (this->_is_scale_function_initialized)
   {
@@ -61,14 +61,14 @@ void Geometry::cal_projected_volumes(double* projected_volumes) const
   if (ref_geo_dim <= 2)
   {
     const auto dimension = this->dimension();
-    const auto num_nodes = this->_consisting_nodes.size();
+    const auto num_nodes = this->_nodes.size();
 
     std::vector<double> coordinate_mins(dimension, std::numeric_limits<double>::max());
     std::vector<double> coordinate_maxs(dimension, std::numeric_limits<double>::min());
 
     for (int i = 0; i < num_nodes; ++i)
     {
-      const auto& node = this->_consisting_nodes[i];
+      const auto& node = this->_nodes[i];
       for (int j = 0; j < dimension; ++j)
       {
         const auto coordinate = node[j];
@@ -164,14 +164,14 @@ Figure Geometry::face_figure(const int face_index) const
   return this->_reference_geometry.face_figure(face_index);
 }
 
-std::vector<std::vector<int>> Geometry::face_index_to_face_vnode_indexes(void) const
+const std::vector<std::vector<int>>& Geometry::get_face_vnode_indexes_s(void) const
 {
-  return this->_reference_geometry.face_index_to_face_vnode_indexes();
+  return this->_reference_geometry.get_face_vnode_indexes_s();
 }
 
 std::vector<int> Geometry::face_node_indexes(const int face_index) const
 {
-  const auto num_nodes       = static_cast<int>(this->_consisting_nodes.size());
+  const auto num_nodes       = static_cast<int>(this->_nodes.size());
   const auto parameter_order = this->_reference_geometry.cal_parameter_order(num_nodes);
 
   const auto  face_figure  = this->_reference_geometry.face_figure(face_index);
@@ -246,6 +246,11 @@ Geometry_Consisting_Nodes_Info Geometry::make_partitioned_geometry_node_info(con
 int Geometry::num_faces(void) const
 {
   return this->_reference_geometry.num_faces();
+}
+
+int Geometry::num_nodes(void) const
+{
+  return static_cast<int>(this->_nodes.size());
 }
 
 int Geometry::num_vertices(void) const
