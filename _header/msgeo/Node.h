@@ -387,3 +387,21 @@ Node::Node(const T& coordinates)
 }
 
 } // namespace ms::geo
+
+/*
+
+
+
+
+
+
+
+
+
+
+*/
+
+namespace ms::geo
+{
+void A_to_B_vector(ms::math::Vector_Wrap vector_wrap, const Node_View A, const Node_View B);
+}

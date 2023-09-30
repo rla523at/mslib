@@ -91,7 +91,7 @@ Figure Reference_Point::face_figure(const int face_index) const
   return Figure::NOT_FIGURE;
 }
 
-std::vector<std::vector<int>> Reference_Point::face_vnode_indexes_s(void) const
+const std::vector<std::vector<int>>& Reference_Point::get_face_vnode_indexes_s(void) const
 {
   EXCEPTION("Point doesn't have any faces");
   return {};

@@ -51,6 +51,12 @@ std::vector<typename Container1::value_type> set_intersection(const Container1& 
   return intersection;
 }
 
+template <typename Container1, typename Container2, std::enable_if_t<std::is_same_v<typename Container1::value_type, typename Container2::value_type>, bool> = true>
+void set_intersection(std::vector<typename Container1::value_type>& intersection, const Container1& container1, const Container2& container2)
+{
+  std::set_intersection(container1.begin(), container1.end(), container2.begin(), container2.end(), std::back_inserter(intersection));
+}
+
 template <typename Container>
 std::vector<typename Container::value_type> set_intersection(const std::vector<Container>& containers)
 {
@@ -126,9 +132,8 @@ Grid::Grid(Grid_Data&& data)
   this->make_grid_nodes(std::move(data.nodes_data));
   this->make_cell_and_boundary_elements(std::move(data.element_datas));
   this->make_periodic_boundary_elements(std::move(data.periodic_datas));
-  this->make_inter_cell_face_elements();
 
-  // precalculate _vnode_number_to_share_cell_number_set_ignore_pbdry
+  // precalculate _node_number_to_share_cell_index_set_ignore_pbdry
   const auto num_cell = this->_cell_elements.size();
 
   for (int i = 0; i < num_cell; ++i)
@@ -136,40 +141,40 @@ Grid::Grid(Grid_Data&& data)
     const auto vnode_numbers = this->_cell_elements[i].vertex_node_numbers();
     for (const auto vnode_number : vnode_numbers)
     {
-      const auto node_index = this->_node_number_to_index.at(vnode_number);
-
-      if (!this->_node_index_to_share_cell_index_set_ignore_pbdry.contains(node_index))
+      if (!this->_node_number_to_share_cell_index_set_ignore_pbdry.contains(vnode_number))
       {
-        this->_node_index_to_share_cell_index_set_ignore_pbdry.emplace(node_index, std::set<int>());
+        this->_node_number_to_share_cell_index_set_ignore_pbdry.emplace(vnode_number, std::set<int>());
       }
 
-      this->_node_index_to_share_cell_index_set_ignore_pbdry.at(node_index).insert(i);
+      this->_node_number_to_share_cell_index_set_ignore_pbdry.at(vnode_number).insert(i);
     }
   }
 
   // precalculate _vnode_number_to_share_cell_number_set_consider_pbdry
-  this->_node_index_to_share_cell_index_set_consider_pbdry = this->_node_index_to_share_cell_index_set_ignore_pbdry;
+  this->_node_number_to_share_cell_index_set_consider_pbdry = this->_node_number_to_share_cell_index_set_ignore_pbdry;
 
-  const auto pbdry_vnode_number_to_matched_vnode_number_set = this->peridoic_boundary_vertex_node_index_to_matched_vertex_node_index_set();
+  const auto pbdry_vnode_number_to_matched_vnode_number_set = this->peridoic_boundary_vertex_node_number_to_matched_vertex_node_number_set();
 
   for (const auto& [pbdry_vnode_number, matched_vnode_number_set] : pbdry_vnode_number_to_matched_vnode_number_set)
   {
     for (const auto matched_vnode_number : matched_vnode_number_set)
     {
-      auto&       i_set = this->_node_index_to_share_cell_index_set_consider_pbdry.at(pbdry_vnode_number);
-      const auto& j_set = this->_node_index_to_share_cell_index_set_consider_pbdry.at(matched_vnode_number);
+      auto&       i_set = this->_node_number_to_share_cell_index_set_consider_pbdry.at(pbdry_vnode_number);
+      const auto& j_set = this->_node_number_to_share_cell_index_set_consider_pbdry.at(matched_vnode_number);
 
       const auto difference = set_difference(j_set, i_set);
 
       i_set.insert(difference.begin(), difference.end());
     }
   }
+
+  this->make_inter_cell_face_elements();
 }
 
 int Grid::boundary_owner_cell_number(const int boundary_number) const
 {
   const auto vnode_numbers = this->_boundary_elements[boundary_number].vertex_node_numbers();
-  const auto cell_numbers  = this->find_cell_numbers_have_these_vertex_nodes_ignore_pbdry(vnode_numbers);
+  const auto cell_numbers  = this->find_cell_indexes_have_these_nodes_ignore_pbdry(vnode_numbers);
   REQUIRE(cell_numbers.size() == 1, "boundary should have unique owner cell");
 
   return cell_numbers.front();
@@ -240,7 +245,7 @@ std::pair<int, int> Grid::inter_cell_face_owner_neighbor_cell_number_pair(const 
   {
     const auto& element       = this->_inter_cell_face_elements.at(inter_cell_face_number);
     const auto  vnode_numbers = element.vertex_node_numbers();
-    const auto  cell_numbers  = this->find_cell_numbers_have_these_vertex_nodes_ignore_pbdry(vnode_numbers);
+    const auto  cell_numbers  = this->find_cell_indexes_have_these_nodes_ignore_pbdry(vnode_numbers);
     REQUIRE(cell_numbers.size() == 2, "inter cell face should have an unique owner neighbor cell pair");
 
     // set first number as owner cell number
@@ -254,8 +259,8 @@ std::pair<int, int> Grid::inter_cell_face_owner_neighbor_cell_number_pair(const 
     // set first element as owner cell side element
     const auto& [oc_side_element, nc_side_element] = this->_periodic_boundary_element_pairs.at(pbdry_pair_number);
 
-    const auto oc_numbers = this->find_cell_numbers_have_these_vertex_nodes_ignore_pbdry(oc_side_element.vertex_node_numbers());
-    const auto nc_numbers = this->find_cell_numbers_have_these_vertex_nodes_ignore_pbdry(nc_side_element.vertex_node_numbers());
+    const auto oc_numbers = this->find_cell_indexes_have_these_nodes_ignore_pbdry(oc_side_element.vertex_node_numbers());
+    const auto nc_numbers = this->find_cell_indexes_have_these_nodes_ignore_pbdry(nc_side_element.vertex_node_numbers());
     REQUIRE(oc_numbers.size() == 1, "periodic boundary should have unique owner cell");
     REQUIRE(nc_numbers.size() == 1, "periodic boundary should have unique neighbor cell");
 
@@ -441,7 +446,7 @@ void Grid::make_cell_and_boundary_elements(std::vector<Grid_Element_Data>&& elem
   this->_cell_elements.reserve(num_element_datas);
   this->_boundary_elements.reserve(num_element_datas);
 
-  for (const auto& element_data : element_datas)
+  for (auto& element_data : element_datas)
   {
     auto element = this->make_element(element_data);
 
@@ -532,127 +537,92 @@ void Grid::make_periodic_boundary_elements(std::vector<Grid_Peridoic_Data>&& per
 
 void Grid::make_inter_cell_face_elements(void)
 {
-  // check constructed face vnode numbers
-  std::set<std::vector<int>> constructed_face_vnode_numbers_set;
-
-  std::vector<int> vnode_numbers;
-  for (const auto& boundray_element : this->_boundary_elements)
+  // list up boundary vertex node numbers
+  std::set<std::vector<int>> bdry_vnode_numbers_set;
+  for (const auto& boundary_element : this->_boundary_elements)
   {
-    const auto& geometry = boundray_element.get_geometry();
-
-    if (geometry.is_point())
-    {
-      const auto num_nodes = geometry.num_nodes();
-
-      vnode_numbers.resize(num_nodes);
-      boundray_element.node_numbers(vnode_numbers.data());
-    }
-    else
-    {
-      const auto num_vertices = geometry.num_vertices();
-
-      vnode_numbers.resize(num_vertices);
-      boundray_element.vertex_node_numbers(vnode_numbers.data());
-      std::sort(vnode_numbers.begin(), vnode_numbers.end()); // to ignore order
-    }
-
-    constructed_face_vnode_numbers_set.insert(std::move(vnode_numbers));
+    bdry_vnode_numbers_set.insert(boundary_element.make_sorted_vertex_node_numbers());
   }
 
+  // list up periodic boundary vertex node numbers
+  std::set<std::vector<int>> pbdry_vnode_numbers_set;
   for (const auto& [pbdry_elem1, pbdry_elem2] : this->_periodic_boundary_element_pairs)
   {
-    const auto& geometry = pbdry_elem1.get_geometry();
-
-    if (geometry.is_point())
-    {
-      const auto num_nodes = geometry.num_nodes();
-
-      vnode_numbers.resize(num_nodes);
-      pbdry_elem1.node_numbers(vnode_numbers.data());
-      constructed_face_vnode_numbers_set.insert(std::move(vnode_numbers));
-
-      vnode_numbers.resize(num_nodes);
-      pbdry_elem2.node_numbers(vnode_numbers.data());
-      constructed_face_vnode_numbers_set.insert(std::move(vnode_numbers));
-    }
-    else
-    {
-      const auto num_vertices = geometry.num_vertices();
-
-      vnode_numbers.resize(num_vertices);
-      pbdry_elem1.vertex_node_numbers(vnode_numbers.data());
-      std::sort(vnode_numbers.begin(), vnode_numbers.end()); // to ignore index order
-      constructed_face_vnode_numbers_set.insert(std::move(vnode_numbers));
-
-      vnode_numbers.resize(num_vertices);
-      pbdry_elem2.vertex_node_numbers(vnode_numbers.data());
-      std::sort(vnode_numbers.begin(), vnode_numbers.end()); // to ignore index order
-      constructed_face_vnode_numbers_set.insert(std::move(vnode_numbers));
-    }
+    pbdry_vnode_numbers_set.insert(pbdry_elem1.make_sorted_vertex_node_numbers());
+    pbdry_vnode_numbers_set.insert(pbdry_elem2.make_sorted_vertex_node_numbers());
   }
 
-  // construct intercell face
+  std::set<int>    finished_cell_index_set;
+  std::vector<int> cell_indexes_for_verifying; // constructed face인지 확인하기 위해 필요한 cell index들
 
-  std::vector<std::vector<int>> face_vnode_numbers_s;
-  for (const auto& cell_element : this->_cell_elements)
+  const auto                              num_cells = this->num_cells();
+  std::vector<std::set<std::vector<int>>> constructed_face_vnode_numbers_sets(num_cells);
+
+  for (int i = 0; i < num_cells; ++i)
   {
-    const auto& geometry = cell_element.get_geometry();
+    const auto& cell_element = this->_cell_elements[i];
+    const auto& geometry     = cell_element.get_geometry();
+    const auto  num_face     = geometry.num_faces();
 
-    const auto num_faces = geometry.num_faces();
-    face_vnode_numbers_s.resize(num_faces);
-    cell_element.face_vertex_node_numbers_s(face_vnode_numbers_s.data());
+    const auto face_sharing_cell_index_set = this->find_face_sharing_cell_index_set_ignore_pbdry(i);
 
-    for (int i = 0; i < num_faces; ++i)
+    for (int j = 0; j < num_face; ++j)
     {
-      auto& face_vnode_numbers = face_vnode_numbers_s[i];
-      std::sort(face_vnode_numbers.begin(), face_vnode_numbers.end()); // to ignore index order
+      auto sorted_vnode_numbers = cell_element.make_sorted_face_vertex_node_numbers(j);
+      
+      if (bdry_vnode_numbers_set.contains(sorted_vnode_numbers)) continue;
+      if (pbdry_vnode_numbers_set.contains(sorted_vnode_numbers)) continue;
 
-      if (constructed_face_vnode_numbers_set.contains(face_vnode_numbers))
+      // check is constructed face
+      cell_indexes_for_verifying.clear();
+      set_intersection(cell_indexes_for_verifying, finished_cell_index_set, face_sharing_cell_index_set);
+
+      bool is_constructed_face = false;
+
+      for (const auto cell_index : cell_indexes_for_verifying)
       {
-        continue;
+        if (constructed_face_vnode_numbers_sets[cell_index].contains(sorted_vnode_numbers))
+        {
+          is_constructed_face = true;
+          break;
+        }
       }
-      else
-      {
-        this->_inter_cell_face_elements.push_back(cell_element.make_face_element(i));
-        constructed_face_vnode_numbers_set.insert(std::move(face_vnode_numbers));
-      }
+
+      if (is_constructed_face) continue;
+
+      // construct intercell face
+      this->_inter_cell_face_elements.push_back(cell_element.make_face_element(j));
+      constructed_face_vnode_numbers_sets[i].insert(std::move(sorted_vnode_numbers));
     }
+
+    finished_cell_index_set.insert(i);
   }
 }
 
-Element Grid::make_element(const Grid_Element_Data& element_data) const
+Element Grid::make_element(Grid_Element_Data& element_data) const
 {
-  const auto& [number, type, figure, node_numbers] = element_data;
+  auto& [number, type, figure, node_numbers] = element_data;
 
   const auto geo_figure = convert(figure);
 
   const auto num_nodes = node_numbers.size();
 
-  std::vector<ms::geo::Node_View>          node_views;
-  std::vector<ms::geo::Numbered_Node_View> numbered_node_views;
-
-  node_views.resize(num_nodes);
-  numbered_node_views.resize(num_nodes);
-
+  std::vector<ms::geo::Node_View> node_views(num_nodes);
   for (int i = 0; i < num_nodes; ++i)
   {
-    auto& node_view          = node_views[i];
-    auto& numbered_node_view = numbered_node_views[i];
+    auto& node_view = node_views[i];
 
     const auto node_number = node_numbers[i];
     const auto index       = this->_node_number_to_index.at(node_number);
-
-    node_view                    = this->_grid_nodes[index];
-    numbered_node_view.node_view = this->_grid_nodes[index];
-    numbered_node_view.number    = node_number;
+    node_view              = this->_grid_nodes[index];
   }
 
   auto geometry = ms::geo::Geometry(geo_figure, std::move(node_views));
-  auto element  = Element(type, std::move(numbered_node_views), std::move(geometry));
+  auto element  = Element(type, std::move(node_numbers), std::move(geometry));
   return element;
 }
 
-std::vector<int> Grid::find_cell_numbers_have_these_vertex_nodes_ignore_pbdry(const std::vector<int>& vnode_numbers) const
+std::vector<int> Grid::find_cell_indexes_have_these_nodes_ignore_pbdry(const std::span<const int> vnode_numbers) const
 {
   const auto num_vnode = vnode_numbers.size();
 
@@ -661,15 +631,15 @@ std::vector<int> Grid::find_cell_numbers_have_these_vertex_nodes_ignore_pbdry(co
 
   for (int i = 0; i < num_vnode; ++i)
   {
-    share_cell_index_set_ptrs.push_back(&this->_node_index_to_share_cell_index_set_ignore_pbdry.at(vnode_numbers[i]));
+    share_cell_index_set_ptrs.push_back(&this->_node_number_to_share_cell_index_set_ignore_pbdry.at(vnode_numbers[i]));
   }
 
   return set_intersection(share_cell_index_set_ptrs);
 }
 
-std::unordered_map<int, std::set<int>> Grid::peridoic_boundary_vertex_node_index_to_matched_vertex_node_index_set(void) const
+std::unordered_map<int, std::set<int>> Grid::peridoic_boundary_vertex_node_number_to_matched_vertex_node_number_set(void) const
 {
-  std::unordered_map<int, std::set<int>> pbdry_vnode_index_to_matched_vnode_index_set;
+  std::unordered_map<int, std::set<int>> pbdry_vnode_number_to_matched_vnode_number_set;
 
   // Grid::make_periodic_boundary_elements에서 periodic boundary element pair를 만들 때, vertex node끼리 정렬되게 만들었음을 가정한다.
   for (const auto& [oc_side_element, nc_side_element] : this->_periodic_boundary_element_pairs)
@@ -682,21 +652,19 @@ std::unordered_map<int, std::set<int>> Grid::peridoic_boundary_vertex_node_index
     {
       const auto i_vnode_number = oc_side_vnode_numbers[i];
       const auto j_vnode_number = nc_side_vnode_numbers[i];
-      const auto i_vnode_index  = this->_node_number_to_index.at(i_vnode_number);
-      const auto j_vnode_index  = this->_node_number_to_index.at(j_vnode_number);
 
-      if (!pbdry_vnode_index_to_matched_vnode_index_set.contains(i_vnode_index))
+      if (!pbdry_vnode_number_to_matched_vnode_number_set.contains(i_vnode_number))
       {
-        pbdry_vnode_index_to_matched_vnode_index_set.emplace(i_vnode_index, std::set<int>());
+        pbdry_vnode_number_to_matched_vnode_number_set.emplace(i_vnode_number, std::set<int>());
       }
 
-      if (!pbdry_vnode_index_to_matched_vnode_index_set.contains(j_vnode_index))
+      if (!pbdry_vnode_number_to_matched_vnode_number_set.contains(j_vnode_number))
       {
-        pbdry_vnode_index_to_matched_vnode_index_set.emplace(j_vnode_index, std::set<int>());
+        pbdry_vnode_number_to_matched_vnode_number_set.emplace(j_vnode_number, std::set<int>());
       }
 
-      pbdry_vnode_index_to_matched_vnode_index_set.at(i_vnode_index).insert(j_vnode_index);
-      pbdry_vnode_index_to_matched_vnode_index_set.at(j_vnode_index).insert(i_vnode_index);
+      pbdry_vnode_number_to_matched_vnode_number_set.at(i_vnode_number).insert(j_vnode_number);
+      pbdry_vnode_number_to_matched_vnode_number_set.at(j_vnode_number).insert(i_vnode_number);
     }
   }
 
@@ -704,27 +672,53 @@ std::unordered_map<int, std::set<int>> Grid::peridoic_boundary_vertex_node_index
   const auto dim = this->dimension();
   for (int i = 0; i < dim - 1; ++i)
   {
-    for (auto& [pbdry_vnode_index, matched_vnode_index_set] : pbdry_vnode_index_to_matched_vnode_index_set)
+    for (auto& [pbdry_vnode_number, matched_vnode_number_set] : pbdry_vnode_number_to_matched_vnode_number_set)
     {
-      if (matched_vnode_index_set.size() == 1) continue;
+      if (matched_vnode_number_set.size() == 1) continue;
 
-      for (const auto matched_vnode_index : matched_vnode_index_set)
+      for (const auto matched_vnode_number : matched_vnode_number_set)
       {
-        const auto& other_matched_vnode_index_set = pbdry_vnode_index_to_matched_vnode_index_set.at(matched_vnode_index);
+        const auto& other_matched_vnode_number_set = pbdry_vnode_number_to_matched_vnode_number_set.at(matched_vnode_number);
 
-        auto&       i_set      = matched_vnode_index_set;
-        const auto& j_set      = other_matched_vnode_index_set;
+        auto&       i_set      = matched_vnode_number_set;
+        const auto& j_set      = other_matched_vnode_number_set;
         const auto  difference = set_difference(j_set, i_set);
 
         if (difference.empty()) continue;
 
         i_set.insert(difference.begin(), difference.end());
-        i_set.erase(pbdry_vnode_index);
+        i_set.erase(pbdry_vnode_number);
       }
     }
   }
 
-  return pbdry_vnode_index_to_matched_vnode_index_set;
+  return pbdry_vnode_number_to_matched_vnode_number_set;
+}
+
+std::set<int> Grid::find_face_sharing_cell_index_set_ignore_pbdry(const int cell_index) const
+{
+  const auto& cell_element = this->_cell_elements[cell_index];
+  const auto& geometry     = cell_element.get_geometry();
+  const auto  num_faces    = geometry.num_faces();
+
+  std::set<int> face_sharing_cell_index_set;
+
+  for (int i = 0; i < num_faces; ++i)
+  {
+    const auto& face_vnode_numbers = cell_element.face_vertex_node_numbers(i);
+    auto        cell_indexes       = this->find_cell_indexes_have_these_nodes_ignore_pbdry(face_vnode_numbers);
+
+    auto iter = std::find(cell_indexes.begin(), cell_indexes.end(), cell_index);
+    REQUIRE(iter != cell_indexes.end(), "cell_index should be in cell_indexes");
+    cell_indexes.erase(iter);
+
+    for (const auto cell_index : cell_indexes)
+    {
+      face_sharing_cell_index_set.insert(cell_index);
+    }
+  }
+
+  return face_sharing_cell_index_set;
 }
 
 } // namespace ms::grid

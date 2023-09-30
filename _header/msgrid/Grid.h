@@ -40,11 +40,12 @@ private:
   void    make_cell_and_boundary_elements(std::vector<Grid_Element_Data>&& element_datas);
   void    make_periodic_boundary_elements(std::vector<Grid_Peridoic_Data>&& periodic_datas);
   void    make_inter_cell_face_elements(void);
-  Element make_element(const Grid_Element_Data& element_data) const;
+  Element make_element(Grid_Element_Data& element_data) const;
 
 private:
-  std::vector<int>                       find_cell_numbers_have_these_vertex_nodes_ignore_pbdry(const std::vector<int>& vnode_numbers) const;
-  std::unordered_map<int, std::set<int>> peridoic_boundary_vertex_node_index_to_matched_vertex_node_index_set(void) const;
+  std::vector<int>                       find_cell_indexes_have_these_nodes_ignore_pbdry(const std::span<const int> vnode_numbers) const;
+  std::unordered_map<int, std::set<int>> peridoic_boundary_vertex_node_number_to_matched_vertex_node_number_set(void) const;
+  std::set<int>                          find_face_sharing_cell_index_set_ignore_pbdry(const int cell_index) const;
 
 private:
   ms::geo::Nodes                           _grid_nodes;
@@ -60,8 +61,9 @@ private:
   // std::unordered_map<int, int>             _inter_cell_face_number_to_index;
   // std::unordered_map<int, int>             _periodic_boundary_number_to_index;
 
-  std::unordered_map<int, std::set<int>> _node_index_to_share_cell_index_set_ignore_pbdry;
-  std::unordered_map<int, std::set<int>> _node_index_to_share_cell_index_set_consider_pbdry;
+  std::unordered_map<int, std::set<int>> _node_number_to_share_cell_index_set_ignore_pbdry;
+  std::unordered_map<int, std::set<int>> _node_number_to_share_cell_index_set_consider_pbdry;
+  // std::unordered_map<int, std::set<int>> _cell_index_to_share_cell_index_set_ignore_pbdry;
 };
 
 } // namespace ms::grid

@@ -27,6 +27,7 @@ public:
 
 public:
   void change_nodes(std::vector<Node_View>&& new_nodes);
+  void reordering_nodes(const std::vector<int>& new_order);
 
 public:
   void                                 cal_normal(double* normal, const Node_View node) const;
@@ -45,15 +46,15 @@ public:
   int                                  num_faces(void) const;
   int                                  num_nodes(void) const;
   int                                  num_vertices(void) const;
+  Node_View                            node_view(const int node_index) const;
 
 private:
   void create_and_store_quadrature_rule(const int integrand_degree) const;
 
 private:
-  const Reference_Geometry& _reference_geometry;
-  std::vector<Node_View>    _nodes;
-  ms::sym::Polynomials      _parametric_functions;
-
+  const Reference_Geometry&              _reference_geometry;
+  std::vector<Node_View>                 _nodes;
+  ms::sym::Polynomials                   _parametric_functions;
   mutable bool                           _is_scale_function_initialized = false;
   mutable ms::sym::Symbol                _scale_function;
   mutable bool                           _is_normal_functions_initialized = false;

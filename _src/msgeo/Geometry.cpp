@@ -38,6 +38,20 @@ void Geometry::change_nodes(std::vector<Node_View>&& new_nodes)
   }
 }
 
+void Geometry::reordering_nodes(const std::vector<int>& new_orders)
+{
+  const auto num_nodes = this->_nodes.size();
+  REQUIRE(num_nodes == new_orders.size(), "The number of nodes is not valid for the current reference geometry.");
+
+  std::vector<Node_View> new_nodes(num_nodes);
+  for (int i = 0; i < num_nodes; ++i)
+  {
+    new_nodes[new_orders[i]] = this->_nodes[i];
+  }
+
+  this->change_nodes(std::move(new_nodes));
+}
+
 void Geometry::cal_normal(double* normal, const Node_View node) const
 {
   if (!this->_is_normal_functions_initialized)
@@ -256,6 +270,12 @@ int Geometry::num_nodes(void) const
 int Geometry::num_vertices(void) const
 {
   return this->_reference_geometry.num_vertices();
+}
+
+Node_View Geometry::node_view(const int node_index) const
+{
+  REQUIRE(node_index < _nodes.size(), "node index is out of range");
+  return this->_nodes[node_index];
 }
 
 // std::vector<Euclidean_Vector> Geometry::post_points(const ushort post_order) const

@@ -505,3 +505,20 @@ bool Nodes::is_null_node(void) const
 }
 
 } // namespace ms::geo
+
+namespace ms::geo
+{
+
+void A_to_B_vector(ms::math::Vector_Wrap vector_wrap, const Node_View A, const Node_View B)
+{
+  const auto dimension = A.dimension();
+  REQUIRE(dimension == B.dimension(), "dimension should be matched");
+  REQUIRE(vector_wrap.dimension() == dimension, "vector wrap dimension should be equal to dimension");
+
+  for (int i = 0; i < dimension; ++i)
+  {
+    vector_wrap[i] = B[i] - A[i];
+  }
+}
+
+} // namespace ms::geo
