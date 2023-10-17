@@ -18,9 +18,12 @@ bool Node_View::operator==(const Node_View& other) const
 {
   if (this->_dimension != other._dimension) return false;
 
+  constexpr auto epsilon = 1.0e-10;
+
   for (int i = 0; i < this->_dimension; ++i)
   {
-    if ((*this)[i] != other[i]) return false;
+    const auto abs_diff = std::abs((*this)[i] - other[i]);
+    if (epsilon < abs_diff) return false;
   }
 
   return true;
@@ -244,6 +247,19 @@ namespace ms::geo
 Node_View Nodes_View::operator[](const int index) const
 {
   return this->at(index);
+}
+
+bool Nodes_View::operator==(const Nodes_View other) const
+{
+  if (this->_num_nodes != other._num_nodes) return false;
+  if (this->_dimension != other._dimension) return false;
+
+  for (int i = 0; i < this->_num_nodes; ++i)
+  {
+    if (this->at(i) != other.at(i)) return false;
+  }
+  
+  return true;
 }
 
 Node_View Nodes_View::at(const int index) const

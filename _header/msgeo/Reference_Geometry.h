@@ -14,7 +14,11 @@ public:
   void change_number(const int old_number, const int new_number);
 
 public:
-  std::vector<int> node_numberss;
+  std::vector<int>::iterator begin(void);
+  std::vector<int>::iterator end(void);
+
+public:
+  std::vector<int> node_numbers;
 };
 
 // struct Geometry_Consisting_Nodes_Info

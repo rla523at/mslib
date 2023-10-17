@@ -44,6 +44,9 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <ItemGroup>
+    <ProjectReference Include="..\filesystem\filesystem.vcxproj">
+      <Project>{76e8c8b6-ebd9-4c77-8396-63d31b060495}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\geo\geo.vcxproj">
       <Project>{09adad60-d5bc-41cb-befd-70df556b7ce1}</Project>
     </ProjectReference>
@@ -52,9 +55,6 @@
     </ProjectReference>
     <ProjectReference Include="..\math\math.vcxproj">
       <Project>{03bedf8c-7f22-4244-a8cb-e7bf9ac7c821}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\path\path.vcxproj">
-      <Project>{a88cc190-f1f1-4c7a-842c-8ac4f104c62b}</Project>
     </ProjectReference>
     <ProjectReference Include="..\string\string.vcxproj">
       <Project>{79f7838f-67fb-4fa8-9790-26bc8b0b664e}</Project>

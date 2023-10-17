@@ -222,6 +222,7 @@ public:
 
 public:
   Node_View operator[](const int index) const;
+  bool      operator==(const Nodes_View other) const;
 
 public:
   Node_View              at(const int index) const;

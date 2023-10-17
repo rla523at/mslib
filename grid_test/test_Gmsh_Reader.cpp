@@ -1,5 +1,5 @@
-#include "msgrid/Gmsh_Reader.h"
 #include "msgrid/Data.h"
+#include "msgrid/Gmsh_Reader.h"
 #include "gtest/gtest.h"
 
 namespace GFR_TEST_API
@@ -33,11 +33,6 @@ TEST(Gmsh_Reader, read1)
 
   constexpr auto ref_num_nodes = 505;
   EXPECT_EQ(num_nodes, ref_num_nodes);
-
-  // const auto&         coordinates      = grid_file_data.nodes_data.coordinates;
-  // std::vector<double> ref_coordinates = {0.4299999999999999, 0.01, 0};
-
-  // EXPECT_EQ(coordinates, ref_coordinates);
 }
 
 TEST(Gmsh_Reader, read2)
@@ -56,8 +51,8 @@ TEST(Gmsh_Reader, read2)
 
   Grid_Element_Data ref_elem_data;
   ref_elem_data.figure       = Figure::QUADRILATERAL;
-  ref_elem_data.type = Element_Type::CELL;
-  ref_elem_data.node_numbers = {42, 43, 144, 143}; // 1¾¿ »©¼­ ÀÐÀ½
+  ref_elem_data.type         = Element_Type::CELL;
+  ref_elem_data.node_numbers = {43, 44, 145, 144};
 
   GFR_TEST_API::is_equal(ref_elem_data, elem_data);
 }

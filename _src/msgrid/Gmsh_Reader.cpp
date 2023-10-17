@@ -218,7 +218,7 @@ Grid_Data Gmsh_Reader::convert(Gmsh_Nodes_Data&& node_data, Gmsh_Elements_Data&&
   Grid_Data grid_data;
 
   // convert Gmsh_Node_Data to Grid_Nodes_Data
-  const auto num_nodes = node_data.numbers.size();
+  const auto num_nodes = static_cast<int>(node_data.numbers.size());
 
   auto& grid_nodes_data   = grid_data.nodes_data;
   grid_nodes_data.nodes   = ms::geo::Nodes(num_nodes, this->_dimension, std::move(node_data.coordinates));

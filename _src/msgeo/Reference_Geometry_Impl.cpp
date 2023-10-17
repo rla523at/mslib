@@ -11,7 +11,7 @@ namespace ms::geo
 
 void Connectivity::add_number(const int number)
 {
-  for (auto& node_number : node_numberss)
+  for (auto& node_number : node_numbers)
   {
     node_number += number;
   }
@@ -19,7 +19,17 @@ void Connectivity::add_number(const int number)
 
 void Connectivity::change_number(const int old_number, const int new_number)
 {
-  std::replace(node_numberss.begin(), node_numberss.end(), old_number, new_number);
+  std::replace(node_numbers.begin(), node_numbers.end(), old_number, new_number);
+}
+
+std::vector<int>::iterator Connectivity::begin(void)
+{
+  return this->node_numbers.begin();
+}
+
+std::vector<int>::iterator Connectivity::end(void)
+{
+  return this->node_numbers.end();
 }
 
 } // namespace ms::geo
@@ -453,7 +463,7 @@ void Reference_Line::create_and_store_partition_geometry(const int partition_ord
     auto& connectivity = connectivities[i];
 
     //   i 式式式式 i+1
-    connectivity.node_numberss = {i, i + 1};
+    connectivity.node_numbers = {i, i + 1};
   }
 
   Geometry_Consisting_Nodes_Info data(std::move(nodes), std::move(connectivities));

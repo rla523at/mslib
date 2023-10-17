@@ -1,16 +1,17 @@
-#include "Grid_Reader_Factory.h"
-
-#include "Gmsh_Reader.h"
+#include "msgrid/Grid_Reader_Factory.h"
 
 #include "msexception/Exception.h"
+#include "msgrid/Gmsh_Reader.h"
 #include "msstring/string.h"
 
 namespace ms::grid
 {
 
 std::unique_ptr<Reader> Reader_Factory::make(const std::string_view grid_type, const int dimension)
-{
-  if (ms::string::contain_icase(grid_type, "gmsh"))
+{ 
+  const auto KEY = ms::string::upper_case(grid_type);
+
+  if (ms::string::contain_icase(KEY, "GMSH"))
   {
     return std::make_unique<Gmsh_Reader>(dimension);
   }
@@ -21,4 +22,4 @@ std::unique_ptr<Reader> Reader_Factory::make(const std::string_view grid_type, c
   }
 }
 
-} // namespace ms
+} // namespace ms::grid

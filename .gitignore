@@ -4,8 +4,9 @@
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
 # User define
-math_test/lib/
 *.idb
+_lib/mkl_core.lib
+
 
 # User-specific files
 *.rsuser
