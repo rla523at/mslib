@@ -44,6 +44,8 @@ std::string      remove(std::string_view str, const char target);
 std::string      remove(std::string_view str, std::string_view target);
 std::string_view remove_after(std::string_view str, std::string_view target);
 void             remove_after_inplace(std::string& str, std::string_view target);
+std::string_view remove_before(std::string_view str, std::string_view target);
+std::string_view remove_up_to(std::string_view str, std::string_view target);
 void             remove_inplace(std::string& str, const char target);
 void             remove_inplace(std::string& str, std::string_view target);
 

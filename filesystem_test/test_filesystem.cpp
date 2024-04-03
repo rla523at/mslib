@@ -1,6 +1,47 @@
 #include "msfilesystem/filesystem.h"
 #include "gtest/gtest.h"
 
+#ifdef _DEBUG
+
+TEST(msfilesystem, copy_file_exception1)
+{
+  constexpr auto src = "Test/Copy/From/folder";
+	constexpr auto dst = "Test/Copy/To/";
+	EXPECT_ANY_THROW(ms::filesystem::copy_file(src, dst));	
+}
+#endif
+
+TEST(msfilesystem, copy_file1)
+{
+  constexpr auto src = "Test/Copy/From/file1.txt";
+  constexpr auto dst = "Test/Copy/To/file1.txt";
+  ms::filesystem::copy_file(src, dst);
+
+  const bool is_exist = ms::filesystem::is_exist_file("Test/Copy/To/file1.txt");
+  EXPECT_TRUE(is_exist);
+
+  if (is_exist)
+	{
+		ms::filesystem::remove_file("Test/Copy/To/file1.txt");
+	}
+}
+
+TEST(msfilesystem, copy_file2)
+{
+  constexpr auto src = "Test/Copy/From/AlreadyExist.txt";
+  constexpr auto dst = "Test/Copy/To/AlreadyExist.txt";
+
+  EXPECT_NO_THROW(ms::filesystem::copy_file(src, dst, std::filesystem::copy_options::overwrite_existing));
+}
+
+TEST(msfilesystem, extract_file_name)
+{
+  constexpr auto src = "Test/Copy/From/file1.txt";
+
+  constexpr auto ref = "file1.txt";
+  EXPECT_EQ(ref, ms::filesystem::extract_file_name(src));
+}
+
 TEST(msfilesystem, has_this_extension)
 {
   EXPECT_TRUE(ms::filesystem::has_this_extension("A.txt", ".txt"));

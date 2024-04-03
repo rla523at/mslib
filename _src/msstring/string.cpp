@@ -408,6 +408,36 @@ void remove_after_inplace(std::string& str, std::string_view target)
   str.erase(pos);
 }
 
+std::string_view remove_before(std::string_view str, std::string_view target)
+{
+  constexpr auto n   = 1;
+  const auto     pos = ms::string::find_nth_position(str, target, n);
+
+  if (pos == ms::string::fail_to_find)
+  {
+    return str;
+  }
+
+  const auto num_remove = pos;
+  str.remove_prefix(num_remove);
+  return str;
+}
+
+std::string_view remove_up_to(std::string_view str, std::string_view target)
+{
+  constexpr auto n   = 1;
+  const auto     pos = ms::string::find_nth_position(str, target, n);
+
+  if (pos == ms::string::fail_to_find)
+  {
+    return str;
+  }
+
+  const auto num_remove = pos + target.size();
+  str.remove_prefix(num_remove);
+  return str;
+}
+
 void remove_inplace(std::string& str, const char target)
 {
   str = ms::string::remove(str, target);

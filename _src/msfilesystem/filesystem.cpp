@@ -2,15 +2,32 @@
 
 #include "msexception/Exception.h"
 #include "msstring/string.h"
-#include <filesystem>
+
 #include <fstream>
 
 namespace ms::filesystem
 {
+void copy_file(const std::string_view from_file_path, const std::string_view to_file_path, const std::filesystem::copy_options option)
+{
+  REQUIRE(!is_folder_path(from_file_path), std::string(from_file_path) + " should be a file");
+  REQUIRE(!is_folder_path(to_file_path), std::string(to_file_path) + " should be a file");
+  REQUIRE(is_exist_file(from_file_path), std::string(from_file_path) + " is not exist file");
+  REQUIRE(is_exist_folder(extract_folder_path(to_file_path)), extract_folder_path(to_file_path) + " is not exist folder");
+  std::filesystem::copy_file(from_file_path, to_file_path, option);
+}
 
 std::string extract_folder_path(const std::string_view file_path)
 {
+  REQUIRE(!is_folder_path(file_path), "input should be file path");
+
   return std::filesystem::path(file_path).parent_path().string() + "/";
+}
+
+std::string extract_file_name(const std::string_view file_path)
+{
+  REQUIRE(!is_folder_path(file_path), "input should be file path");
+
+  return std::filesystem::path(file_path).filename().string();
 }
 
 std::vector<std::string> file_names_in_folder(const std::string_view folder_path)
@@ -172,4 +189,4 @@ void remove_file(const std::string_view file_path)
   std::filesystem::remove(p);
 }
 
-} // namespace ms::path
+} // namespace ms::filesystem
