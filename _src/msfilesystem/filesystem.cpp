@@ -147,6 +147,20 @@ void make_folder(const std::string_view folder_path)
   std::filesystem::create_directories(p);
 }
 
+void move_file(const std::string_view file_path, const std::string_view new_folder_path)
+{
+  REQUIRE(ms::filesystem::is_exist_file(file_path), " file should be exist.");
+  REQUIRE(ms::filesystem::is_exist_folder(new_folder_path), " new folder path should be exist."); //반드시 존재하는 폴더여야 됨!
+
+  const auto file_name = ms::filesystem::extract_file_name(file_path);
+  const auto new_file_path = new_folder_path.data() + file_name;
+
+  std::filesystem::path old_p(file_path);
+  std::filesystem::path new_p(new_file_path);
+  std::filesystem::rename(old_p, new_p);
+
+}
+
 void remove_empty_folder(const std::string_view folder_path)
 {
   REQUIRE(is_folder_path(folder_path), "folder_path should be end with /");

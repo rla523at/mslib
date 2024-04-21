@@ -13,6 +13,15 @@ TEST(msfilesystem, copy_file_exception1)
 }
 #endif
 
+TEST(msfilesystem, move_file1)
+{
+  constexpr auto file_path = "Test/move_file/A.txt";
+  constexpr auto new_folder_path = "Test/move_file/A/";
+  ms::filesystem::move_file(file_path, new_folder_path);
+
+  EXPECT_TRUE(ms::filesystem::is_exist_file("Test/move_file/A/A.txt"));
+}
+
 TEST(msfilesystem, copy_file1)
 {
   constexpr auto src = "Test/Copy/From/file1.txt";

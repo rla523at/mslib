@@ -22,6 +22,7 @@ bool                     is_folder_path(const std::string_view folder_path);
 bool                     is_exist_folder(const std::string_view folder_path);
 bool                     is_exist_file(const std::string_view file_path);
 void                     make_folder(const std::string_view folder_path);
+void                     move_file(const std::string_view file_path, const std::string_view new_folder_path);
 void                     rename(const std::string& path, const std::string& old_name, const std::string& new_name);
 void                     remove_empty_folder(const std::string_view folder_path);
 void                     remove_folder(const std::string_view folder_path);
