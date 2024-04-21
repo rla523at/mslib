@@ -1,8 +1,8 @@
 #pragma once
+#include <filesystem>
 #include <string>
 #include <string_view>
 #include <vector>
-#include <filesystem>
 
 // convention
 // denominator in path should be '/'
@@ -10,7 +10,8 @@
 // file/folder paths are not case-sensitive
 namespace ms::filesystem
 {
-void										 copy_file(const std::string_view from_file_path, const std::string_view to_file_path, const std::filesystem::copy_options option = std::filesystem::copy_options::none);
+void                     copy_file(const std::string_view from_file_path, const std::string_view to_file_path, const std::filesystem::copy_options option = std::filesystem::copy_options::none);
+void                     replace_file(const std::string_view from_file_path, const std::string_view to_file_path);
 std::string              extract_folder_path(const std::string_view file_path);
 std::string              extract_file_name(const std::string_view file_path);
 std::vector<std::string> file_names_in_folder(const std::string_view folder_path);

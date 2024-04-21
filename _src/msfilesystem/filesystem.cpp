@@ -16,6 +16,15 @@ void copy_file(const std::string_view from_file_path, const std::string_view to_
   std::filesystem::copy_file(from_file_path, to_file_path, option);
 }
 
+void replace_file(const std::string_view from_file_path, const std::string_view to_file_path)
+{
+  REQUIRE(!is_folder_path(from_file_path), std::string(from_file_path) + " should be a file");
+  REQUIRE(!is_folder_path(to_file_path), std::string(to_file_path) + " should be a file");
+  REQUIRE(is_exist_file(from_file_path), std::string(from_file_path) + " is not exist file");
+  REQUIRE(is_exist_file(to_file_path), std::string(to_file_path) + " is not exist file");
+  std::filesystem::copy_file(from_file_path, to_file_path, std::filesystem::copy_options::overwrite_existing);
+}
+
 std::string extract_folder_path(const std::string_view file_path)
 {
   REQUIRE(!is_folder_path(file_path), "input should be file path");

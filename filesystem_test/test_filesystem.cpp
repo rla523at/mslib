@@ -1,6 +1,8 @@
 #include "msfilesystem/filesystem.h"
 #include "gtest/gtest.h"
 
+#include <fstream>
+
 #ifdef _DEBUG
 
 TEST(msfilesystem, copy_file_exception1)
@@ -32,6 +34,30 @@ TEST(msfilesystem, copy_file2)
   constexpr auto dst = "Test/Copy/To/AlreadyExist.txt";
 
   EXPECT_NO_THROW(ms::filesystem::copy_file(src, dst, std::filesystem::copy_options::overwrite_existing));
+}
+
+TEST(msfilesystem, replace_file1)
+{
+  constexpr auto src = "Test/Replace/A/file.txt";
+  constexpr auto dst = "Test/Replace/B/B.txt";
+
+  std::string temp;
+
+  std::ifstream file(dst);
+  std::getline(file, temp);
+  EXPECT_EQ(temp, "B");
+  file.close();
+
+  ms::filesystem::replace_file(src, dst);
+
+  file.open(dst);
+  std::getline(file, temp);
+  EXPECT_EQ(temp, "A");
+  file.close();
+  
+  //roll back
+  std::ofstream out_file(dst);
+  out_file << "B";
 }
 
 TEST(msfilesystem, extract_file_name)
