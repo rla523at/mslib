@@ -20,6 +20,8 @@ TEST(msfilesystem, move_file1)
   ms::filesystem::move_file(file_path, new_folder_path);
 
   EXPECT_TRUE(ms::filesystem::is_exist_file("Test/move_file/A/A.txt"));
+
+  ms::filesystem::move_file("Test/move_file/A/A.txt", "Test/move_file/");
 }
 
 TEST(msfilesystem, copy_file1)

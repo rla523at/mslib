@@ -1428,7 +1428,7 @@ TEST(Polynomial, to_string)
 
 TEST(Polynomials, with_nodes)
 {
-  ms::geo::Nodes nodes(ms::geo::Coordinates_Type::BLOCK, 2, 2);
+  ms::geo::Nodes nodes(2, 2);
 
   auto node0 = nodes[0];
   auto node1 = nodes[1];
@@ -1444,11 +1444,11 @@ TEST(Polynomials, with_nodes)
   f[0] = x + y;
   f[1] = x * x - x * y;
 
-  ms::geo::Nodes result(ms::geo::Coordinates_Type::BLOCK, 2, 2);
+  ms::geo::Nodes result(2, 2);
   
   for (int i = 0; i < 2; ++i)
   {
-    f.calculate(result[i], nodes[i]);
+    f.calculate(result[i].to_vector_wrap(), nodes[i].to_vector_wrap());
   }
 
   EXPECT_DOUBLE_EQ(result[0][0], 2);

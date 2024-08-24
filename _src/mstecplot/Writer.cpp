@@ -1,7 +1,7 @@
-#include "Writer.h"
+#include "mstecplot/Writer.h"
 
 #include "msexception/Exception.h"
-#include "mspath/path.h"
+#include "msfilesystem/filesystem.h"
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -39,7 +39,7 @@ void Writer::write_grid_file(const Grid_Data& data)
 
   const auto grid_file_path = grid_folder_path + "/_grid.plt";
 
-  if (THIS::_configuration.file_fomrat == File_Format::ASCII)
+  if (THIS::_configuration.file_format == File_Format::ASCII)
   {
     std::ofstream out_file(grid_file_path);
     REQUIRE(out_file.is_open(), "fail to open grid file.");
@@ -49,7 +49,7 @@ void Writer::write_grid_file(const Grid_Data& data)
     THIS::write_ASCII_connectivity(out_file, data.connectivities);
     out_file.close();
   }
-  else if (THIS::_configuration.file_fomrat == File_Format::Binary)
+  else if (THIS::_configuration.file_format == File_Format::Binary)
   {
     Binary_File out_file(grid_file_path);
     THIS::write_binary_grid_file_header(out_file);
@@ -80,7 +80,7 @@ void Writer::write_solution_file(const Solution_Data& info)
 
   const auto solution_file_path = solution_folder_path + "solution" + std::to_string(THIS::_strand_id) + ".plt";
 
-  if (THIS::_configuration.file_fomrat == File_Format::ASCII)
+  if (THIS::_configuration.file_format == File_Format::ASCII)
   {
     std::ofstream out_file(solution_file_path);
     REQUIRE(out_file.is_open(), "fail to open solution file.");
@@ -89,7 +89,7 @@ void Writer::write_solution_file(const Solution_Data& info)
     THIS::write_ASCII_solution_file_data(out_file, info);
     out_file.close();
   }
-  else if (THIS::_configuration.file_fomrat == File_Format::Binary)
+  else if (THIS::_configuration.file_format == File_Format::Binary)
   {
     Binary_File out_file(solution_file_path);
     THIS::write_binary_solution_file_header(out_file, info);

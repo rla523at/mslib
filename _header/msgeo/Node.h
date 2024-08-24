@@ -14,8 +14,10 @@
 namespace ms::geo
 {
 
-template <typename T>
-concept const_span = requires(const T& t) { std::span<const double>(t); };
+template <typename... T>
+concept can_form_const_span = requires(T&&... args) {
+  std::span<const double>(std::forward<T>(args)...);
+};
 
 template <typename T>
 concept span = requires(T& t) { std::span<double>(t); };
@@ -44,11 +46,13 @@ class Node_View
 public:
   Node_View(void) = default;
 
-  template <const_span T>
-  Node_View(const T& coordinates);
+  template <typename... T>
+    requires can_form_const_span<T...>
+  Node_View(T&&... coordinates);
 
-  template <const_span T>
-  Node_View(const T& coordinates, const int dimenion, const int inc = 1);
+  template <typename... T>
+    requires can_form_const_span<T...>
+  Node_View(const int inc = 1, T&&... coordinates);
 
 public:
   ms::math::Vector<0> operator-(const Node_View& other) const;
@@ -98,13 +102,13 @@ public:
 
   template <span T>
   Node_Wrap(T& coordinates)
-      : Node_View(coordinates),
-        _coordinates_wrap(coordinates){};
+    : Node_View(coordinates),
+      _coordinates_wrap(coordinates){};
 
   template <span T>
   Node_Wrap(T& coordsinates, const int dimension, const int inc = 1)
-      : Node_View(coordsinates, dimension, inc),
-        _coordinates_wrap(coordsinates){};
+    : Node_View(coordsinates, dimension, inc),
+      _coordinates_wrap(coordsinates){};
 
 public:
   double& operator[](const int index);
@@ -148,8 +152,9 @@ public:
   Node(const Node& other);
   Node(Node&& other) noexcept;
 
-  template <const_span T>
-  Node(const T& coordinates);
+  template <typename... T>
+    requires can_form_const_span<T...>
+  Node(T&&... coordinates);
 
 private:
   void reallocate_coordinates(void);
@@ -217,8 +222,9 @@ class Nodes_View
 public:
   Nodes_View(void) = default;
 
-  template <const_span T>
-  Nodes_View(const T& coordinates, const int num_nodes, const int dimension);
+  template <typename... T>
+    requires can_form_const_span<T...>
+  Nodes_View(const int num_nodes, const int dimension, T&&... coordinates);
 
 public:
   Node_View operator[](const int index) const;
@@ -265,8 +271,8 @@ public:
 
   template <span T>
   Nodes_Wrapper(T& coordinates, const int num_nodes, const int dimension)
-      : Nodes_View(coordinates, num_nodes, dimension),
-        _coordinates_wrap(coordinates){};
+    : Nodes_View(coordinates, num_nodes, dimension),
+      _coordinates_wrap(coordinates){};
 
 public:
   Node_Wrap operator[](const int index);
@@ -343,40 +349,44 @@ private:
 // template definitions
 namespace ms::geo
 {
-template <const_span T>
-inline Node_View::Node_View(const T& coordinates)
-    : _coordinates_view(coordinates)
+
+template <typename... T>
+  requires can_form_const_span<T...>
+inline Node_View::Node_View(T&&... args)
+  : _coordinates_view(std::forward<T>(args)...)
 {
   this->_dimension = static_cast<int>(this->_coordinates_view.size());
   this->_inc       = 1;
 }
 
-template <const_span T>
-inline Node_View::Node_View(const T& coordinates, const int dimension, const int inc)
-    : _coordinates_view(coordinates),
-      _dimension(dimension),
-      _inc(inc)
+template <typename... T>
+  requires can_form_const_span<T...>
+inline Node_View::Node_View(const int inc, T&&... coordinates)
+  : _coordinates_view(std::forward<T>(coordinates)...)
 {
-  REQUIRE(0 < this->_dimension, "dimension should be natural number");
-  REQUIRE(0 < this->_inc, "inc should be natural number");
-  REQUIRE(this->_dimension * this->_inc == this->_coordinates_view.size(), "Given coordinates should be matched wtih given size");
+  REQUIRE(0 < inc, "inc should be natural number");
+
+  this->_dimension = static_cast<int>(this->_coordinates_view.size());
+  this->_inc       = inc;
 }
 
-template <const_span T>
-inline Nodes_View::Nodes_View(const T& coordinates, const int num_nodes, const int dimension)
-    : _coordinates_view(coordinates),
-      _num_nodes(num_nodes),
-      _dimension(dimension)
+template <typename... T>
+  requires can_form_const_span<T...>
+inline Nodes_View::Nodes_View(const int num_nodes, const int dimension, T&&... coordinates)
+  : _coordinates_view(std::forward<T>(coordinates)...),
+    _num_nodes(num_nodes),
+    _dimension(dimension)
 {
   REQUIRE(0 < this->_num_nodes, "number of nodes should be natural number");
   REQUIRE(0 < this->_dimension, "dimension should be natural number");
   REQUIRE(this->_coordinates_view.size() == this->_num_nodes * this->_dimension, "Given coordinates size should be matched with given size");
 };
 
-template <const_span T>
-Node::Node(const T& coordinates)
+template <typename... T>
+  requires can_form_const_span<T...>
+Node::Node(T&&... coordinates)
 {
-  std::span<const double> cooridnates_view = coordinates;
+  std::span<const double> cooridnates_view(std::forward<T>(coordinates)...);
 
   this->_dimension = static_cast<int>(cooridnates_view.size());
   this->_inc       = 1;

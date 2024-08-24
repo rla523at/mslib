@@ -2,7 +2,7 @@
 
 #include "msexception/Exception.h"
 #include "msgeo/Figure.h"
-#include "msgrid/Data.h"
+#include "msgrid/Grid_Data.h"
 #include "msmath/Vector.h"
 #include <algorithm>
 #include <functional>

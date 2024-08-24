@@ -56,7 +56,7 @@ TEST(Nodes_View, construct)
   const auto          dimension   = 2;
   std::vector<double> coordinates = {1, 2, 3, 3, 2, 1};
 
-  ms::geo::Nodes_View nodes(coordinates, num_nodes, dimension);
+  ms::geo::Nodes_View nodes(num_nodes, dimension, coordinates);
 
   const auto& node1 = nodes[1];
   EXPECT_DOUBLE_EQ(node1[0], 3);
@@ -68,8 +68,8 @@ TEST(Nodes_View, other_node_to_this_node)
   std::vector<double> coordinates  = {1, 2, 3};
   std::vector<double> coordinates2 = {3, 2, 1};
 
-  ms::geo::Node_View node1(coordinates, dimension);
-  ms::geo::Node_View node2(coordinates2, dimension);
+  ms::geo::Node_View node1(coordinates);
+  ms::geo::Node_View node2(coordinates2);
 
   ms::math::Vector<3> v;
   node1.other_to_this_vector(node2, v);
@@ -81,7 +81,7 @@ TEST(Nodes_View, conversion1)
 {
   constexpr auto      dimension   = 3;
   std::vector<double> coordinates = {1, 3, 5, 2, 4, 6};
-  ms::geo::Nodes_View nodes(coordinates, 2, dimension);
+  ms::geo::Nodes_View nodes(2, dimension, coordinates);
 
   ms::sym::Polynomial x("x0");
   ms::sym::Polynomial y("x1");
@@ -102,7 +102,7 @@ TEST(Nodes_View, axis_coordinates1)
   std::vector<double> coordinates = {1, 3, 5, 2, 4, 6, 1, 4, 3};
   constexpr auto      dimension   = 3;
   constexpr auto      num_nodes   = 3;
-  ms::geo::Nodes_View nodes(coordinates, num_nodes, dimension);
+  ms::geo::Nodes_View nodes(num_nodes, dimension, coordinates);
 
   const auto result0 = nodes.axis_coordinates_vector_view(0);
   const auto result1 = nodes.axis_coordinates_vector_view(1);

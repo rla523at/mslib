@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
-#include "Data.h"
+#include "Tecplot_Data.h"
 #include "Binary_File.h"
 
 

@@ -43,14 +43,10 @@
     <Import Project="..\release.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <ItemGroup>
-    <ProjectReference Include="..\geo\geo.vcxproj">
-      <Project>{09adad60-d5bc-41cb-befd-70df556b7ce1}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\sym\sym.vcxproj">
-      <Project>{eb3d5635-a62e-4846-ab9c-595352887bf2}</Project>
-    </ProjectReference>
-  </ItemGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <TargetName>$(ProjectName)</TargetName>
+  </PropertyGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
@@ -92,6 +88,8 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>mkl_core.lib;mkl_intel_lp64.lib;mkl_sequential.lib;mslib_debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../_lib/</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

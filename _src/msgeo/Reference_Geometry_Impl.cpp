@@ -262,7 +262,7 @@ ms::sym::Polynomials Reference_Geometry_Common::make_shape_functions(const int p
   const auto coords         = this->make_parametric_functions_reference_coords(parameter_order);
   const auto num_ref_points = this->num_parametric_function_reference_points(parameter_order);
   const auto dim            = this->dimension();
-  Nodes_View ref_points(coords, num_ref_points, dim);
+  Nodes_View ref_points(num_ref_points, dim, coords);
 
   const auto bases     = this->make_parametric_function_bases(parameter_order);
   const auto num_bases = bases.size();
