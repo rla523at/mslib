@@ -1,44 +1,50 @@
 #pragma once
+#include <cassert>
+#include <format>
+#include <iostream>
 #include <string_view>
-#include <stdexcept>
-#include <sstream>
-
 
 #ifdef _DEBUG
-#define FILE_NAME ms::exception::extract_file_name(__FILE__)
-#define REQUIRE(requirement, message) ms::exception::require(requirement, message, FILE_NAME, __FUNCTION__, __LINE__)
-#define EXCEPTION(message) ms::exception::require(false, message, FILE_NAME, __FUNCTION__, __LINE__)
+
+#define REQUIRE( requirement, format_string, ... )                                                      \
+  if ( !( requirement ) )                                                                               \
+  {                                                                                                     \
+    setlocale( LC_ALL, "" );                                                                            \
+                                                                                                        \
+    std::string_view function_call_file_name = __FILE__;                                                \
+    const size_t     num_remove              = function_call_file_name.rfind( "\\" ) + 1;               \
+    function_call_file_name.remove_prefix( num_remove );                                                \
+                                                                                                        \
+    std::cout << "\n==============================EXCEPTION========================================\n"; \
+    std::cout << std::format( "{:10}: {}", "File", function_call_file_name ) << "\n";                   \
+    std::cout << std::format( "{:10}: {}", "Function", __FUNCTION__ ) << "\n";                          \
+    std::cout << std::format( "{:10}: {}", "Line", __LINE__ ) << "\n";                                  \
+    ms::exception::print_message( format_string __VA_OPT__(, __VA_ARGS__ ) );                           \
+    std::cout << "==============================EXCEPTION========================================\n\n"; \
+                                                                                                        \
+    assert( false );                                                                                    \
+  }                                        
+
+
+#define EXCEPTION( format_string, ... ) REQUIRE( false, format_string, __VA_ARGS__ )
+
 #else
-#define LOCATION 
-#define REQUIRE(requirement, message)
-#define EXCEPTION(message)
+#define REQUIRE( requirement, format_string, ... )
+#define EXCEPTION( format_string, ... )
 #endif
 
 namespace ms::exception
 {
-	inline void require(const bool requirement, const std::string_view& message,
-		const std::string_view& file_name, const std::string_view& function_name, const int num_line)
-	{
-		if (!requirement)
-		{
-			std::ostringstream os;
-
-			os << "\n==============================EXCEPTION========================================\n";
-			os << "File\t\t: " << file_name << "\n";
-			os << "Function\t: " << function_name << "\n";
-			os << "Line\t\t: " << num_line << "\n";
-			os << "Message\t\t: " << message.data() << "\n";
-			os << "==============================EXCEPTION========================================\n\n";
-
-			throw std::runtime_error(os.str());
-		}
-	}
-
-	inline std::string_view extract_file_name(std::string_view __FILE__macro)
+  template <typename... Ts>
+  void print_message( const std::string_view format_string, const Ts&... args )
   {
-    const auto num_remove = __FILE__macro.rfind("\\") + 1;
-    __FILE__macro.remove_prefix(num_remove);
+    std::cout << std::format( "{:10}: {}", "Message", std::vformat( format_string, std::make_format_args( args... ) ) ) << "\n";
+  }
 
-    return __FILE__macro;
+  template <typename... Ts>
+  void print_message( const std::wstring_view format_string, const Ts&... args )
+  {
+    std::wcout << std::format( L"{:10}: {}", L"Message", std::vformat( format_string, std::make_wformat_args( args... ) ) ) << "\n";
   }
-  }
+
+} // namespace ms::exception

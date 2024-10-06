@@ -3,6 +3,7 @@
 #include "msexception/Exception.h"
 #include "msmath/BLAS.h"
 #include <iomanip>
+#include <sstream>
 
 namespace ms::math
 {
