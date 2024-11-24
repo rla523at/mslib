@@ -115,6 +115,11 @@
   <ItemGroup>
     <ClCompile Include="test_filesystem.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\filesystem\filesystem.vcxproj">
+      <Project>{76e8c8b6-ebd9-4c77-8396-63d31b060495}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\Microsoft.googletest.v140.windesktop.msvcstl.static.rt-dyn.1.8.1.7\build\native\Microsoft.googletest.v140.windesktop.msvcstl.static.rt-dyn.targets" Condition="Exists('..\packages\Microsoft.googletest.v140.windesktop.msvcstl.static.rt-dyn.1.8.1.7\build\native\Microsoft.googletest.v140.windesktop.msvcstl.static.rt-dyn.targets')" />

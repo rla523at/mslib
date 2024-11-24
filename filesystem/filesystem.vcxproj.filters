@@ -15,12 +15,15 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\_src\msfilesystem\filesystem.cpp">
+    <ClCompile Include="..\_src\msfilesystem.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="..\_src\msstring.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\_header\msfilesystem\filesystem.h">
+    <ClInclude Include="..\_src\msfilesystem.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
   </ItemGroup>
