@@ -543,3 +543,6 @@ Vector<0> operator*(const double constant, const Vector_View x)
 }
 
 } // namespace ms::math
+
+
+

@@ -5,7 +5,7 @@
 
 # User define
 *.idb
-_lib/mkl_core.lib
+__dist/mkl_core.lib
 
 
 # User-specific files

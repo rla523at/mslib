@@ -192,3 +192,6 @@ void mkl_zgeqrf_compact( MKL_LAYOUT layout, MKL_INT m, MKL_INT n, double* ap,
 #endif    /* __cplusplus */
 
 #endif /* _MKL_COMPACT_H */
+
+
+

@@ -13,16 +13,16 @@ inline constexpr int fail_to_find = -19940523;
 
 bool compare_icase(const int c1, const int c2);
 bool compare_icase(std::string_view str1, std::string_view str2);
-bool contain(std::string_view str, const char target); // Çüº¯È¯ÀÌ ÇÊ¿äÇÏ¸é templateÀÌ ¿ì¼±¼øÀ§°¡ ÀÖ±â¶§¹®¿¡ ÇÊ¿ä
+bool contain(std::string_view str, const char target); // ï¿½ï¿½ï¿½ï¿½È¯ï¿½ï¿½ ï¿½Ê¿ï¿½ï¿½Ï¸ï¿½ templateï¿½ï¿½ ï¿½ì¼±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö±â¶§ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¿ï¿½
 bool contain(std::string_view str, const int target);
-bool contain(std::string_view str, const char* target);        // Çüº¯È¯ÀÌ ÇÊ¿äÇÏ¸é templateÀÌ ¿ì¼±¼øÀ§°¡ ÀÖ±â¶§¹®¿¡ ÇÊ¿ä
-bool contain(std::string_view str, const std::string& target); // Çüº¯È¯ÀÌ ÇÊ¿äÇÏ¸é templateÀÌ ¿ì¼±¼øÀ§°¡ ÀÖ±â¶§¹®¿¡ ÇÊ¿ä
+bool contain(std::string_view str, const char* target);        // ï¿½ï¿½ï¿½ï¿½È¯ï¿½ï¿½ ï¿½Ê¿ï¿½ï¿½Ï¸ï¿½ templateï¿½ï¿½ ï¿½ì¼±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö±â¶§ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¿ï¿½
+bool contain(std::string_view str, const std::string& target); // ï¿½ï¿½ï¿½ï¿½È¯ï¿½ï¿½ ï¿½Ê¿ï¿½ï¿½Ï¸ï¿½ templateï¿½ï¿½ ï¿½ì¼±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö±â¶§ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¿ï¿½
 bool contain(std::string_view str, std::string_view target);
-bool contain_icase(std::string_view str, const char target); // Çüº¯È¯ÀÌ ÇÊ¿äÇÏ¸é templateÀÌ ¿ì¼±¼øÀ§°¡ ÀÖ±â¶§¹®¿¡ ÇÊ¿ä
+bool contain_icase(std::string_view str, const char target); // ï¿½ï¿½ï¿½ï¿½È¯ï¿½ï¿½ ï¿½Ê¿ï¿½ï¿½Ï¸ï¿½ templateï¿½ï¿½ ï¿½ì¼±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö±â¶§ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¿ï¿½
 bool contain_icase(std::string_view str, const int target);
-bool contain_icase(std::string_view str, const char* target); // Çüº¯È¯ÀÌ ÇÊ¿äÇÏ¸é templateÀÌ ¿ì¼±¼øÀ§°¡ ÀÖ±â¶§¹®¿¡ ÇÊ¿ä
+bool contain_icase(std::string_view str, const char* target); // ï¿½ï¿½ï¿½ï¿½È¯ï¿½ï¿½ ï¿½Ê¿ï¿½ï¿½Ï¸ï¿½ templateï¿½ï¿½ ï¿½ì¼±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö±â¶§ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¿ï¿½
 bool contain_icase(std::string_view str, std::string_view target);
-bool contain_icase(std::string_view str, const std::string& target); // Çüº¯È¯ÀÌ ÇÊ¿äÇÏ¸é templateÀÌ ¿ì¼±¼øÀ§°¡ ÀÖ±â¶§¹®¿¡ ÇÊ¿ä
+bool contain_icase(std::string_view str, const std::string& target); // ï¿½ï¿½ï¿½ï¿½È¯ï¿½ï¿½ ï¿½Ê¿ï¿½ï¿½Ï¸ï¿½ templateï¿½ï¿½ ï¿½ì¼±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö±â¶§ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¿ï¿½
 
 // When fail to find target in str, return ms::sel::failt_to_find
 int find_nth_position(std::string_view str, const char target, const int n);
@@ -114,3 +114,5 @@ T str_to_value(std::string_view str)
 };
 
 } // namespace ms::string
+
+

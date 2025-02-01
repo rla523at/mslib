@@ -153,3 +153,6 @@ int vsldSSCompute(VSLSSTaskPtr, const unsigned MKL_INT64, const MKL_INT) NOTHROW
 #endif /* __cplusplus */
 
 #endif // _MKL_VSL_OMP_OFFLOAD_H_
+
+
+

@@ -884,3 +884,6 @@ _MKL_API(int,VSLSSDELETETASK,(VSLSSTaskPtr* ) NOTHROW)
 #endif /* __cplusplus */
 
 #endif /* __MKL_VSL_FUNCTIONS_H__ */
+
+
+

@@ -79,3 +79,6 @@ typedef int (*VMLErrorCallBack) (DefVmlErrorContext* pdefVmlErrorContext);
 #endif /* __cplusplus */
 
 #endif /* __MKL_VML_TYPES_H__ */
+
+
+

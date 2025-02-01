@@ -152,3 +152,6 @@ extern "C" {
 #endif /*__cplusplus */
 
 #endif /*_MKL_SPBLAS_OMP_VARIANT_H_ */
+
+
+

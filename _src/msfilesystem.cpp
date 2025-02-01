@@ -4,6 +4,7 @@
 #include "msstring.h"
 
 #include <fstream>
+#include <windows.h>
 
 namespace ms::filesystem
 {
@@ -27,6 +28,20 @@ namespace ms::filesystem
     REQUIRE( is_exist_file( from_file_path ), std::string( from_file_path ) + " is not exist file" );
     REQUIRE( is_exist_folder( extract_folder_path( to_file_path ) ), extract_folder_path( to_file_path ) + " is not exist folder" );
     std::filesystem::copy_file( from_file_path, to_file_path, option );
+  }
+
+  std::string excutable_file_path( void )
+  {
+    constexpr unsigned __int64 buffer_size = 256;
+
+    char        buffer[buffer_size];
+    const DWORD length = GetModuleFileNameA( NULL, buffer, buffer_size );
+    REQUIRE( length != 0, ".exe ÌååÏùºÏùò Ïã§Ìñâ Í≤∞Î°úÎ•º Í∞ÄÏ†∏Ïò§ÎäîÎç∞ Ïã§Ìå®ÌñàÏäµÎãàÎã§." );
+
+    std::string result = buffer;
+    ms::string::replace_inplace( result, '\\', '/' );
+
+    return result;
   }
 
   void replace_file( const std::string_view from_file_path, const std::string_view to_file_path )
@@ -180,6 +195,14 @@ namespace ms::filesystem
     return std::filesystem::exists( p );
   }
 
+  bool is_exist_file( const std::wstring_view file_path )
+  {
+    REQUIRE( !is_folder_path( file_path ), "file path should not be end with /" );
+
+    std::filesystem::path p( file_path );
+    return std::filesystem::exists( p );
+  }
+
   bool is_exist_file( const std::string_view file_path )
   {
     REQUIRE( !is_folder_path( file_path ), "file path should not be end with /" );
@@ -200,6 +223,22 @@ namespace ms::filesystem
     return last_char == '/';
   }
 
+  bool is_modified_later( const std::wstring_view reference_file_path, const std::wstring_view target_file_path )
+  {
+    const std::chrono::file_clock::time_point reference_time_point = std::filesystem::last_write_time( reference_file_path );
+    const std::chrono::file_clock::time_point target_time_point    = std::filesystem::last_write_time( target_file_path );
+
+    return reference_time_point < target_time_point;
+  }
+
+  bool is_modified_later( const std::string_view reference_file_path, const std::string_view target_file_path )
+  {
+    const std::chrono::file_clock::time_point reference_time_point = std::filesystem::last_write_time( reference_file_path );
+    const std::chrono::file_clock::time_point target_time_point    = std::filesystem::last_write_time( target_file_path );
+
+    return reference_time_point < target_time_point;
+  }
+
   void make_folder( const std::string_view folder_path )
   {
     REQUIRE( is_folder_path( folder_path ), "folder_path should be end with /" );
@@ -215,7 +254,7 @@ namespace ms::filesystem
   void move_file( const std::string_view file_path, const std::string_view new_folder_path )
   {
     REQUIRE( ms::filesystem::is_exist_file( file_path ), " file should be exist." );
-    REQUIRE( ms::filesystem::is_exist_folder( new_folder_path ), " new folder path should be exist." ); // π›µÂΩ√ ¡∏¿Á«œ¥¬ ∆˙¥ıø©æﬂ µ !
+    REQUIRE( ms::filesystem::is_exist_folder( new_folder_path ), " new folder path should be exist." ); // ÔøΩ›µÔøΩÔøΩ ÔøΩÔøΩÔøΩÔøΩÔøΩœ¥ÔøΩ ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ ÔøΩÔøΩ!
 
     const auto file_name     = ms::filesystem::extract_file_name( file_path );
     const auto new_file_path = new_folder_path.data() + file_name;
@@ -223,6 +262,19 @@ namespace ms::filesystem
     std::filesystem::path old_p( file_path );
     std::filesystem::path new_p( new_file_path );
     std::filesystem::rename( old_p, new_p );
+  }
+
+  std::string_view parent_path_view( const std::string_view path, const int depth )
+  {
+    const int pos = ms::string::find_r_nth_position( path, "/", depth + 1 );
+    if ( pos == ms::string::fail_to_find )
+      return {};
+
+    std::string_view result = path;
+
+    const auto num_remove = path.size() - pos - 1;
+    result.remove_suffix( num_remove );
+    return result;    
   }
 
   void remove_empty_folder( const std::string_view folder_path )
@@ -277,3 +329,5 @@ namespace ms::filesystem
   }
 
 } // namespace ms::filesystem
+
+

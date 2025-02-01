@@ -3260,3 +3260,6 @@ static __inline lapack_int mkl_dc_lapacke_potrf_convert(int matrix_layout, char 
     return MKL_DC_CONCAT3(LAPACKE_, MKL_DC_PREC_LETTER, potrf)(matrix_layout, uplo, n, a, lda);
 }
 #endif
+
+
+

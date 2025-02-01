@@ -152,12 +152,12 @@ bool Element::is_outward_face(const Element& face_element) const
 
   if (face_geometry.is_point())
   {
-    // ¿À¸¥ÂÊ¿¡ ÀÖ´Â face¸¦ outward face·Î Á¤ÀÇÇÑ´Ù.
+    // ï¿½ï¿½ï¿½ï¿½ï¿½Ê¿ï¿½ ï¿½Ö´ï¿½ faceï¿½ï¿½ outward faceï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½.
     return face_index == 1;
   }
   else if (face_geometry.is_line())
   {
-    // ¹Ý½Ã°è ¹æÇâ face¸¦ outward face·Î Á¤ÀÇÇÑ´Ù.
+    // ï¿½Ý½Ã°ï¿½ ï¿½ï¿½ï¿½ï¿½ faceï¿½ï¿½ outward faceï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½.
     return std::equal(this_face_vnode_numbers.begin(), this_face_vnode_numbers.end(), face_vnode_numbers.begin());
   }
   else
@@ -168,7 +168,7 @@ bool Element::is_outward_face(const Element& face_element) const
     temp.insert(temp.end(), this_face_vnode_numbers.begin(), this_face_vnode_numbers.end());
     temp.insert(temp.end(), this_face_vnode_numbers.begin(), this_face_vnode_numbers.end());
 
-    // ¹Ý½Ã°è ¹æÇâ face¸¦ outward face·Î Á¤ÀÇÇÑ´Ù.
+    // ï¿½Ý½Ã°ï¿½ ï¿½ï¿½ï¿½ï¿½ faceï¿½ï¿½ outward faceï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½.
     std::boyer_moore_searcher searcher(face_vnode_numbers.begin(), face_vnode_numbers.end());
     return std::search(temp.begin(), temp.end(), searcher) != temp.end();
   }
@@ -270,7 +270,7 @@ int Element::find_face_index(const Element& face_element) const
 //  const auto& face_vnode_indexes_s = this->_geometry.get_face_vnode_indexes_s();
 //  const auto  num_faces            = face_vnode_indexes_s.size();
 //
-//  // index¸¦ node number·Î ¹Ù²Ù´Â °úÁ¤
+//  // indexï¿½ï¿½ node numberï¿½ï¿½ ï¿½Ù²Ù´ï¿½ ï¿½ï¿½ï¿½ï¿½
 //  std::vector<std::vector<int>> face_vnode_numbers_s(num_faces);
 //
 //  for (int i = 0; i < num_faces; ++i)
@@ -348,7 +348,7 @@ int Element::find_face_index(const Element& face_element) const
 //
 // void Element::accumulate_node_info(ms::geo::Geometry_Consisting_Nodes_Info& node_info, const int partition_order) const
 //{
-//   // geometry¿¡¼­ ¸¸µç partitioned geometry node info¿¡ ¾Ë¸ÂÀº connectivity¸¦ ÁÖ´Â °úÁ¤
+//   // geometryï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ partitioned geometry node infoï¿½ï¿½ ï¿½Ë¸ï¿½ï¿½ï¿½ connectivityï¿½ï¿½ ï¿½Ö´ï¿½ ï¿½ï¿½ï¿½ï¿½
 //   auto        pg_node_info         = this->_geometry.make_partitioned_geometry_node_info(partition_order);
 //   const auto& numbered_nodes_in_pg = pg_node_info.numbered_nodes;
 //   auto&       connectivities_of_pg = pg_node_info.connectivities;
@@ -443,10 +443,10 @@ int Element::find_face_index(const Element& face_element) const
 //
 //   const auto num_nodes_in_pg = numbered_nodes_in_pg.num_nodes();
 //
-//   // nodes in pg¿¡ ÀûÀýÇÑ number¸¦ ÁÖ´Â °úÁ¤ÀÌ±¸³ª.
+//   // nodes in pgï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ numberï¿½ï¿½ ï¿½Ö´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ì±ï¿½ï¿½ï¿½.
 //   // numbered nodes.
-//   // connectivity¸¦ numberd nodes¿Í ¿«¾îº¸ÀÚ. ÀÇ¹Ì°¡ ¸íÈ®ÇØÁø´Ù!
-//   // nodeinfo¿¡ nodes°¡ ¾Æ´Ï¶ó numbered nodes¿Í connectivity·Î º¸ÀÚ.
+//   // connectivityï¿½ï¿½ numberd nodesï¿½ï¿½ ï¿½ï¿½ï¿½îº¸ï¿½ï¿½. ï¿½Ç¹Ì°ï¿½ ï¿½ï¿½È®ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½!
+//   // nodeinfoï¿½ï¿½ nodesï¿½ï¿½ ï¿½Æ´Ï¶ï¿½ numbered nodesï¿½ï¿½ connectivityï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
 //   std::map<int, int> index_to_node_number;
 //
 //   for (int i = 0; i < num_nodes_in_pg; ++i)
@@ -480,3 +480,5 @@ int Element::find_face_index(const Element& face_element) const
 //
 //   connectivities.insert(connectivities.end(), connectivities_of_pg.begin(), connectivities_of_pg.end());
 // }
+
+

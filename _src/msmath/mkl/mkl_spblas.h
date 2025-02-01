@@ -1,4 +1,4 @@
-﻿/*******************************************************************************
+/*******************************************************************************
 * Copyright 2005-2022 Intel Corporation.
 *
 * This software and the related documents are Intel copyrighted  materials,  and
@@ -1727,3 +1727,6 @@ MKL_DEPRECATED void MKL_ZCSRADD(const char *transa,  const MKL_INT *job,  const 
 }
 #endif /*__cplusplus */
 #endif /*_MKL_SPBLAS_H_ */
+
+
+

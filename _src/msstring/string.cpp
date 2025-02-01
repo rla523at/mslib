@@ -562,7 +562,7 @@ bool is_natural_number(std::string_view str)
     return false;
   }
 
-  return std::all_of(str.begin(), str.end(), ::isdigit); // ¿Ö ::isdigitÇØ¾ßµÇÁö??
+  return std::all_of(str.begin(), str.end(), ::isdigit); // ï¿½ï¿½ ::isdigitï¿½Ø¾ßµï¿½ï¿½ï¿½??
 }
 
 bool is_integer(std::string_view str)
@@ -620,3 +620,5 @@ bool is_real_number(std::string_view str)
 }
 
 } // namespace ms::string
+
+

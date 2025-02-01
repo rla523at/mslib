@@ -5,12 +5,12 @@
 
 #ifdef _DEBUG
 
-//TEST( msfilesystem, copy_file_exception1 )
+// TEST( msfilesystem, copy_file_exception1 )
 //{
-//  constexpr auto src = "Test/Copy/From/folder";
-//  constexpr auto dst = "Test/Copy/To/";
-//  EXPECT_ANY_THROW( ms::filesystem::copy_file( src, dst ) );
-//}
+//   constexpr auto src = "Test/Copy/From/folder";
+//   constexpr auto dst = "Test/Copy/To/";
+//   EXPECT_ANY_THROW( ms::filesystem::copy_file( src, dst ) );
+// }
 #endif
 
 TEST( msfilesystem, base_name_view1 )
@@ -105,6 +105,13 @@ TEST( msfilesystem, extract_file_name )
   constexpr auto ref = "file1.txt";
   EXPECT_EQ( ref, ms::filesystem::extract_file_name( src ) );
 }
+TEST( msfilesystem, extract_folder_path )
+{
+  constexpr auto src = "D:/Code/mslib/x64/Debug/filesystem_test.exe";
+
+  constexpr auto ref = "D:/Code/mslib/x64/Debug/";
+  EXPECT_EQ( ref, ms::filesystem::extract_folder_path( src ) );
+}
 
 TEST( msfilesystem, has_this_extension )
 {
@@ -162,11 +169,29 @@ TEST( msfilesystem, remove_empty_folder1 )
 }
 TEST( msfilesystem, remove_folder1 )
 {
-  std::string folder_path = "Test/D/";
-  ms::filesystem::make_folder( folder_path );
-  ms::filesystem::make_folder( folder_path + "A/" );
-  ms::filesystem::make_folder( folder_path + "B/" );
+  std::string reference_path = "Test/is_modefied_later/reference.txt";
+  std::string target_path    = "Test/is_modefied_later/target.txt";
 
-  ms::filesystem::remove_folder( folder_path );
-  EXPECT_FALSE( ms::filesystem::is_exist_folder( folder_path ) );
+  EXPECT_TRUE( ms::filesystem::is_modified_later( reference_path, target_path ) );
+}
+TEST( msfilesystem, executable_path1 )
+{
+  std::string reference_path = "D:/Code/mslib/x64/Debug/filesystem_test.exe";
+  std::string result         = ms::filesystem::excutable_file_path();
+
+  EXPECT_EQ( reference_path, result );
+}
+TEST( msfilesystem, parent_path_view1 )
+{
+  constexpr auto src = "D:/Code/mslib/x64/Debug/filesystem_test.exe";
+
+  constexpr auto ref = "D:/Code/mslib/";
+  EXPECT_EQ( ref, ms::filesystem::parent_path_view( src, 2 ) );
+}
+TEST( msfilesystem, parent_path_view2 )
+{
+  constexpr auto src = "D:/Code/mslib/x64/Debug/filesystem_test.exe";
+
+  constexpr auto ref = "";
+  EXPECT_EQ( ref, ms::filesystem::parent_path_view( src, 5 ) );
 }

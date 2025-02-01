@@ -319,7 +319,7 @@ Reference_Line::Reference_Line(void)
 {
   this->_center_coords = {0.0};
 
-  // 0 ¦¡¦¡¦¡¦¡ 1
+  // 0 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 1
   this->_face_vnode_indexes_s = {{0}, {1}};
 }
 
@@ -375,7 +375,7 @@ bool Reference_Line::is_line(void) const
 
 std::vector<int> Reference_Line::node_indexes(const int parameter_order) const
 {
-  // 0 ¦¡¦¡¦¡ 2 ¦¡¦¡¦¡ ¡¤¡¤¡¤ ¦¡¦¡¦¡ order+1 ¦¡¦¡¦¡ 1
+  // 0 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 2 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ order+1 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 1
 
   std::vector<int> node_indexes(parameter_order + 1);
 
@@ -462,7 +462,7 @@ void Reference_Line::create_and_store_partition_geometry(const int partition_ord
   {
     auto& connectivity = connectivities[i];
 
-    //   i ¦¡¦¡¦¡¦¡ i+1
+    //   i ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ i+1
     connectivity.node_numbers = {i, i + 1};
   }
 
@@ -861,7 +861,7 @@ ms::sym::Polynomials cal_paramteric_curve_normal_functions(const ms::sym::Polyno
 //
 // std::vector<std::vector<ushort>>
 // Reference_Line::set_of_face_vertex_index_sequences(void) const {
-//  // 0 ¦¡¦¡¦¡¦¡ 1
+//  // 0 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 1
 //  const std::vector<ushort> face0_node_index = {0};
 //  const std::vector<ushort> face1_node_index = {1};
 //  return {face0_node_index, face1_node_index};
@@ -869,7 +869,7 @@ ms::sym::Polynomials cal_paramteric_curve_normal_functions(const ms::sym::Polyno
 //
 // std::vector<std::vector<ushort>>
 // Reference_Line::set_of_face_node_index_sequences(void) const {
-//  // 0 ¦¡¦¡¦¡¦¡ 1
+//  // 0 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 1
 //  const std::vector<ushort> face0_node_index = {0};
 //  const std::vector<ushort> face1_node_index = {1};
 //  return {face0_node_index, face1_node_index};
@@ -891,7 +891,7 @@ ms::sym::Polynomials cal_paramteric_curve_normal_functions(const ms::sym::Polyno
 // std::vector<Euclidean_Vector> Reference_Line::make_mapping_points(void)
 // const
 // {
-//  // 0 ¦¡¦¡¦¡¦¡ 1
+//  // 0 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 1
 //  switch (this->order_) {
 //    case 1:
 //      return {{-1, 0}, {1, 0}};
@@ -1714,7 +1714,7 @@ ms::sym::Polynomials cal_paramteric_curve_normal_functions(const ms::sym::Polyno
 //  //      2
 //  //  2  / \  1
 //  //	  /   \
-//	//   0¦¡¦¡¦¡¦¡¦¡1
+//	//   0ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½1
 //  //      0
 //  const std::vector<ushort> face0_node_index = {0, 1};
 //  const std::vector<ushort> face1_node_index = {1, 2};
@@ -1727,7 +1727,7 @@ ms::sym::Polynomials cal_paramteric_curve_normal_functions(const ms::sym::Polyno
 //  //      2
 //  //  2  / \  1
 //  //	  /   \
-//	//   0¦¡¦¡¦¡¦¡¦¡1
+//	//   0ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½1
 //  //      0
 //  constexpr ushort num_face = 3;
 //  std::vector<std::vector<ushort>> set_of_face_node_index_orders(num_face);
@@ -1777,9 +1777,9 @@ ms::sym::Polynomials cal_paramteric_curve_normal_functions(const ms::sym::Polyno
 // std::vector<Euclidean_Vector> Reference_Triangle::make_mapping_points(
 //    void) const {
 //  //	  2
-//  //    ¦¢ \ 
-//	//	  ¦¢   \
-//	//    0¦¡¦¡¦¡¦¡¦¡1
+//  //    ï¿½ï¿½ \ 
+//	//	  ï¿½ï¿½   \
+//	//    0ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½1
 //
 //  switch (this->order_) {
 //    case 1:
@@ -1825,9 +1825,9 @@ ms::sym::Polynomials cal_paramteric_curve_normal_functions(const ms::sym::Polyno
 //
 //  for (ushort j = 0; j < n + 1; j++) {
 //    for (ushort i = 0; i < n + 1 - j; i++) {
-//      //   I2¦¡¦¡¦¡¦¡I2+1
-//      //   ¦¢     ¦¢
-//      //   I1¦¡¦¡¦¡¦¡I1+1
+//      //   I2ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½I2+1
+//      //   ï¿½ï¿½     ï¿½ï¿½
+//      //   I1ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½I1+1
 //
 //      const uint I1 = (n + 3) * j - j * (j + 1) / 2 + i;
 //      const uint I2 = (n + 3) * (j + 1) - (j + 1) * (j + 2) / 2 + i;
@@ -2686,9 +2686,9 @@ ms::sym::Polynomials cal_paramteric_curve_normal_functions(const ms::sym::Polyno
 // std::vector<std::vector<ushort>>
 // Reference_Quadrilateral::set_of_face_vertex_index_sequences(void) const {
 //  //      2
-//  //   3¦¡¦¡¦¡¦¡¦¡2
-//  // 3  ¦¢     ¦¢   1
-//  //   0¦¡¦¡¦¡¦¡¦¡1
+//  //   3ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½2
+//  // 3  ï¿½ï¿½     ï¿½ï¿½   1
+//  //   0ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½1
 //  //      0
 //  std::vector<ushort> face0_node_index = {0, 1};
 //  std::vector<ushort> face1_node_index = {1, 2};
@@ -2701,9 +2701,9 @@ ms::sym::Polynomials cal_paramteric_curve_normal_functions(const ms::sym::Polyno
 // std::vector<std::vector<ushort>>
 // Reference_Quadrilateral::set_of_face_node_index_sequences(void) const {
 //  //      2
-//  //   3¦¡¦¡¦¡¦¡¦¡2
-//  // 3  ¦¢     ¦¢   1
-//  //   0¦¡¦¡¦¡¦¡¦¡1
+//  //   3ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½2
+//  // 3  ï¿½ï¿½     ï¿½ï¿½   1
+//  //   0ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½1
 //  //      0
 //  constexpr ushort num_face = 4;
 //  std::vector<std::vector<ushort>> set_of_face_node_index_orders(num_face);
@@ -2743,9 +2743,9 @@ ms::sym::Polynomials cal_paramteric_curve_normal_functions(const ms::sym::Polyno
 // std::vector<std::vector<ushort>>
 // Reference_Quadrilateral::set_of_sub_simplex_vertex_index_sequences(void)
 // const {
-//  //   3¦¡¦¡¦¡¦¡¦¡2
-//  //   ¦¢     ¦¢
-//  //   0¦¡¦¡¦¡¦¡¦¡1
+//  //   3ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½2
+//  //   ï¿½ï¿½     ï¿½ï¿½
+//  //   0ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½1
 //
 //  constexpr auto num_sub_simplex = 4;
 //
@@ -2774,9 +2774,9 @@ ms::sym::Polynomials cal_paramteric_curve_normal_functions(const ms::sym::Polyno
 //
 // std::vector<Euclidean_Vector> Reference_Quadrilateral::make_mapping_points(
 //    void) const {
-//  //   3¦¡¦¡¦¡¦¡¦¡2
-//  //   ¦¢     ¦¢
-//  //   0¦¡¦¡¦¡¦¡¦¡1
+//  //   3ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½2
+//  //   ï¿½ï¿½     ï¿½ï¿½
+//  //   0ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½1
 //  switch (this->order_) {
 //    case 1:
 //      return {{-1, -1}, {1, -1}, {1, 1}, {-1, 1}};
@@ -2822,9 +2822,9 @@ ms::sym::Polynomials cal_paramteric_curve_normal_functions(const ms::sym::Polyno
 //
 //  for (ushort j = 0; j <= n; j++) {
 //    for (ushort i = 0; i <= n; i++) {
-//      //   I2¦¡¦¡¦¡¦¡I2+1
-//      //   ¦¢     ¦¢
-//      //   I1¦¡¦¡¦¡¦¡I1+1
+//      //   I2ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½I2+1
+//      //   ï¿½ï¿½     ï¿½ï¿½
+//      //   I1ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½I1+1
 //
 //      const uint I1 = (n + 2) * j + i;
 //      const uint I2 = (n + 2) * (j + 1) + i;
@@ -2922,3 +2922,5 @@ ms::sym::Polynomials cal_paramteric_curve_normal_functions(const ms::sym::Polyno
 //  Reference_Geometry_Container::order_to_reference_quadrilateral_.emplace(
 //      order, std::make_shared<Reference_Quadrilateral>(order));
 //}
+
+

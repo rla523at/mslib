@@ -1359,3 +1359,6 @@ void MKL_VARIANT_NAME(vm, vmdtrunci)(const MKL_INT n, const double * a, const MK
 
 #endif /* ifndef _MKL_VML_OMP_VARIANT_H_ */
 
+
+
+

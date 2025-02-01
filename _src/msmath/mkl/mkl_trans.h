@@ -315,3 +315,6 @@ void mkl_zomatadd_batch_strided(
 #endif /* __cplusplus */
 
 #endif /* _MKL_TRANS_H */
+
+
+

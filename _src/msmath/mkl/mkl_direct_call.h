@@ -1106,3 +1106,6 @@ static __inline float  mkl_dc_sdot_convert(const MKL_INT *n, const float* x, con
 
 #endif /* #ifdef MKL_DIRECT_CALL */
 #endif /* _MKL_DIRECT_CALL_H */
+
+
+

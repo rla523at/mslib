@@ -670,7 +670,7 @@ std::unordered_map<int, std::set<int>> Grid::peridoic_boundary_vertex_node_numbe
 {
   std::unordered_map<int, std::set<int>> pbdry_vnode_number_to_matched_vnode_number_set;
 
-  // Grid::make_periodic_boundary_elements¿¡¼­ periodic boundary element pair¸¦ ¸¸µé ¶§, vertex node³¢¸® Á¤·ÄµÇ°Ô ¸¸µé¾úÀ½À» °¡Á¤ÇÑ´Ù.
+  // Grid::make_periodic_boundary_elementsï¿½ï¿½ï¿½ï¿½ periodic boundary element pairï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½, vertex nodeï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ÄµÇ°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½.
   for (const auto& [oc_side_element, nc_side_element] : this->_periodic_boundary_element_pairs)
   {
     const auto oc_side_vnode_numbers = oc_side_element.vertex_node_numbers();
@@ -780,3 +780,5 @@ std::set<int> Grid::find_face_sharing_cell_index_set_ignore_pbdry_and_less_then(
 }
 
 } // namespace ms::grid
+
+

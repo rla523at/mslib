@@ -251,7 +251,7 @@ Grid_Data Gmsh_Reader::convert(Gmsh_Nodes_Data&& node_data, Gmsh_Elements_Data&&
     elem_data.figure       = ms::grid::index_to_figure_type(figure_type_numbers[i]);
     elem_data.node_numbers = std::move(node_numbers_s[i]);
 
-    // ÀÌ ºÎºÐ Å×½ºÆ®ÇÏ±â!
+    // ï¿½ï¿½ ï¿½Îºï¿½ ï¿½×½ï¿½Æ®ï¿½Ï±ï¿½!
     //// The node numbers in the Grid_Element_Data start from 0.
     //// Since Gmsh's node numbering starts from 1, subtract 1 from it.
     // for (auto& node_number : elem_data.node_numbers)
@@ -552,3 +552,5 @@ void Gmsh_Reader::read_phys_data(std::ifstream& file, Gmsh_Physical_Data& data) 
 // }
 
 } // namespace ms::grid
+
+

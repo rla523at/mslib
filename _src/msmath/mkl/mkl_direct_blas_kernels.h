@@ -8116,3 +8116,6 @@ static __inline void MKL_DC_FNAME_GEMM_KERNEL(dgemm_tt_mnk)
 #undef MKL_DC_BB
 #undef MKL_DC_CC
 #undef MKL_DC_FNAME_GEMM_KERNEL
+
+
+

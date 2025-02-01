@@ -934,3 +934,6 @@ static __inline mkl_dc_type mkl_dc_dot (const MKL_INT* N, const mkl_dc_type *x,
 #undef mkl_dc_trsm_rxcu_mn_pst
 #undef mkl_dc_axpy
 #undef mkl_dc_dot
+
+
+

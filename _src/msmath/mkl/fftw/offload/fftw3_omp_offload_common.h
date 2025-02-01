@@ -104,3 +104,6 @@ sfftw_plan_guru_dft_omp_offload_impl(PLAN *p, INTEGER *rank, INTEGER *n, INTEGER
                     COMPLEX8 *out, INTEGER *sign, INTEGER *flags, void *interopObj);
 
 #endif
+
+
+

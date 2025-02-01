@@ -20,3 +20,6 @@ const Reference_Geometry& Reference_Geometry_Container::get(const Figure fig)
 }
 
 } // namespace ms::geo
+
+
+
