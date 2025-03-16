@@ -9,8 +9,6 @@
 #define REQUIRE( requirement, format_string, ... )                                                      \
   if ( !( requirement ) )                                                                               \
   {                                                                                                     \
-    setlocale( LC_ALL, "" );                                                                            \
-                                                                                                        \
     std::string_view function_call_file_name = __FILE__;                                                \
     const size_t     num_remove              = function_call_file_name.rfind( "\\" ) + 1;               \
     function_call_file_name.remove_prefix( num_remove );                                                \

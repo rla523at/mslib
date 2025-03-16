@@ -31,7 +31,8 @@ int find_nth_position(std::string_view str, std::string_view target, const int n
 int find_nth_position_icase(std::string_view str, const char target, const int n);
 int find_nth_position_icase(std::string_view str, const int target, const int n) = delete;
 int find_nth_position_icase(std::string_view str, std::string_view target, const int n);
-int find_r_nth_position(std::string_view str, std::string_view target, const int n);
+int find_r_nth_position( std::wstring_view str, std::wstring_view target, const int n );
+int find_r_nth_position( std::string_view str, std::string_view target, const int n );
 
 bool is_natural_number(std::string_view str);
 bool is_integer(std::string_view str);
@@ -52,7 +53,8 @@ void             remove_inplace(std::string& str, std::string_view target);
 
 std::string replace(std::string_view str, const char target, const char replacement);
 std::string replace(std::string_view str, std::string_view target, std::string_view replacement);
-void        replace_inplace(std::string& str, const char target, const char replacement);
+void        replace_inplace( std::wstring& str, const wchar_t target, const wchar_t replacement );
+void        replace_inplace( std::string& str, const char target, const char replacement );
 void        replace_inplace(std::string& str, std::string_view target, std::string_view replacement);
 
 int         upper_case(const int c);

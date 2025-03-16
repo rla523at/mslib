@@ -1,10 +1,4 @@
 #pragma once
-#include <filesystem>
-#include <string>
-#include <string_view>
-#include <vector>
-
-
 /*
 convention
 
@@ -17,15 +11,16 @@ convention
 * path : A/B/C/D/E/
   * E : depth 0
   * D : depth 1
-  * C : depth 2 
+  * C : depth 2
   ...
 
 */
 
-namespace ms::filesystem
+namespace mslib::filesystem
 {
   std::wstring_view        base_name_view( std::wstring_view file_path );
   void                     copy_file( const std::string_view from_file_path, const std::string_view to_file_path, const std::filesystem::copy_options option = std::filesystem::copy_options::none );
+  std::wstring             excutable_file_path_utf16( void );
   std::string              excutable_file_path( void );
   std::wstring             extract_folder_path( const std::wstring_view file_path );
   std::string              extract_folder_path( const std::string_view file_path );
@@ -47,6 +42,7 @@ namespace ms::filesystem
   bool                     is_modified_later( const std::string_view reference_file_path, const std::string_view target_file_path );
   void                     make_folder( const std::string_view folder_path );
   void                     move_file( const std::string_view file_path, const std::string_view new_folder_path );
+  std::wstring_view        parent_path_view( const std::wstring_view path, const int depth );
   std::string_view         parent_path_view( const std::string_view path, const int depth );
   void                     replace_file( const std::string_view from_file_path, const std::string_view to_file_path );
   void                     rename( const std::string& path, const std::string& old_name, const std::string& new_name );
@@ -56,5 +52,3 @@ namespace ms::filesystem
   void                     remove_file( const std::string_view file_path );
 
 } // namespace ms::filesystem
-
-

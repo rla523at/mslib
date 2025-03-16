@@ -1,11 +1,8 @@
+#include "stdafx.h"
+
 #include "msstring.h"
 
-#include <algorithm>
-#include <functional>
-#include <iomanip>
-#include <sstream>
-
-namespace ms::string
+namespace mslib::string
 {
 
 class Case_Insensitive_Comparator
@@ -13,13 +10,13 @@ class Case_Insensitive_Comparator
 public:
   bool operator()(const char c1, const char c2) const
   {
-    return ms::string::compare_icase(c1, c2);
+    return mslib::string::compare_icase(c1, c2);
   }
 };
 
 bool compare_icase(const int c1, const int c2)
 {
-  return ms::string::upper_case(c1) == ms::string::upper_case(c2);
+  return mslib::string::upper_case(c1) == mslib::string::upper_case(c2);
 }
 
 bool compare_icase(std::string_view str1, std::string_view str2)
@@ -33,7 +30,7 @@ bool compare_icase(std::string_view str1, std::string_view str2)
 
   for (size_t i = 0; i < str_size; i++)
   {
-    if (ms::string::upper_case(str1[i]) != ms::string::upper_case(str2[i]))
+    if (mslib::string::upper_case(str1[i]) != mslib::string::upper_case(str2[i]))
     {
       return false;
     }
@@ -82,7 +79,7 @@ bool contain_icase(std::string_view str, const int target)
 {
   for (size_t i = 0; i < str.size(); ++i)
   {
-    if (ms::string::compare_icase(str[i], target))
+    if (mslib::string::compare_icase(str[i], target))
     {
       return true;
     }
@@ -109,24 +106,24 @@ bool contain_icase(std::string_view str, const char* target)
 
 bool contain_icase(std::string_view str, std::string_view target)
 {
-  return ms::string::contain_icase(str, target.data());
+  return mslib::string::contain_icase(str, target.data());
 }
 
 bool contain_icase(std::string_view str, const std::string& target)
 {
-  return ms::string::contain_icase(str, target.data());
+  return mslib::string::contain_icase(str, target.data());
 }
 
 int find_nth_position(std::string_view str, const char target, const int n)
 {
   if (str.empty())
   {
-    return ms::string::fail_to_find;
+    return mslib::string::fail_to_find;
   }
 
   if (n < 1)
   {
-    return ms::string::fail_to_find;
+    return mslib::string::fail_to_find;
   }
 
   auto count = 0;
@@ -141,19 +138,19 @@ int find_nth_position(std::string_view str, const char target, const int n)
     }
   }
 
-  return ms::string::fail_to_find;
+  return mslib::string::fail_to_find;
 }
 
 int find_nth_position(std::string_view str, std::string_view target, const int n)
 {
   if (str.empty() || target.empty())
   {
-    return ms::string::fail_to_find;
+    return mslib::string::fail_to_find;
   }
 
   if (n < 1)
   {
-    return ms::string::fail_to_find;
+    return mslib::string::fail_to_find;
   }
 
   std::boyer_moore_searcher searcher(target.begin(), target.end());
@@ -173,7 +170,7 @@ int find_nth_position(std::string_view str, std::string_view target, const int n
 
     if (iter == search_end_iter)
     {
-      return ms::string::fail_to_find;
+      return mslib::string::fail_to_find;
     }
 
     // str iter pointing ith target end position
@@ -188,18 +185,18 @@ int find_nth_position_icase(std::string_view str, const char target, const int n
 {
   if (str.empty())
   {
-    return ms::string::fail_to_find;
+    return mslib::string::fail_to_find;
   }
 
   if (n < 1)
   {
-    return ms::string::fail_to_find;
+    return mslib::string::fail_to_find;
   }
 
   auto count = 0;
   for (int i = 0; i < str.size(); ++i)
   {
-    if (ms::string::compare_icase(str[i], target))
+    if (mslib::string::compare_icase(str[i], target))
     {
       if (n == ++count)
       {
@@ -208,19 +205,19 @@ int find_nth_position_icase(std::string_view str, const char target, const int n
     }
   }
 
-  return ms::string::fail_to_find;
+  return mslib::string::fail_to_find;
 }
 
 int find_nth_position_icase(std::string_view str, std::string_view target, const int n)
 {
   if (str.empty() || target.empty())
   {
-    return ms::string::fail_to_find;
+    return mslib::string::fail_to_find;
   }
 
   if (n < 1)
   {
-    return ms::string::fail_to_find;
+    return mslib::string::fail_to_find;
   }
 
   std::default_searcher searcher(target.begin(), target.end(), Case_Insensitive_Comparator());
@@ -240,7 +237,7 @@ int find_nth_position_icase(std::string_view str, std::string_view target, const
 
     if (iter == search_end_iter)
     {
-      return ms::string::fail_to_find;
+      return mslib::string::fail_to_find;
     }
 
     // search_start_iter := str iter pointing ith target end position
@@ -251,16 +248,56 @@ int find_nth_position_icase(std::string_view str, std::string_view target, const
   return pos;
 }
 
+int find_r_nth_position( std::wstring_view str, std::wstring_view target, const int n )
+{
+  if ( str.empty() || target.empty() )
+  {
+    return mslib::string::fail_to_find;
+  }
+
+  if ( n < 1 )
+  {
+    return mslib::string::fail_to_find;
+  }
+
+  const auto target_size = target.size();
+  const auto str_rbegin  = str.rbegin();
+  const auto str_rend    = str.rend();
+
+  std::boyer_moore_searcher searcher( target.rbegin(), target.rend() );
+
+  auto rpos = 0;
+  for ( size_t i = 0; i < n; ++i )
+  {
+    // str riter pointing ith target rbegin position
+    const auto iter1 = std::search( str_rbegin + rpos, str_rend, searcher );
+
+    if ( iter1 == str_rend )
+    {
+      return mslib::string::fail_to_find;
+    }
+
+    // str riter pointing ith target rend position
+    const auto iter2 = iter1 + target_size;
+
+    // ith target rpos
+    rpos = static_cast<int>( iter2 - str_rbegin );
+  }
+
+  const auto pos = static_cast<int>( str.size() ) - rpos;
+  return pos;
+}
+
 int find_r_nth_position(std::string_view str, std::string_view target, const int n)
 {
   if (str.empty() || target.empty())
   {
-    return ms::string::fail_to_find;
+    return mslib::string::fail_to_find;
   }
 
   if (n < 1)
   {
-    return ms::string::fail_to_find;
+    return mslib::string::fail_to_find;
   }
 
   const auto target_size = target.size();
@@ -277,7 +314,7 @@ int find_r_nth_position(std::string_view str, std::string_view target, const int
 
     if (iter1 == str_rend)
     {
-      return ms::string::fail_to_find;
+      return mslib::string::fail_to_find;
     }
 
     // str riter pointing ith target rend position
@@ -289,6 +326,24 @@ int find_r_nth_position(std::string_view str, std::string_view target, const int
 
   const auto pos = static_cast<int>(str.size()) - rpos;
   return pos;
+}
+
+uint64 find_position_saerching_backwards( _In_ const std::string_view str, _In_ const utf8 target, _In_ const uint64 start_position )
+{
+  if ( str.empty() )
+    return invalid_position;
+
+  REQUIRE( start_position < str.size(), "start_position({:d}) is out of range.", start_position );
+
+  for ( uint64 i = 0; i < start_position; ++i )
+  {
+    if ( str[start_position - i] == target )
+    {
+      return start_position - i;
+    }
+  }
+
+  return invalid_position;
 }
 
 std::vector<std::wstring_view> parse_by( std::wstring_view wstr, const wchar_t delimiter )
@@ -417,9 +472,9 @@ std::string remove(std::string_view str, std::string_view target)
 
   while (true)
   {
-    const auto target_start_pos = ms::string::find_nth_position(str, target, 1);
+    const auto target_start_pos = mslib::string::find_nth_position(str, target, 1);
 
-    if (target_start_pos == ms::string::fail_to_find)
+    if (target_start_pos == mslib::string::fail_to_find)
     {
       result.append(str);
       break;
@@ -438,9 +493,9 @@ std::string remove(std::string_view str, std::string_view target)
 std::string_view remove_after(std::string_view str, std::string_view target)
 {
   constexpr auto n   = 1;
-  const auto     pos = ms::string::find_nth_position(str, target, n);
+  const auto     pos = mslib::string::find_nth_position(str, target, n);
 
-  if (pos == ms::string::fail_to_find)
+  if (pos == mslib::string::fail_to_find)
   {
     return str;
   }
@@ -453,9 +508,9 @@ std::string_view remove_after(std::string_view str, std::string_view target)
 void remove_after_inplace(std::string& str, std::string_view target)
 {
   constexpr auto n   = 1;
-  const auto     pos = ms::string::find_nth_position(str, target, n);
+  const auto     pos = mslib::string::find_nth_position(str, target, n);
 
-  if (pos == ms::string::fail_to_find) return;
+  if (pos == mslib::string::fail_to_find) return;
 
   str.erase(pos);
 }
@@ -463,9 +518,9 @@ void remove_after_inplace(std::string& str, std::string_view target)
 std::string_view remove_before(std::string_view str, std::string_view target)
 {
   constexpr auto n   = 1;
-  const auto     pos = ms::string::find_nth_position(str, target, n);
+  const auto     pos = mslib::string::find_nth_position(str, target, n);
 
-  if (pos == ms::string::fail_to_find)
+  if (pos == mslib::string::fail_to_find)
   {
     return str;
   }
@@ -478,9 +533,9 @@ std::string_view remove_before(std::string_view str, std::string_view target)
 std::string_view remove_up_to(std::string_view str, std::string_view target)
 {
   constexpr auto n   = 1;
-  const auto     pos = ms::string::find_nth_position(str, target, n);
+  const auto     pos = mslib::string::find_nth_position(str, target, n);
 
-  if (pos == ms::string::fail_to_find)
+  if (pos == mslib::string::fail_to_find)
   {
     return str;
   }
@@ -492,12 +547,12 @@ std::string_view remove_up_to(std::string_view str, std::string_view target)
 
 void remove_inplace(std::string& str, const char target)
 {
-  str = ms::string::remove(str, target);
+  str = mslib::string::remove(str, target);
 };
 
 void remove_inplace(std::string& str, std::string_view target)
 {
-  str = ms::string::remove(str, target);
+  str = mslib::string::remove(str, target);
 }
 
 std::string replace(std::string_view str, const char target, const char replacement)
@@ -529,9 +584,9 @@ std::string replace(std::string_view str, std::string_view target, std::string_v
 
   while (true)
   {
-    const auto target_start_pos = ms::string::find_nth_position(str, target, 1);
+    const auto target_start_pos = mslib::string::find_nth_position(str, target, 1);
 
-    if (target_start_pos == ms::string::fail_to_find)
+    if (target_start_pos == mslib::string::fail_to_find)
     {
       result.append(str);
       break;
@@ -548,6 +603,17 @@ std::string replace(std::string_view str, std::string_view target, std::string_v
   return result;
 }
 
+void replace_inplace( std::wstring& str, const wchar_t target, const wchar_t replacement )
+{
+  for ( auto& c : str )
+  {
+    if ( c == target )
+    {
+      c = replacement;
+    }
+  }
+}
+
 void replace_inplace(std::string& str, const char target, const char replacement)
 {
   for (auto& c : str)
@@ -561,7 +627,7 @@ void replace_inplace(std::string& str, const char target, const char replacement
 
 void replace_inplace(std::string& str, std::string_view target, std::string_view replacement)
 {
-  str = ms::string::replace(str, target, replacement);
+  str = mslib::string::replace(str, target, replacement);
 }
 
 int upper_case(const int c)
@@ -578,7 +644,7 @@ std::string upper_case(std::string_view str)
 
   for (size_t i = 0; i < size; i++)
   {
-    result[i] = static_cast<char>(ms::string::upper_case(str[i]));
+    result[i] = static_cast<char>(mslib::string::upper_case(str[i]));
   }
 
   return result;
@@ -593,7 +659,7 @@ void upper_case_inplace(std::string& str)
 {
   for (auto& c : str)
   {
-    c = static_cast<char>(ms::string::upper_case(c));
+    c = static_cast<char>(mslib::string::upper_case(c));
   }
 }
 
@@ -671,6 +737,6 @@ bool is_real_number(std::string_view str)
   return true;
 }
 
-} // namespace ms::string
+} // namespace mslib::string
 
 

@@ -181,6 +181,14 @@ TEST( msfilesystem, executable_path1 )
 
   EXPECT_EQ( reference_path, result );
 }
+TEST( msfilesystem, excutable_file_path_utf16_1 )
+{
+  std::wstring reference_path = L"D:/Code/mslib/x64/Debug/filesystem_test.exe";
+  std::wstring result         = ms::filesystem::excutable_file_path_utf16();
+
+  EXPECT_EQ( reference_path, result );
+}
+
 TEST( msfilesystem, parent_path_view1 )
 {
   constexpr auto src = "D:/Code/mslib/x64/Debug/filesystem_test.exe";
@@ -193,5 +201,19 @@ TEST( msfilesystem, parent_path_view2 )
   constexpr auto src = "D:/Code/mslib/x64/Debug/filesystem_test.exe";
 
   constexpr auto ref = "";
+  EXPECT_EQ( ref, ms::filesystem::parent_path_view( src, 5 ) );
+}
+TEST( msfilesystem, parent_path_view3 )
+{
+  constexpr auto src = L"D:/Code/mslib/x64/Debug/filesystem_test.exe";
+
+  constexpr auto ref = L"D:/Code/mslib/";
+  EXPECT_EQ( ref, ms::filesystem::parent_path_view( src, 2 ) );
+}
+TEST( msfilesystem, parent_path_view4 )
+{
+  constexpr auto src = L"D:/Code/mslib/x64/Debug/filesystem_test.exe";
+
+  constexpr auto ref = L"";
   EXPECT_EQ( ref, ms::filesystem::parent_path_view( src, 5 ) );
 }

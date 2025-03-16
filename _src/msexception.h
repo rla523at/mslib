@@ -1,8 +1,4 @@
 #pragma once
-#include <cassert>
-#include <format>
-#include <iostream>
-#include <string_view>
 
 #ifdef _DEBUG
 
@@ -21,17 +17,16 @@
     std::cout << std::format( "{:10}: {}", "Line", __LINE__ ) << "\n";                                  \
     ms::exception::print_message( format_string __VA_OPT__(, __VA_ARGS__ ) );                           \
     std::cout << "==============================EXCEPTION========================================\n\n"; \
-                                                                                                        \
-    assert( false );                                                                                    \
-  }                                        
-
+    auto message = ms::exception::make_message( format_string __VA_OPT__(, __VA_ARGS__ ) ).data();      \
+    assert( false && message );                                                                         \
+  }
 
 #define EXCEPTION( format_string, ... ) REQUIRE( false, format_string, __VA_ARGS__ )
 
 #else
 #define REQUIRE( requirement, format_string, ... )
 #define EXCEPTION( format_string, ... )
-#endif
+#endif // #ifdef _DEBUG
 
 namespace ms::exception
 {
@@ -47,7 +42,16 @@ namespace ms::exception
     std::wcout << std::format( L"{:10}: {}", L"Message", std::vformat( format_string, std::make_wformat_args( args... ) ) ) << "\n";
   }
 
+  template <typename... Ts>
+  std::string make_message( const std::string_view format_string, const Ts&... args )
+  {
+    return std::format( "{:10}: {}", "Message", std::vformat( format_string, std::make_format_args( args... ) ) ) + "\n";
+  }
+
+  template <typename... Ts>
+  std::wstring make_message( const std::wstring_view format_string, const Ts&... args )
+  {
+    return std::format( L"{:10}: {}", L"Message", std::vformat( format_string, std::make_wformat_args( args... ) ) ) + L"\n";
+  }
+
 } // namespace ms::exception
-
-
-

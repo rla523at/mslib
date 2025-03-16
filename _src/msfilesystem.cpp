@@ -1,12 +1,13 @@
+#include "stdafx.h"
+
 #include "msfilesystem.h"
 
 #include "msexception.h"
 #include "msstring.h"
 
-#include <fstream>
 #include <windows.h>
 
-namespace ms::filesystem
+namespace mslib::filesystem
 {
   std::wstring_view base_name_view( std::wstring_view file_path )
   {
@@ -30,6 +31,20 @@ namespace ms::filesystem
     std::filesystem::copy_file( from_file_path, to_file_path, option );
   }
 
+  std::wstring excutable_file_path_utf16( void )
+  {
+    constexpr unsigned __int64 buffer_size = 256;
+
+    wchar_t     buffer[buffer_size];
+    const DWORD length = GetModuleFileNameW( NULL, buffer, buffer_size );
+    REQUIRE( length != 0, ".exe 파일의 실행 결로를 가져오는데 실패했습니다." );
+
+    std::wstring result = buffer;
+    mslib::string::replace_inplace( result, L'\\', L'/' );
+
+    return result;
+  }
+
   std::string excutable_file_path( void )
   {
     constexpr unsigned __int64 buffer_size = 256;
@@ -39,7 +54,7 @@ namespace ms::filesystem
     REQUIRE( length != 0, ".exe 파일의 실행 결로를 가져오는데 실패했습니다." );
 
     std::string result = buffer;
-    ms::string::replace_inplace( result, '\\', '/' );
+    mslib::string::replace_inplace( result, '\\', '/' );
 
     return result;
   }
@@ -245,7 +260,7 @@ namespace ms::filesystem
 
     if ( folder_path.empty() ) return;
 
-    if ( ms::filesystem::is_exist_folder( folder_path ) ) return;
+    if ( mslib::filesystem::is_exist_folder( folder_path ) ) return;
 
     std::filesystem::path p( folder_path );
     std::filesystem::create_directories( p );
@@ -253,10 +268,10 @@ namespace ms::filesystem
 
   void move_file( const std::string_view file_path, const std::string_view new_folder_path )
   {
-    REQUIRE( ms::filesystem::is_exist_file( file_path ), " file should be exist." );
-    REQUIRE( ms::filesystem::is_exist_folder( new_folder_path ), " new folder path should be exist." ); // �ݵ�� �����ϴ� �������� ��!
+    REQUIRE( mslib::filesystem::is_exist_file( file_path ), " file should be exist." );
+    REQUIRE( mslib::filesystem::is_exist_folder( new_folder_path ), " new folder path should be exist." ); // �ݵ�� �����ϴ� �������� ��!
 
-    const auto file_name     = ms::filesystem::extract_file_name( file_path );
+    const auto file_name     = mslib::filesystem::extract_file_name( file_path );
     const auto new_file_path = new_folder_path.data() + file_name;
 
     std::filesystem::path old_p( file_path );
@@ -264,17 +279,30 @@ namespace ms::filesystem
     std::filesystem::rename( old_p, new_p );
   }
 
+  std::wstring_view parent_path_view( const std::wstring_view path, const int depth )
+  {
+    const int pos = mslib::string::find_r_nth_position( path, L"/", depth + 1 );
+    if ( pos == mslib::string::fail_to_find )
+      return {};
+
+    std::wstring_view result = path;
+
+    const auto num_remove = path.size() - pos - 1;
+    result.remove_suffix( num_remove );
+    return result;
+  }
+
   std::string_view parent_path_view( const std::string_view path, const int depth )
   {
-    const int pos = ms::string::find_r_nth_position( path, "/", depth + 1 );
-    if ( pos == ms::string::fail_to_find )
+    const int pos = mslib::string::find_r_nth_position( path, "/", depth + 1 );
+    if ( pos == mslib::string::fail_to_find )
       return {};
 
     std::string_view result = path;
 
     const auto num_remove = path.size() - pos - 1;
     result.remove_suffix( num_remove );
-    return result;    
+    return result;
   }
 
   void remove_empty_folder( const std::string_view folder_path )
@@ -312,7 +340,7 @@ namespace ms::filesystem
     std::string temp;
     while ( std::getline( ifs, temp ) )
     {
-      ms::string::replace_inplace( temp, old_content, new_contnet );
+      mslib::string::replace_inplace( temp, old_content, new_contnet );
       new_contents += temp + "\n";
       temp.clear();
     }
@@ -323,11 +351,9 @@ namespace ms::filesystem
 
   void remove_file( const std::string_view file_path )
   {
-    REQUIRE( ms::filesystem::is_exist_file( file_path ), std::string( file_path ) + " is not exist file" );
+    REQUIRE( mslib::filesystem::is_exist_file( file_path ), std::string( file_path ) + " is not exist file" );
     std::filesystem::path p( file_path );
     std::filesystem::remove( p );
   }
 
-} // namespace ms::filesystem
-
-
+} // namespace mslib::filesystem

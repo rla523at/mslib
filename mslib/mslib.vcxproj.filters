@@ -13,177 +13,39 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="소스 파일\config">
-      <UniqueIdentifier>{7e3aaf19-a44c-40c4-b1c2-ba7c07401269}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="소스 파일\exception">
-      <UniqueIdentifier>{cafb7c33-d539-462e-8ade-3a63fb331540}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="소스 파일\filesystem">
-      <UniqueIdentifier>{571feacc-44d2-4a0d-b59b-f637c1724a93}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="소스 파일\geo">
-      <UniqueIdentifier>{f9c7bc36-d5e5-4fdf-80fa-19a4f6c6cc2d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="소스 파일\grid">
-      <UniqueIdentifier>{11399d2f-9d6b-4613-a7e2-2aabf458c694}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="소스 파일\math">
-      <UniqueIdentifier>{be4fdbff-10d4-4579-854e-6b8720e92c39}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="소스 파일\string">
-      <UniqueIdentifier>{82ab2583-8ab1-44e7-a777-39b32393cce5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="소스 파일\sym">
-      <UniqueIdentifier>{694be43a-43bd-44de-8c56-fb64a4b8b315}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="소스 파일\tecplot">
-      <UniqueIdentifier>{ad27be14-d70c-4c01-890b-a7177c6354dc}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\_header\msconfig\Config_Reader.h">
-      <Filter>소스 파일\config</Filter>
-    </ClInclude>
-    <ClInclude Include="..\_header\msconfig\Config_Data.h">
-      <Filter>소스 파일\config</Filter>
-    </ClInclude>
-    <ClInclude Include="..\_header\msexception\Exception.h">
-      <Filter>소스 파일\exception</Filter>
-    </ClInclude>
-    <ClInclude Include="..\_header\msfilesystem\filesystem.h">
-      <Filter>소스 파일\filesystem</Filter>
-    </ClInclude>
-    <ClInclude Include="..\_header\msgeo\Figure.h">
-      <Filter>소스 파일\geo</Filter>
-    </ClInclude>
-    <ClInclude Include="..\_header\msgeo\Geometry.h">
-      <Filter>소스 파일\geo</Filter>
-    </ClInclude>
-    <ClInclude Include="..\_header\msgeo\Node.h">
-      <Filter>소스 파일\geo</Filter>
-    </ClInclude>
-    <ClInclude Include="..\_header\msgeo\Reference_Geometry.h">
-      <Filter>소스 파일\geo</Filter>
-    </ClInclude>
-    <ClInclude Include="..\_header\msgeo\Reference_Geometry_Container.h">
-      <Filter>소스 파일\geo</Filter>
-    </ClInclude>
-    <ClInclude Include="..\_header\msgeo\Reference_Geometry_Impl.h">
-      <Filter>소스 파일\geo</Filter>
-    </ClInclude>
-    <ClInclude Include="..\_header\msgrid\Grid_Data.h">
-      <Filter>소스 파일\grid</Filter>
-    </ClInclude>
-    <ClInclude Include="..\_header\msgrid\Element.h">
-      <Filter>소스 파일\grid</Filter>
-    </ClInclude>
-    <ClInclude Include="..\_header\msgrid\Gmsh_Reader.h">
-      <Filter>소스 파일\grid</Filter>
-    </ClInclude>
-    <ClInclude Include="..\_header\msgrid\Grid.h">
-      <Filter>소스 파일\grid</Filter>
-    </ClInclude>
-    <ClInclude Include="..\_header\msgrid\Grid_Reader_Factory.h">
-      <Filter>소스 파일\grid</Filter>
-    </ClInclude>
-    <ClInclude Include="..\_header\msgrid\Reader.h">
-      <Filter>소스 파일\grid</Filter>
-    </ClInclude>
-    <ClInclude Include="..\_header\msmath\BLAS.h">
-      <Filter>소스 파일\math</Filter>
-    </ClInclude>
-    <ClInclude Include="..\_header\msmath\Vector.h">
-      <Filter>소스 파일\math</Filter>
-    </ClInclude>
-    <ClInclude Include="..\_header\msmath\Matrix.h">
-      <Filter>소스 파일\math</Filter>
-    </ClInclude>
-    <ClInclude Include="..\_header\msstring\string.h">
-      <Filter>소스 파일\string</Filter>
-    </ClInclude>
-    <ClInclude Include="..\_header\mssym\Polynomial.h">
-      <Filter>소스 파일\sym</Filter>
-    </ClInclude>
-    <ClInclude Include="..\_header\mssym\Symbol.h">
-      <Filter>소스 파일\sym</Filter>
-    </ClInclude>
-    <ClInclude Include="..\_header\mssym\Symbol_Base.h">
-      <Filter>소스 파일\sym</Filter>
-    </ClInclude>
-    <ClInclude Include="..\_header\mstecplot\Binary_File.h">
-      <Filter>소스 파일\tecplot</Filter>
-    </ClInclude>
-    <ClInclude Include="..\_header\mstecplot\Tecplot_Data.h">
-      <Filter>소스 파일\tecplot</Filter>
-    </ClInclude>
-    <ClInclude Include="..\_header\mstecplot\Writer.h">
-      <Filter>소스 파일\tecplot</Filter>
-    </ClInclude>
     <ClInclude Include="mslib.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\_src\stdafx.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\_src\file_reader.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\_src\msfilesystem.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\_src\msstring.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\_src\msexception.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\_src\msconfig\Config_Data.cpp">
-      <Filter>소스 파일\config</Filter>
+    <ClCompile Include="..\_src\file_reader.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="..\_src\msconfig\Config_Reader.cpp">
-      <Filter>소스 파일\config</Filter>
+    <ClCompile Include="..\_src\msfilesystem.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="..\_src\msfilesystem\filesystem.cpp">
-      <Filter>소스 파일\filesystem</Filter>
+    <ClCompile Include="..\_src\msstring.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="..\_src\msgeo\Geometry.cpp">
-      <Filter>소스 파일\geo</Filter>
-    </ClCompile>
-    <ClCompile Include="..\_src\msgeo\Node.cpp">
-      <Filter>소스 파일\geo</Filter>
-    </ClCompile>
-    <ClCompile Include="..\_src\msgeo\Reference_Geometry_Container.cpp">
-      <Filter>소스 파일\geo</Filter>
-    </ClCompile>
-    <ClCompile Include="..\_src\msgeo\Reference_Geometry_Impl.cpp">
-      <Filter>소스 파일\geo</Filter>
-    </ClCompile>
-    <ClCompile Include="..\_src\msgrid\Element.cpp">
-      <Filter>소스 파일\grid</Filter>
-    </ClCompile>
-    <ClCompile Include="..\_src\msgrid\Gmsh_Reader.cpp">
-      <Filter>소스 파일\grid</Filter>
-    </ClCompile>
-    <ClCompile Include="..\_src\msgrid\Grid.cpp">
-      <Filter>소스 파일\grid</Filter>
-    </ClCompile>
-    <ClCompile Include="..\_src\msgrid\Grid_Reader_Factory.cpp">
-      <Filter>소스 파일\grid</Filter>
-    </ClCompile>
-    <ClCompile Include="..\_src\msmath\BLAS.cpp">
-      <Filter>소스 파일\math</Filter>
-    </ClCompile>
-    <ClCompile Include="..\_src\msmath\Matrix.cpp">
-      <Filter>소스 파일\math</Filter>
-    </ClCompile>
-    <ClCompile Include="..\_src\msmath\Vector.cpp">
-      <Filter>소스 파일\math</Filter>
-    </ClCompile>
-    <ClCompile Include="..\_src\mstecplot\Binary_File.cpp">
-      <Filter>소스 파일\tecplot</Filter>
-    </ClCompile>
-    <ClCompile Include="..\_src\mstecplot\Tecplot_Data.cpp">
-      <Filter>소스 파일\tecplot</Filter>
-    </ClCompile>
-    <ClCompile Include="..\_src\mstecplot\Writer.cpp">
-      <Filter>소스 파일\tecplot</Filter>
-    </ClCompile>
-    <ClCompile Include="..\_src\mssym\Polynomial.cpp">
-      <Filter>소스 파일\sym</Filter>
-    </ClCompile>
-    <ClCompile Include="..\_src\mssym\Symbol.cpp">
-      <Filter>소스 파일\sym</Filter>
-    </ClCompile>
-    <ClCompile Include="..\_src\msstring\string.cpp">
-      <Filter>소스 파일\string</Filter>
+    <ClCompile Include="..\_src\stdafx.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
