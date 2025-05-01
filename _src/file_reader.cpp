@@ -2,8 +2,8 @@
 
 #include "file_reader.h"
 
-#include "msexception.h"
-#include "msfilesystem.h"
+#include "exception.h"
+#include "file_system.h"
 #include <thread>
 
 namespace mslib::file_reader

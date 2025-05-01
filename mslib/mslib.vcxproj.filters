@@ -24,13 +24,16 @@
     <ClInclude Include="..\_src\file_reader.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
-    <ClInclude Include="..\_src\msfilesystem.h">
+    <ClInclude Include="..\_src\file_system.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
-    <ClInclude Include="..\_src\msstring.h">
+    <ClInclude Include="..\_src\string_util.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
-    <ClInclude Include="..\_src\msexception.h">
+    <ClInclude Include="..\_src\exception.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\_src\Thread_Pool.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
   </ItemGroup>
@@ -38,13 +41,16 @@
     <ClCompile Include="..\_src\file_reader.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="..\_src\msfilesystem.cpp">
+    <ClCompile Include="..\_src\file_system.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="..\_src\msstring.cpp">
+    <ClCompile Include="..\_src\string_util.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="..\_src\stdafx.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="..\_src\Thread_Pool.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

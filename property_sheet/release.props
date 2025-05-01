@@ -3,15 +3,14 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <TargetName>ms$(ProjectName)_release</TargetName>
-    <TargetExt>.lib</TargetExt>
-    <OutDir>$(SolutionDir)_lib</OutDir>
+    <TargetName>$(ProjectName)_release</TargetName>
+    <OutDir>$(SolutionDir)_lib\</OutDir>
+    <IncludePath>$(SolutionDir)_src\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)_header\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <ForcedIncludeFiles>stdafx.h</ForcedIncludeFiles>

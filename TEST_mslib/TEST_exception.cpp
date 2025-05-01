@@ -1,6 +1,6 @@
 #include "pch.h"
 
-#include "msexception.h"
+#include "exception.h"
 
 TEST( exception, 1 )
 {

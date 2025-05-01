@@ -3,7 +3,7 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <TargetName>ms$(ProjectName)_$(Configuration)</TargetName>
+    <TargetName>$(ProjectName)_$(Configuration)</TargetName>
     <OutDir>$(SolutionDir)_lib\</OutDir>
     <IncludePath>$(SolutionDir)_src\;$(IncludePath)</IncludePath>
   </PropertyGroup>
