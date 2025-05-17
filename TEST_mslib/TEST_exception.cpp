@@ -4,5 +4,5 @@
 
 TEST( exception, 1 )
 {
-  //EXCEPTION( "test");
+  // EXCEPTION( "test");
 }

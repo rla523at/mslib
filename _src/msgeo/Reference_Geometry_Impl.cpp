@@ -9,28 +9,28 @@
 namespace ms::geo
 {
 
-void Connectivity::add_number(const int number)
-{
-  for (auto& node_number : node_numbers)
+  void Connectivity::add_number( const int number )
   {
-    node_number += number;
+    for ( auto& node_number : node_numbers )
+    {
+      node_number += number;
+    }
   }
-}
 
-void Connectivity::change_number(const int old_number, const int new_number)
-{
-  std::replace(node_numbers.begin(), node_numbers.end(), old_number, new_number);
-}
+  void Connectivity::change_number( const int old_number, const int new_number )
+  {
+    std::replace( node_numbers.begin(), node_numbers.end(), old_number, new_number );
+  }
 
-std::vector<int>::iterator Connectivity::begin(void)
-{
-  return this->node_numbers.begin();
-}
+  std::vector<int>::iterator Connectivity::begin( void )
+  {
+    return this->node_numbers.begin();
+  }
 
-std::vector<int>::iterator Connectivity::end(void)
-{
-  return this->node_numbers.end();
-}
+  std::vector<int>::iterator Connectivity::end( void )
+  {
+    return this->node_numbers.end();
+  }
 
 } // namespace ms::geo
 
@@ -50,571 +50,111 @@ std::vector<int>::iterator Connectivity::end(void)
 namespace ms::geo
 {
 
-ms::sym::Polynomials Reference_Point::cal_normal_functions(const ms::sym::Polynomials& parametric_functions) const
-{
-  ms::sym::Polynomials result;
-  result[0] = 1.0;
-  return result;
-}
-
-ms::sym::Polynomials Reference_Point::cal_parametric_functions(const std::vector<Node_View>& consisting_node_wraps) const
-{
-  REQUIRE(consisting_node_wraps.size() == 1, "Point must consist of only one single point.");
-
-  const auto& node_cwrap = consisting_node_wraps.front();
-  const auto  dimension  = node_cwrap.dimension();
-
-  ms::sym::Polynomials result(dimension);
-  for (int i = 0; i < dimension; ++i)
+  ms::sym::Polynomials Reference_Point::cal_normal_functions( const ms::sym::Polynomials& parametric_functions ) const
   {
-    result[i] = node_cwrap[i];
+    ms::sym::Polynomials result;
+    result[0] = 1.0;
+    return result;
   }
 
-  return result;
-}
-
-int Reference_Point::cal_parameter_order(const int num_points) const
-{
-  return 0;
-}
-
-ms::sym::Symbol Reference_Point::cal_scale_function(const ms::sym::Polynomials& parametric_functions) const
-{
-  EXCEPTION("Point doesn't have scale function");
-  return {};
-}
-
-Node_View Reference_Point::center_point(void) const
-{
-  auto result = Node_View(this->_center_coords);
-  return result;
-}
-
-int Reference_Point::dimension(void) const
-{
-  return 0;
-}
-
-Figure Reference_Point::face_figure(const int face_index) const
-{
-  EXCEPTION("Point doesn't have any face");
-  return Figure::NOT_FIGURE;
-}
-
-const std::vector<std::vector<int>>& Reference_Point::get_face_vnode_indexes_s(void) const
-{
-  EXCEPTION("Point doesn't have any faces");
-  return {};
-}
-
-bool Reference_Point::is_valid_num_points(const int num_points) const
-{
-  return num_points == 1;
-}
-
-bool Reference_Point::is_point(void) const
-{
-  return true;
-}
-
-bool Reference_Point::is_line(void) const
-{
-  return false;
-}
-
-std::vector<int> Reference_Point::node_indexes(const int parameter_order) const
-{
-  return {0};
-}
-
-int Reference_Point::num_faces(void) const
-{
-  EXCEPTION("Point doesn't have any vertices");
-  return -1;
-}
-
-int Reference_Point::num_vertices(void) const
-{
-  return 1;
-}
-
-Nodes_View Reference_Point::quadrature_points(const int integrand_degree) const
-{
-  EXCEPTION("Integration is not possible over a point.");
-  return {};
-}
-
-const std::vector<double>& Reference_Point::get_quadrature_weights(const int integrand_degree) const
-{
-  EXCEPTION("Integration is not possible over a point.");
-  return {};
-}
-
-const Geometry_Consisting_Nodes_Info& Reference_Point::get_partition_geometry_nodes_info(const int partition_order) const
-{
-  EXCEPTION("Partition is not possible over a point.");
-  return {};
-}
-
-} // namespace ms::geo
-
-/*
-
-
-
-
-
-
-
-
-
-
-*/
-
-namespace ms::geo
-{
-
-ms::sym::Polynomials Reference_Geometry_Common::cal_parametric_functions(const std::vector<Node_View>& consisting_nodes) const
-{
-  const auto  num_nodes       = static_cast<int>(consisting_nodes.size());
-  const auto  param_order     = this->cal_parameter_order(num_nodes);
-  const auto& shape_functions = this->get_shape_functions(param_order);
-
-  const auto           dim = consisting_nodes.front().dimension();
-  ms::sym::Polynomials parametric_functions(dim);
-
-  for (int i = 0; i < dim; ++i)
+  ms::sym::Polynomials Reference_Point::cal_parametric_functions( const std::vector<Node_View>& consisting_node_wraps ) const
   {
-    for (int j = 0; j < num_nodes; ++j)
+    REQUIRE( consisting_node_wraps.size() == 1, "Point must consist of only one single point." );
+
+    const auto& node_cwrap = consisting_node_wraps.front();
+    const auto  dimension  = node_cwrap.dimension();
+
+    ms::sym::Polynomials result( dimension );
+    for ( int i = 0; i < dimension; ++i )
     {
-      const auto& node = consisting_nodes[j];
-      parametric_functions[i] += node[i] * shape_functions[j];
+      result[i] = node_cwrap[i];
     }
+
+    return result;
   }
 
-  return parametric_functions;
-}
-
-Node_View geo::Reference_Geometry_Common::center_point(void) const
-{
-  auto result = Node_View(this->_center_coords);
-  return result;
-}
-
-const std::vector<std::vector<int>>& geo::Reference_Geometry_Common::get_face_vnode_indexes_s(void) const
-{
-  return this->_face_vnode_indexes_s;
-}
-
-bool Reference_Geometry_Common::is_point(void) const
-{
-  return false;
-}
-
-Nodes_View Reference_Geometry_Common::quadrature_points(const int integrand_degree) const
-{
-  REQUIRE(0 <= integrand_degree, "integrand degree should be positive");
-
-  const auto tag = this->cal_quadrature_rule_tag(integrand_degree);
-
-  if (!this->_tag_to_quadrature_points.contains(tag))
+  int Reference_Point::cal_parameter_order( const int num_points ) const
   {
-    this->create_and_store_quadrature_points(tag);
-  }
-
-  return this->_tag_to_quadrature_points.at(tag);
-}
-
-const std::vector<double>& Reference_Geometry_Common::get_quadrature_weights(const int integrand_degree) const
-{
-  const auto tag = this->cal_quadrature_rule_tag(integrand_degree);
-
-  if (!this->_tag_to_quadrature_weights.contains(tag))
-  {
-    this->create_and_store_quadrature_weights(tag);
-  }
-
-  return this->_tag_to_quadrature_weights.at(tag);
-}
-
-const Geometry_Consisting_Nodes_Info& Reference_Geometry_Common::get_partition_geometry_nodes_info(const int partition_order) const
-{
-  if (!this->_order_to_partition_geometry.contains(partition_order))
-  {
-    this->create_and_store_partition_geometry(partition_order);
-  }
-
-  return this->_order_to_partition_geometry.at(partition_order);
-}
-
-const ms::sym::Polynomials& Reference_Geometry_Common::get_shape_functions(const int porder) const
-{
-  if (!this->_parameter_order_to_shape_functions.contains(porder))
-  {
-    this->_parameter_order_to_shape_functions.emplace(porder, this->make_shape_functions(porder));
-  }
-
-  return this->_parameter_order_to_shape_functions[porder];
-}
-
-ms::sym::Polynomials Reference_Geometry_Common::make_shape_functions(const int parameter_order) const
-{
-  const auto coords         = this->make_parametric_functions_reference_coords(parameter_order);
-  const auto num_ref_points = this->num_parametric_function_reference_points(parameter_order);
-  const auto dim            = this->dimension();
-  Nodes_View ref_points(num_ref_points, dim, coords);
-
-  const auto bases     = this->make_parametric_function_bases(parameter_order);
-  const auto num_bases = bases.size();
-  REQUIRE(num_ref_points == num_bases, "it should be same for invertibility");
-
-  const auto       n = static_cast<int>(num_bases);
-  ms::math::Matrix coefficients(n, n);
-
-  for (int i = 0; i < n; ++i)
-  {
-    const auto& basis = bases[i];
-
-    for (int j = 0; j < n; ++j)
-    {
-      const auto& point = ref_points[j];
-
-      coefficients.at(i, j) = basis(point.to_vector_view());
-    }
-  }
-
-  coefficients.be_inverse();
-
-  ms::sym::Polynomials shape_functions(n);
-  for (int i = 0; i < n; ++i)
-  {
-    for (int j = 0; j < n; ++j)
-    {
-      shape_functions[i] += coefficients.at(i, j) * bases[j];
-    }
-  }
-
-  return shape_functions;
-}
-
-} // namespace ms::geo
-
-/*
-
-
-
-
-
-
-
-
-
-
-*/
-
-namespace ms::geo
-{
-
-Reference_Line::Reference_Line(void)
-{
-  this->_center_coords = {0.0};
-
-  // 0 �������� 1
-  this->_face_vnode_indexes_s = {{0}, {1}};
-}
-
-// Node_View Reference_Line::center_point(void) const
-//{
-//   auto result = Node_View(this->_center_coords);
-//   return result;
-// };
-
-ms::sym::Polynomials Reference_Line::cal_normal_functions(const ms::sym::Polynomials& curve) const
-{
-  return ms::geo::cal_paramteric_curve_normal_functions(curve);
-}
-
-int Reference_Line::cal_parameter_order(const int num_points) const
-{
-  switch (num_points)
-  {
-  case 2:
     return 0;
-  case 3:
-    return 1;
-  default:
-    EXCEPTION("given num nodes does not match any order of parameter");
-    return -1;
-    break;
   }
-}
 
-Figure Reference_Line::face_figure(const int face_index) const
-{
-  REQUIRE(face_index < this->num_faces(), "face index can't exceed num face");
-
-  return Figure::POINT;
-}
-
-bool Reference_Line::is_valid_num_points(const int num_points) const
-{
-  switch (num_points)
+  ms::sym::Symbol Reference_Point::cal_scale_function( const ms::sym::Polynomials& parametric_functions ) const
   {
-  case 2:
-  case 3:
+    EXCEPTION( "Point doesn't have scale function" );
+    return {};
+  }
+
+  Node_View Reference_Point::center_point( void ) const
+  {
+    auto result = Node_View( this->_center_coords );
+    return result;
+  }
+
+  int Reference_Point::dimension( void ) const
+  {
+    return 0;
+  }
+
+  Figure Reference_Point::face_figure( const int face_index ) const
+  {
+    EXCEPTION( "Point doesn't have any face" );
+    return Figure::NOT_FIGURE;
+  }
+
+  const std::vector<std::vector<int>>& Reference_Point::get_face_vnode_indexes_s( void ) const
+  {
+    EXCEPTION( "Point doesn't have any faces" );
+    return {};
+  }
+
+  bool Reference_Point::is_valid_num_points( const int num_points ) const
+  {
+    return num_points == 1;
+  }
+
+  bool Reference_Point::is_point( void ) const
+  {
     return true;
-  default:
+  }
+
+  bool Reference_Point::is_line( void ) const
+  {
     return false;
   }
-}
 
-bool Reference_Line::is_line(void) const
-{
-  return true;
-}
-
-std::vector<int> Reference_Line::node_indexes(const int parameter_order) const
-{
-  // 0 ������ 2 ������ ������ ������ order+1 ������ 1
-
-  std::vector<int> node_indexes(parameter_order + 1);
-
-  for (auto i = 0; i < parameter_order + 1; ++i)
+  std::vector<int> Reference_Point::node_indexes( const int parameter_order ) const
   {
-    node_indexes[i] = i;
+    return { 0 };
   }
 
-  return node_indexes;
-}
-
-int Reference_Line::num_faces(void) const
-{
-  return 2;
-}
-
-int Reference_Line::num_vertices(void) const
-{
-  return 2;
-}
-
-ms::sym::Symbol Reference_Line::cal_scale_function(const ms::sym::Polynomials& parametric_functions) const
-{
-  constexpr int r = 0;
-
-  const auto df_dr = ms::sym::get_differentiate(parametric_functions, r);
-  return ms::sym::cal_L2_norm(df_dr);
-}
-
-int Reference_Line::dimension(void) const
-{
-  return 1;
-}
-
-int Reference_Line::num_quadrature_points(const int tag) const
-{
-  return tag + 1;
-}
-
-int Reference_Line::num_parametric_function_reference_points(const int param_order) const
-{
-  return param_order + 2;
-}
-
-int Reference_Line::cal_quadrature_rule_tag(const int integrand_degree) const
-{
-  return integrand_degree / 2;
-}
-
-void Reference_Line::create_and_store_partition_geometry(const int partition_order) const
-{
-  constexpr auto dimension      = 1;
-  constexpr auto X0_start_coord = -1.0;
-
-  const auto num_nodes    = partition_order + 2;
-  const auto num_elements = partition_order + 1;
-  const auto delta        = 2.0 / num_elements;
-
-  Nodes nodes(num_nodes, dimension);
-
-  for (int i = 0; i < num_nodes; ++i)
+  int Reference_Point::num_faces( void ) const
   {
-    auto       node_wrap = nodes[i];
-    const auto X0_coord  = X0_start_coord + delta * i;
-    node_wrap[0]         = X0_coord;
+    EXCEPTION( "Point doesn't have any vertices" );
+    return -1;
   }
 
-  // std::vector<Numbered_Node> consisting_nodes;
-  // consisting_nodes.reserve(num_consisting_nodes);
-
-  // const auto delta = 2.0 / num_consisting_elements;
-
-  // for (int i = 0; i < num_consisting_nodes; ++i)
-  //{
-  //   const auto    X0_coord      = X0_start_coord + delta * i;
-  //   Node          node          = {X0_coord};
-  //   Numbered_Node numbered_node = {node, i};
-  //   consisting_nodes.push_back(std::move(numbered_node));
-  // }
-
-  std::vector<Connectivity> connectivities(num_elements);
-
-  for (int i = 0; i < num_elements; i++)
+  int Reference_Point::num_vertices( void ) const
   {
-    auto& connectivity = connectivities[i];
-
-    //   i �������� i+1
-    connectivity.node_numbers = {i, i + 1};
+    return 1;
   }
 
-  Geometry_Consisting_Nodes_Info data(std::move(nodes), std::move(connectivities));
-  this->_order_to_partition_geometry.emplace(partition_order, std::move(data));
-}
-
-void Reference_Line::create_and_store_quadrature_points(const int tag) const
-{
-  REQUIRE(0 <= tag, "param_order can not be negative");
-
-  std::vector<double> coordinates;
-
-  switch (tag)
+  Nodes_View Reference_Point::quadrature_points( const int integrand_degree ) const
   {
-  case 0:
-    coordinates = {0.000000000000000};
-    break;
-  case 1:
-    coordinates = {-0.577350269189626, 0.577350269189626};
-    break;
-  case 2:
-    coordinates = {-0.774596669241483, 0.000000000000000, 0.774596669241483};
-    break;
-  case 3:
-    coordinates = {-0.861136311594052, -0.339981043584856, 0.339981043584856, 0.861136311594052};
-    break;
-  case 4:
-    coordinates = {-0.906179845938664, -0.538469310105683, 0.000000000000000, 0.538469310105683, 0.906179845938664};
-    break;
-  case 5:
-    coordinates = {-0.932469514203152, -0.661209386466264, -0.238619186083197, 0.238619186083197, 0.661209386466264, 0.932469514203152};
-    break;
-  case 6:
-    coordinates = {-0.949107912342758, -0.741531185599394, -0.405845151377397, 0.000000000000000, 0.405845151377397, 0.741531185599394, 0.949107912342758};
-    break;
-  case 7:
-    coordinates = {-0.960289856497536, -0.796666477413627, -0.525532409916329, -0.183434642495650, 0.183434642495650, 0.525532409916329, 0.796666477413627, 0.960289856497536};
-    break;
-  case 8:
-    coordinates = {-0.968160239507626, -0.836031107326636, -0.613371432700590, -0.324253423403809, 0.000000000000000, 0.324253423403809, 0.613371432700590, 0.836031107326636, 0.968160239507626};
-    break;
-  case 9:
-    coordinates = {-0.973906528517172, -0.865063366688985, -0.679409568299024, -0.433395394129247, -0.148874338981631, 0.148874338981631, 0.433395394129247, 0.679409568299024, 0.865063366688985, 0.973906528517172};
-    break;
-  case 10:
-    coordinates = {-0.978228658146057, -0.887062599768095, -0.730152005574049, -0.519096129206812, -0.269543155952345, 0.000000000000000, 0.269543155952345, 0.519096129206812, 0.730152005574049, 0.887062599768095, 0.978228658146057};
-    break;
-
-  default:
-    EXCEPTION("unsupported param_order");
-    break;
+    EXCEPTION( "Integration is not possible over a point." );
+    return {};
   }
 
-  const auto     num_nodes = tag + 1;
-  constexpr auto dimension = 1;
-
-  this->_tag_to_quadrature_points.emplace(tag, Nodes(num_nodes, dimension, std::move(coordinates)));
-}
-
-void Reference_Line::create_and_store_quadrature_weights(const int tag) const
-{
-  REQUIRE(0 <= tag, "param_order can not be negative");
-
-  std::vector<double> weights;
-
-  switch (tag)
+  const std::vector<double>& Reference_Point::get_quadrature_weights( const int integrand_degree ) const
   {
-  case 0:
-    weights = {2.000000000000000};
-    break;
-  case 1:
-    weights = {1.000000000000000, 1.000000000000000};
-    break;
-  case 2:
-    weights = {0.555555555555554, 0.888888888888889, 0.555555555555554};
-    break;
-  case 3:
-    weights = {0.347854845137454, 0.652145154862546, 0.652145154862546, 0.347854845137454};
-    break;
-  case 4:
-    weights = {0.236926885056189, 0.478628670499366, 0.568888888888889, 0.478628670499366, 0.236926885056189};
-    break;
-  case 5:
-    weights = {0.171324492379171, 0.360761573048139, 0.467913934572691, 0.467913934572691, 0.360761573048139, 0.171324492379171};
-    break;
-  case 6:
-    weights = {0.129484966168870, 0.279705391489277, 0.381830050505119, 0.417959183673469, 0.381830050505119, 0.279705391489277, 0.129484966168870};
-    break;
-  case 7:
-    weights = {0.101228536290377, 0.222381034453374, 0.313706645877887, 0.362683783378362, 0.362683783378362, 0.313706645877887, 0.222381034453374, 0.101228536290377};
-    break;
-  case 8:
-    weights = {0.081274388361575, 0.180648160694857, 0.260610696402936, 0.312347077040003, 0.330239355001260, 0.312347077040003, 0.260610696402936, 0.180648160694857, 0.081274388361575};
-    break;
-  case 9:
-    weights = {0.066671344308688, 0.149451349150581, 0.219086362515982, 0.269266719309996, 0.295524224714753, 0.295524224714753, 0.269266719309996, 0.219086362515982, 0.149451349150581, 0.066671344308688};
-    break;
-  case 10:
-    weights = {0.055668567116174, 0.125580369464904, 0.186290210927734, 0.233193764591990, 0.262804544510247, 0.272925086777901, 0.262804544510247, 0.233193764591990, 0.186290210927734, 0.125580369464904, 0.055668567116174};
-    break;
-  default:
-    EXCEPTION("unsupported param_order");
-    break;
+    EXCEPTION( "Integration is not possible over a point." );
+    return {};
   }
 
-  this->_tag_to_quadrature_weights.emplace(tag, std::move(weights));
-}
-
-std::vector<double> Reference_Line::make_parametric_functions_reference_coords(const int tag) const
-{
-  REQUIRE(0 <= tag, "param_order can not be negative");
-
-  std::vector<double> VCP_coords;
-
-  switch (tag)
+  const Geometry_Consisting_Nodes_Info& Reference_Point::get_partition_geometry_nodes_info( const int partition_order ) const
   {
-  case 0:
-    VCP_coords = {
-        -1.0,
-        1.0};
-    break;
-  case 1:
-    VCP_coords = {
-        -1.0,
-        1.0,
-        0.0};
-    break;
-  default:
-    EXCEPTION("unsupported param_order");
-    break;
+    EXCEPTION( "Partition is not possible over a point." );
+    return {};
   }
-
-  return VCP_coords;
-}
-
-ms::sym::Polynomials Reference_Line::make_parametric_function_bases(const int tag) const
-{
-  REQUIRE(0 <= tag, "param_order can not be negative");
-
-  const auto           num_bases = tag + 2;
-  ms::sym::Polynomials VCF_bases(num_bases);
-
-  ms::sym::Polynomial r("x0");
-  for (int i = 0; i < num_bases; ++i)
-  {
-    VCF_bases[i] = (r ^ i);
-  }
-
-  // 1 r r^2 ...
-  return VCF_bases;
-}
 
 } // namespace ms::geo
 
@@ -634,47 +174,507 @@ ms::sym::Polynomials Reference_Line::make_parametric_function_bases(const int ta
 namespace ms::geo
 {
 
-ms::sym::Symbols cal_principal_normal(const ms::sym::Polynomials& curve)
+  ms::sym::Polynomials Reference_Geometry_Common::cal_parametric_functions( const std::vector<Node_View>& consisting_nodes ) const
+  {
+    const auto  num_nodes       = static_cast<int>( consisting_nodes.size() );
+    const auto  param_order     = this->cal_parameter_order( num_nodes );
+    const auto& shape_functions = this->get_shape_functions( param_order );
+
+    const auto           dim = consisting_nodes.front().dimension();
+    ms::sym::Polynomials parametric_functions( dim );
+
+    for ( int i = 0; i < dim; ++i )
+    {
+      for ( int j = 0; j < num_nodes; ++j )
+      {
+        const auto& node         = consisting_nodes[j];
+        parametric_functions[i] += node[i] * shape_functions[j];
+      }
+    }
+
+    return parametric_functions;
+  }
+
+  Node_View geo::Reference_Geometry_Common::center_point( void ) const
+  {
+    auto result = Node_View( this->_center_coords );
+    return result;
+  }
+
+  const std::vector<std::vector<int>>& geo::Reference_Geometry_Common::get_face_vnode_indexes_s( void ) const
+  {
+    return this->_face_vnode_indexes_s;
+  }
+
+  bool Reference_Geometry_Common::is_point( void ) const
+  {
+    return false;
+  }
+
+  Nodes_View Reference_Geometry_Common::quadrature_points( const int integrand_degree ) const
+  {
+    REQUIRE( 0 <= integrand_degree, "integrand degree should be positive" );
+
+    const auto tag = this->cal_quadrature_rule_tag( integrand_degree );
+
+    if ( !this->_tag_to_quadrature_points.contains( tag ) )
+    {
+      this->create_and_store_quadrature_points( tag );
+    }
+
+    return this->_tag_to_quadrature_points.at( tag );
+  }
+
+  const std::vector<double>& Reference_Geometry_Common::get_quadrature_weights( const int integrand_degree ) const
+  {
+    const auto tag = this->cal_quadrature_rule_tag( integrand_degree );
+
+    if ( !this->_tag_to_quadrature_weights.contains( tag ) )
+    {
+      this->create_and_store_quadrature_weights( tag );
+    }
+
+    return this->_tag_to_quadrature_weights.at( tag );
+  }
+
+  const Geometry_Consisting_Nodes_Info& Reference_Geometry_Common::get_partition_geometry_nodes_info( const int partition_order ) const
+  {
+    if ( !this->_order_to_partition_geometry.contains( partition_order ) )
+    {
+      this->create_and_store_partition_geometry( partition_order );
+    }
+
+    return this->_order_to_partition_geometry.at( partition_order );
+  }
+
+  const ms::sym::Polynomials& Reference_Geometry_Common::get_shape_functions( const int porder ) const
+  {
+    if ( !this->_parameter_order_to_shape_functions.contains( porder ) )
+    {
+      this->_parameter_order_to_shape_functions.emplace( porder, this->make_shape_functions( porder ) );
+    }
+
+    return this->_parameter_order_to_shape_functions[porder];
+  }
+
+  ms::sym::Polynomials Reference_Geometry_Common::make_shape_functions( const int parameter_order ) const
+  {
+    const auto coords         = this->make_parametric_functions_reference_coords( parameter_order );
+    const auto num_ref_points = this->num_parametric_function_reference_points( parameter_order );
+    const auto dim            = this->dimension();
+    Nodes_View ref_points( num_ref_points, dim, coords );
+
+    const auto bases     = this->make_parametric_function_bases( parameter_order );
+    const auto num_bases = bases.size();
+    REQUIRE( num_ref_points == num_bases, "it should be same for invertibility" );
+
+    const auto       n = static_cast<int>( num_bases );
+    ms::math::Matrix coefficients( n, n );
+
+    for ( int i = 0; i < n; ++i )
+    {
+      const auto& basis = bases[i];
+
+      for ( int j = 0; j < n; ++j )
+      {
+        const auto& point = ref_points[j];
+
+        coefficients.at( i, j ) = basis( point.to_vector_view() );
+      }
+    }
+
+    coefficients.be_inverse();
+
+    ms::sym::Polynomials shape_functions( n );
+    for ( int i = 0; i < n; ++i )
+    {
+      for ( int j = 0; j < n; ++j )
+      {
+        shape_functions[i] += coefficients.at( i, j ) * bases[j];
+      }
+    }
+
+    return shape_functions;
+  }
+
+} // namespace ms::geo
+
+/*
+
+
+
+
+
+
+
+
+
+
+*/
+
+namespace ms::geo
 {
-  const auto var_index = 0;
 
-  auto tangent      = ms::sym::get_differentiate(curve, var_index);
-  auto unit_tangent = ms::sym::get_normalize(tangent);
+  Reference_Line::Reference_Line( void )
+  {
+    this->_center_coords = { 0.0 };
 
-  return ms::sym::get_differentiate(unit_tangent, var_index);
-}
+    // 0 �������� 1
+    this->_face_vnode_indexes_s = { { 0 }, { 1 } };
+  }
 
-ms::sym::Symbol cal_curvature(const ms::sym::Polynomials& curve)
+  // Node_View Reference_Line::center_point(void) const
+  //{
+  //   auto result = Node_View(this->_center_coords);
+  //   return result;
+  // };
+
+  ms::sym::Polynomials Reference_Line::cal_normal_functions( const ms::sym::Polynomials& curve ) const
+  {
+    return ms::geo::cal_paramteric_curve_normal_functions( curve );
+  }
+
+  int Reference_Line::cal_parameter_order( const int num_points ) const
+  {
+    switch ( num_points )
+    {
+    case 2:
+      return 0;
+    case 3:
+      return 1;
+    default:
+      EXCEPTION( "given num nodes does not match any order of parameter" );
+      return -1;
+      break;
+    }
+  }
+
+  Figure Reference_Line::face_figure( const int face_index ) const
+  {
+    REQUIRE( face_index < this->num_faces(), "face index can't exceed num face" );
+
+    return Figure::POINT;
+  }
+
+  bool Reference_Line::is_valid_num_points( const int num_points ) const
+  {
+    switch ( num_points )
+    {
+    case 2:
+    case 3:
+      return true;
+    default:
+      return false;
+    }
+  }
+
+  bool Reference_Line::is_line( void ) const
+  {
+    return true;
+  }
+
+  std::vector<int> Reference_Line::node_indexes( const int parameter_order ) const
+  {
+    // 0 ������ 2 ������ ������ ������ order+1 ������ 1
+
+    std::vector<int> node_indexes( parameter_order + 1 );
+
+    for ( auto i = 0; i < parameter_order + 1; ++i )
+    {
+      node_indexes[i] = i;
+    }
+
+    return node_indexes;
+  }
+
+  int Reference_Line::num_faces( void ) const
+  {
+    return 2;
+  }
+
+  int Reference_Line::num_vertices( void ) const
+  {
+    return 2;
+  }
+
+  ms::sym::Symbol Reference_Line::cal_scale_function( const ms::sym::Polynomials& parametric_functions ) const
+  {
+    constexpr int r = 0;
+
+    const auto df_dr = ms::sym::get_differentiate( parametric_functions, r );
+    return ms::sym::cal_L2_norm( df_dr );
+  }
+
+  int Reference_Line::dimension( void ) const
+  {
+    return 1;
+  }
+
+  int Reference_Line::num_quadrature_points( const int tag ) const
+  {
+    return tag + 1;
+  }
+
+  int Reference_Line::num_parametric_function_reference_points( const int param_order ) const
+  {
+    return param_order + 2;
+  }
+
+  int Reference_Line::cal_quadrature_rule_tag( const int integrand_degree ) const
+  {
+    return integrand_degree / 2;
+  }
+
+  void Reference_Line::create_and_store_partition_geometry( const int partition_order ) const
+  {
+    constexpr auto dimension      = 1;
+    constexpr auto X0_start_coord = -1.0;
+
+    const auto num_nodes    = partition_order + 2;
+    const auto num_elements = partition_order + 1;
+    const auto delta        = 2.0 / num_elements;
+
+    Nodes nodes( num_nodes, dimension );
+
+    for ( int i = 0; i < num_nodes; ++i )
+    {
+      auto       node_wrap = nodes[i];
+      const auto X0_coord  = X0_start_coord + delta * i;
+      node_wrap[0]         = X0_coord;
+    }
+
+    // std::vector<Numbered_Node> consisting_nodes;
+    // consisting_nodes.reserve(num_consisting_nodes);
+
+    // const auto delta = 2.0 / num_consisting_elements;
+
+    // for (int i = 0; i < num_consisting_nodes; ++i)
+    //{
+    //   const auto    X0_coord      = X0_start_coord + delta * i;
+    //   Node          node          = {X0_coord};
+    //   Numbered_Node numbered_node = {node, i};
+    //   consisting_nodes.push_back(std::move(numbered_node));
+    // }
+
+    std::vector<Connectivity> connectivities( num_elements );
+
+    for ( int i = 0; i < num_elements; i++ )
+    {
+      auto& connectivity = connectivities[i];
+
+      //   i �������� i+1
+      connectivity.node_numbers = { i, i + 1 };
+    }
+
+    Geometry_Consisting_Nodes_Info data( std::move( nodes ), std::move( connectivities ) );
+    this->_order_to_partition_geometry.emplace( partition_order, std::move( data ) );
+  }
+
+  void Reference_Line::create_and_store_quadrature_points( const int tag ) const
+  {
+    REQUIRE( 0 <= tag, "param_order can not be negative" );
+
+    std::vector<double> coordinates;
+
+    switch ( tag )
+    {
+    case 0:
+      coordinates = { 0.000000000000000 };
+      break;
+    case 1:
+      coordinates = { -0.577350269189626, 0.577350269189626 };
+      break;
+    case 2:
+      coordinates = { -0.774596669241483, 0.000000000000000, 0.774596669241483 };
+      break;
+    case 3:
+      coordinates = { -0.861136311594052, -0.339981043584856, 0.339981043584856, 0.861136311594052 };
+      break;
+    case 4:
+      coordinates = { -0.906179845938664, -0.538469310105683, 0.000000000000000, 0.538469310105683, 0.906179845938664 };
+      break;
+    case 5:
+      coordinates = { -0.932469514203152, -0.661209386466264, -0.238619186083197, 0.238619186083197, 0.661209386466264, 0.932469514203152 };
+      break;
+    case 6:
+      coordinates = { -0.949107912342758, -0.741531185599394, -0.405845151377397, 0.000000000000000, 0.405845151377397, 0.741531185599394, 0.949107912342758 };
+      break;
+    case 7:
+      coordinates = { -0.960289856497536, -0.796666477413627, -0.525532409916329, -0.183434642495650, 0.183434642495650, 0.525532409916329, 0.796666477413627, 0.960289856497536 };
+      break;
+    case 8:
+      coordinates = { -0.968160239507626, -0.836031107326636, -0.613371432700590, -0.324253423403809, 0.000000000000000, 0.324253423403809, 0.613371432700590, 0.836031107326636, 0.968160239507626 };
+      break;
+    case 9:
+      coordinates = { -0.973906528517172, -0.865063366688985, -0.679409568299024, -0.433395394129247, -0.148874338981631, 0.148874338981631, 0.433395394129247, 0.679409568299024, 0.865063366688985, 0.973906528517172 };
+      break;
+    case 10:
+      coordinates = { -0.978228658146057, -0.887062599768095, -0.730152005574049, -0.519096129206812, -0.269543155952345, 0.000000000000000, 0.269543155952345, 0.519096129206812, 0.730152005574049, 0.887062599768095, 0.978228658146057 };
+      break;
+
+    default:
+      EXCEPTION( "unsupported param_order" );
+      break;
+    }
+
+    const auto     num_nodes = tag + 1;
+    constexpr auto dimension = 1;
+
+    this->_tag_to_quadrature_points.emplace( tag, Nodes( num_nodes, dimension, std::move( coordinates ) ) );
+  }
+
+  void Reference_Line::create_and_store_quadrature_weights( const int tag ) const
+  {
+    REQUIRE( 0 <= tag, "param_order can not be negative" );
+
+    std::vector<double> weights;
+
+    switch ( tag )
+    {
+    case 0:
+      weights = { 2.000000000000000 };
+      break;
+    case 1:
+      weights = { 1.000000000000000, 1.000000000000000 };
+      break;
+    case 2:
+      weights = { 0.555555555555554, 0.888888888888889, 0.555555555555554 };
+      break;
+    case 3:
+      weights = { 0.347854845137454, 0.652145154862546, 0.652145154862546, 0.347854845137454 };
+      break;
+    case 4:
+      weights = { 0.236926885056189, 0.478628670499366, 0.568888888888889, 0.478628670499366, 0.236926885056189 };
+      break;
+    case 5:
+      weights = { 0.171324492379171, 0.360761573048139, 0.467913934572691, 0.467913934572691, 0.360761573048139, 0.171324492379171 };
+      break;
+    case 6:
+      weights = { 0.129484966168870, 0.279705391489277, 0.381830050505119, 0.417959183673469, 0.381830050505119, 0.279705391489277, 0.129484966168870 };
+      break;
+    case 7:
+      weights = { 0.101228536290377, 0.222381034453374, 0.313706645877887, 0.362683783378362, 0.362683783378362, 0.313706645877887, 0.222381034453374, 0.101228536290377 };
+      break;
+    case 8:
+      weights = { 0.081274388361575, 0.180648160694857, 0.260610696402936, 0.312347077040003, 0.330239355001260, 0.312347077040003, 0.260610696402936, 0.180648160694857, 0.081274388361575 };
+      break;
+    case 9:
+      weights = { 0.066671344308688, 0.149451349150581, 0.219086362515982, 0.269266719309996, 0.295524224714753, 0.295524224714753, 0.269266719309996, 0.219086362515982, 0.149451349150581, 0.066671344308688 };
+      break;
+    case 10:
+      weights = { 0.055668567116174, 0.125580369464904, 0.186290210927734, 0.233193764591990, 0.262804544510247, 0.272925086777901, 0.262804544510247, 0.233193764591990, 0.186290210927734, 0.125580369464904, 0.055668567116174 };
+      break;
+    default:
+      EXCEPTION( "unsupported param_order" );
+      break;
+    }
+
+    this->_tag_to_quadrature_weights.emplace( tag, std::move( weights ) );
+  }
+
+  std::vector<double> Reference_Line::make_parametric_functions_reference_coords( const int tag ) const
+  {
+    REQUIRE( 0 <= tag, "param_order can not be negative" );
+
+    std::vector<double> VCP_coords;
+
+    switch ( tag )
+    {
+    case 0:
+      VCP_coords = {
+        -1.0,
+        1.0 };
+      break;
+    case 1:
+      VCP_coords = {
+        -1.0,
+        1.0,
+        0.0 };
+      break;
+    default:
+      EXCEPTION( "unsupported param_order" );
+      break;
+    }
+
+    return VCP_coords;
+  }
+
+  ms::sym::Polynomials Reference_Line::make_parametric_function_bases( const int tag ) const
+  {
+    REQUIRE( 0 <= tag, "param_order can not be negative" );
+
+    const auto           num_bases = tag + 2;
+    ms::sym::Polynomials VCF_bases( num_bases );
+
+    ms::sym::Polynomial r( "x0" );
+    for ( int i = 0; i < num_bases; ++i )
+    {
+      VCF_bases[i] = ( r ^ i );
+    }
+
+    // 1 r r^2 ...
+    return VCF_bases;
+  }
+
+} // namespace ms::geo
+
+/*
+
+
+
+
+
+
+
+
+
+
+*/
+
+namespace ms::geo
 {
-  const auto var_index = 0;
 
-  auto       tangent      = ms::sym::get_differentiate(curve, var_index);
-  auto       unit_tangent = ms::sym::get_normalize(tangent);
-  const auto diff_ut      = ms::sym::get_differentiate(unit_tangent, var_index);
+  ms::sym::Symbols cal_principal_normal( const ms::sym::Polynomials& curve )
+  {
+    const auto var_index = 0;
 
-  auto curvature = ms::sym::cal_L2_norm(diff_ut) / ms::sym::cal_L2_norm(tangent);
-  return curvature;
-}
+    auto tangent      = ms::sym::get_differentiate( curve, var_index );
+    auto unit_tangent = ms::sym::get_normalize( tangent );
 
-ms::sym::Polynomials cal_paramteric_curve_normal_functions(const ms::sym::Polynomials& parameteric_curve)
-{
-  const auto range_dimension = parameteric_curve.size();
-  REQUIRE(2 <= range_dimension, "1D can't have normal");
+    return ms::sym::get_differentiate( unit_tangent, var_index );
+  }
 
-  ms::sym::Polynomials normal_functions(range_dimension);
+  ms::sym::Symbol cal_curvature( const ms::sym::Polynomials& curve )
+  {
+    const auto var_index = 0;
 
-  const auto& x = parameteric_curve[0];
-  const auto& y = parameteric_curve[1];
+    auto       tangent      = ms::sym::get_differentiate( curve, var_index );
+    auto       unit_tangent = ms::sym::get_normalize( tangent );
+    const auto diff_ut      = ms::sym::get_differentiate( unit_tangent, var_index );
 
-  constexpr auto var_index = 0;
-  const auto     dx_dr     = x.get_diff_polynomial(var_index);
-  const auto     dy_dr     = y.get_diff_polynomial(var_index);
+    auto curvature = ms::sym::cal_L2_norm( diff_ut ) / ms::sym::cal_L2_norm( tangent );
+    return curvature;
+  }
 
-  normal_functions[0] = -1 * dy_dr;
-  normal_functions[1] = dx_dr;
+  ms::sym::Polynomials cal_paramteric_curve_normal_functions( const ms::sym::Polynomials& parameteric_curve )
+  {
+    const auto range_dimension = parameteric_curve.size();
+    REQUIRE( 2 <= range_dimension, "1D can't have normal" );
 
-  return normal_functions;
-}
+    ms::sym::Polynomials normal_functions( range_dimension );
+
+    const auto& x = parameteric_curve[0];
+    const auto& y = parameteric_curve[1];
+
+    constexpr auto var_index = 0;
+    const auto     dx_dr     = x.get_diff_polynomial( var_index );
+    const auto     dy_dr     = y.get_diff_polynomial( var_index );
+
+    normal_functions[0] = -1 * dy_dr;
+    normal_functions[1] = dx_dr;
+
+    return normal_functions;
+  }
 
 } // namespace ms::geo
 
@@ -2922,5 +2922,3 @@ ms::sym::Polynomials cal_paramteric_curve_normal_functions(const ms::sym::Polyno
 //  Reference_Geometry_Container::order_to_reference_quadrilateral_.emplace(
 //      order, std::make_shared<Reference_Quadrilateral>(order));
 //}
-
-

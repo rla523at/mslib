@@ -9,258 +9,258 @@
 namespace ms::grid
 {
 
-Element::Element(const Element_Type type, std::vector<int>&& node_numbers, ms::geo::Geometry&& geometry)
-    : _type(type),
-      _node_numbers(std::move(node_numbers)),
-      _geometry(std::move(geometry))
-{
-  // initialize _face_vertex_node_numbers_s
-  
-  // point element doesn't need to initialize
-  if (this->_geometry.is_point()) return;
-
-  const auto& face_vnode_indexes_s = this->_geometry.get_face_vnode_indexes_s();
-  const auto  num_faces            = face_vnode_indexes_s.size();
-
-  // index -> node number
-  this->_face_vertex_node_numbers_s.resize(num_faces);
-
-  for (int i = 0; i < num_faces; ++i)
+  Element::Element( const Element_Type type, std::vector<int>&& node_numbers, ms::geo::Geometry&& geometry )
+    : _type( type ),
+      _node_numbers( std::move( node_numbers ) ),
+      _geometry( std::move( geometry ) )
   {
-    const auto& face_vnode_indexes = face_vnode_indexes_s[i];
-    auto&       face_vnode_numbers = this->_face_vertex_node_numbers_s[i];
+    // initialize _face_vertex_node_numbers_s
 
-    const auto num_face_vnode = face_vnode_indexes.size();
-    face_vnode_numbers.resize(num_face_vnode);
+    // point element doesn't need to initialize
+    if ( this->_geometry.is_point() ) return;
 
-    for (int j = 0; j < num_face_vnode; ++j)
+    const auto& face_vnode_indexes_s = this->_geometry.get_face_vnode_indexes_s();
+    const auto  num_faces            = face_vnode_indexes_s.size();
+
+    // index -> node number
+    this->_face_vertex_node_numbers_s.resize( num_faces );
+
+    for ( int i = 0; i < num_faces; ++i )
     {
-      const auto index      = face_vnode_indexes[j];
-      face_vnode_numbers[j] = this->_node_numbers[index];
-    }
-  }
-}
+      const auto& face_vnode_indexes = face_vnode_indexes_s[i];
+      auto&       face_vnode_numbers = this->_face_vertex_node_numbers_s[i];
 
-void Element::reordering_nodes(const std::vector<int>& new_ordered_node_numbers)
-{
-  const auto begin = new_ordered_node_numbers.begin();
-  const auto end   = new_ordered_node_numbers.end();
+      const auto num_face_vnode = face_vnode_indexes.size();
+      face_vnode_numbers.resize( num_face_vnode );
 
-  std::vector<int> new_orders;
-  new_orders.reserve(this->_node_numbers.size());
-
-  for (const auto& node_number : this->_node_numbers)
-  {
-    const auto iter = std::find(begin, end, node_number);
-    REQUIRE(iter != end, "Fail to find node which match with node number");
-
-    const auto new_order = static_cast<int>(iter - begin);
-    new_orders.push_back(new_order);
-  }
-
-  this->_geometry.reordering_nodes(new_orders);
-}
-
-int Element::dimension(void) const
-{
-  return this->_geometry.dimension();
-}
-
-std::vector<int> Element::find_periodic_matched_node_numbers(const ms::math::Vector_View direction_vector, const Element& other) const
-{
-  // It returns the node indices in "this element" that match the nodes of the "other element".
-
-  REQUIRE(this->_type == Element_Type::PERIODIC && other._type == Element_Type::PERIODIC, "both element should be periodic");
-
-  const auto this_num_nodes  = this->_geometry.num_nodes();
-  const auto other_num_nodes = other._geometry.num_nodes();
-
-  if (this_num_nodes != other_num_nodes)
-  {
-    return {};
-  }
-
-  std::unordered_set<int> matched_vnode_number_set;
-  matched_vnode_number_set.reserve(other_num_nodes);
-
-  std::vector<int> matched_node_numbers(this_num_nodes);
-
-  const auto       dimension = this->dimension();
-  ms::math::Vector node_to_node_vector(dimension);
-
-  for (int i = 0; i < other_num_nodes; ++i)
-  {
-    const auto other_node_number = other._node_numbers[i];
-    const auto other_node_view   = other._geometry.node_view(i);
-
-    bool not_find_pair = true;
-
-    for (int j = 0; j < this_num_nodes; ++j)
-    {
-      const auto this_node_number = this->_node_numbers[j];
-      const auto this_node_view   = this->_geometry.node_view(j);
-
-      if (matched_vnode_number_set.contains(this_node_number)) continue;
-
-      ms::geo::A_to_B_vector(node_to_node_vector, other_node_view, this_node_view);
-
-      if (direction_vector.is_parallel(node_to_node_vector))
+      for ( int j = 0; j < num_face_vnode; ++j )
       {
-        matched_node_numbers[i] = this_node_number;
-        matched_vnode_number_set.insert(this_node_number);
-        not_find_pair = false;
-        break;
+        const auto index      = face_vnode_indexes[j];
+        face_vnode_numbers[j] = this->_node_numbers[index];
       }
     }
+  }
 
-    if (not_find_pair)
+  void Element::reordering_nodes( const std::vector<int>& new_ordered_node_numbers )
+  {
+    const auto begin = new_ordered_node_numbers.begin();
+    const auto end   = new_ordered_node_numbers.end();
+
+    std::vector<int> new_orders;
+    new_orders.reserve( this->_node_numbers.size() );
+
+    for ( const auto& node_number : this->_node_numbers )
+    {
+      const auto iter = std::find( begin, end, node_number );
+      REQUIRE( iter != end, "Fail to find node which match with node number" );
+
+      const auto new_order = static_cast<int>( iter - begin );
+      new_orders.push_back( new_order );
+    }
+
+    this->_geometry.reordering_nodes( new_orders );
+  }
+
+  int Element::dimension( void ) const
+  {
+    return this->_geometry.dimension();
+  }
+
+  std::vector<int> Element::find_periodic_matched_node_numbers( const ms::math::Vector_View direction_vector, const Element& other ) const
+  {
+    // It returns the node indices in "this element" that match the nodes of the "other element".
+
+    REQUIRE( this->_type == Element_Type::PERIODIC && other._type == Element_Type::PERIODIC, "both element should be periodic" );
+
+    const auto this_num_nodes  = this->_geometry.num_nodes();
+    const auto other_num_nodes = other._geometry.num_nodes();
+
+    if ( this_num_nodes != other_num_nodes )
     {
       return {};
     }
+
+    std::unordered_set<int> matched_vnode_number_set;
+    matched_vnode_number_set.reserve( other_num_nodes );
+
+    std::vector<int> matched_node_numbers( this_num_nodes );
+
+    const auto       dimension = this->dimension();
+    ms::math::Vector node_to_node_vector( dimension );
+
+    for ( int i = 0; i < other_num_nodes; ++i )
+    {
+      const auto other_node_number = other._node_numbers[i];
+      const auto other_node_view   = other._geometry.node_view( i );
+
+      bool not_find_pair = true;
+
+      for ( int j = 0; j < this_num_nodes; ++j )
+      {
+        const auto this_node_number = this->_node_numbers[j];
+        const auto this_node_view   = this->_geometry.node_view( j );
+
+        if ( matched_vnode_number_set.contains( this_node_number ) ) continue;
+
+        ms::geo::A_to_B_vector( node_to_node_vector, other_node_view, this_node_view );
+
+        if ( direction_vector.is_parallel( node_to_node_vector ) )
+        {
+          matched_node_numbers[i] = this_node_number;
+          matched_vnode_number_set.insert( this_node_number );
+          not_find_pair = false;
+          break;
+        }
+      }
+
+      if ( not_find_pair )
+      {
+        return {};
+      }
+    }
+
+    return matched_node_numbers;
   }
 
-  return matched_node_numbers;
-}
-
-std::span<const int> Element::face_vertex_node_numbers(const int face_index) const
-{
-  REQUIRE(0 <= face_index && face_index < this->_face_vertex_node_numbers_s.size(), "face index is out of range");
-  return this->_face_vertex_node_numbers_s[face_index];
-}
-
-const ms::geo::Geometry& Element::get_geometry(void) const
-{
-  return this->_geometry;
-}
-
-std::span<const int> Element::node_numbers(void) const
-{
-  return this->_node_numbers;
-}
-
-bool Element::is_outward_face(const Element& face_element) const
-{
-  REQUIRE(this->_type == Element_Type::CELL, "owner cell should be cell type");
-  REQUIRE(face_element._type != Element_Type::CELL, "face element should not be cell type");
-
-  const auto face_index = this->find_face_index(face_element);
-
-  // check direction
-  const auto& face_geometry           = face_element.get_geometry();
-  const auto& this_face_vnode_numbers = this->_face_vertex_node_numbers_s[face_index];
-  const auto  face_vnode_numbers      = face_element.vertex_node_numbers();
-
-  if (face_geometry.is_point())
+  std::span<const int> Element::face_vertex_node_numbers( const int face_index ) const
   {
-    // �����ʿ� �ִ� face�� outward face�� �����Ѵ�.
-    return face_index == 1;
+    REQUIRE( 0 <= face_index && face_index < this->_face_vertex_node_numbers_s.size(), "face index is out of range" );
+    return this->_face_vertex_node_numbers_s[face_index];
   }
-  else if (face_geometry.is_line())
+
+  const ms::geo::Geometry& Element::get_geometry( void ) const
   {
-    // �ݽð� ���� face�� outward face�� �����Ѵ�.
-    return std::equal(this_face_vnode_numbers.begin(), this_face_vnode_numbers.end(), face_vnode_numbers.begin());
+    return this->_geometry;
   }
-  else
+
+  std::span<const int> Element::node_numbers( void ) const
   {
-    // consider circular permutation
-    std::vector<int> temp;
-    temp.reserve(this_face_vnode_numbers.size() * 2);
-    temp.insert(temp.end(), this_face_vnode_numbers.begin(), this_face_vnode_numbers.end());
-    temp.insert(temp.end(), this_face_vnode_numbers.begin(), this_face_vnode_numbers.end());
-
-    // �ݽð� ���� face�� outward face�� �����Ѵ�.
-    std::boyer_moore_searcher searcher(face_vnode_numbers.begin(), face_vnode_numbers.end());
-    return std::search(temp.begin(), temp.end(), searcher) != temp.end();
+    return this->_node_numbers;
   }
-}
 
-Element Element::make_face_element(const int face_index) const
-{
-  const auto face_figure       = this->_geometry.face_figure(face_index);
-  const auto face_node_indexes = this->_geometry.face_node_indexes(face_index);
-  const auto num_face_nodes    = face_node_indexes.size();
-
-  std::vector<ms::geo::Node_View> face_nodes(num_face_nodes);
-  std::vector<int>                face_node_numbers(num_face_nodes);
-
-  for (int i = 0; i < num_face_nodes; ++i)
+  bool Element::is_outward_face( const Element& face_element ) const
   {
-    const auto index     = face_node_indexes[i];
-    face_nodes[i]        = this->_geometry.node_view(index);
-    face_node_numbers[i] = this->_node_numbers[index];
+    REQUIRE( this->_type == Element_Type::CELL, "owner cell should be cell type" );
+    REQUIRE( face_element._type != Element_Type::CELL, "face element should not be cell type" );
+
+    const auto face_index = this->find_face_index( face_element );
+
+    // check direction
+    const auto& face_geometry           = face_element.get_geometry();
+    const auto& this_face_vnode_numbers = this->_face_vertex_node_numbers_s[face_index];
+    const auto  face_vnode_numbers      = face_element.vertex_node_numbers();
+
+    if ( face_geometry.is_point() )
+    {
+      // �����ʿ� �ִ� face�� outward face�� �����Ѵ�.
+      return face_index == 1;
+    }
+    else if ( face_geometry.is_line() )
+    {
+      // �ݽð� ���� face�� outward face�� �����Ѵ�.
+      return std::equal( this_face_vnode_numbers.begin(), this_face_vnode_numbers.end(), face_vnode_numbers.begin() );
+    }
+    else
+    {
+      // consider circular permutation
+      std::vector<int> temp;
+      temp.reserve( this_face_vnode_numbers.size() * 2 );
+      temp.insert( temp.end(), this_face_vnode_numbers.begin(), this_face_vnode_numbers.end() );
+      temp.insert( temp.end(), this_face_vnode_numbers.begin(), this_face_vnode_numbers.end() );
+
+      // �ݽð� ���� face�� outward face�� �����Ѵ�.
+      std::boyer_moore_searcher searcher( face_vnode_numbers.begin(), face_vnode_numbers.end() );
+      return std::search( temp.begin(), temp.end(), searcher ) != temp.end();
+    }
   }
 
-  auto face_geometry = ms::geo::Geometry(face_figure, std::move(face_nodes));
-  return Element(Element_Type::FACE, std::move(face_node_numbers), std::move(face_geometry));
-}
-
-std::vector<int> Element::make_sorted_face_vertex_node_numbers(const int face_index) const
-{
-  const auto vnode_numbers = this->face_vertex_node_numbers(face_index);
-
-  std::vector<int> sorted_vertex_node_numbers(vnode_numbers.size());
-  std::copy(vnode_numbers.begin(), vnode_numbers.end(), sorted_vertex_node_numbers.begin());
-  std::sort(sorted_vertex_node_numbers.begin(), sorted_vertex_node_numbers.end());
-
-  return sorted_vertex_node_numbers;
-}
-
-void Element::make_sorted_face_vertex_node_numbers(const int face_index, std::vector<int>& sorted_vertex_node_numbers) const
-{
-  const auto vnode_numbers = this->face_vertex_node_numbers(face_index);
-  sorted_vertex_node_numbers.resize(vnode_numbers.size());
-  std::copy(vnode_numbers.begin(), vnode_numbers.end(), sorted_vertex_node_numbers.begin());
-  std::sort(sorted_vertex_node_numbers.begin(), sorted_vertex_node_numbers.end());
-}
-
-std::vector<int> Element::make_sorted_vertex_node_numbers(void) const
-{
-  const auto vnode_numbers = this->vertex_node_numbers();
-
-  std::vector<int> sorted_vertex_node_numbers(vnode_numbers.size());
-  std::copy(vnode_numbers.begin(), vnode_numbers.end(), sorted_vertex_node_numbers.begin());
-  std::sort(sorted_vertex_node_numbers.begin(), sorted_vertex_node_numbers.end());
-
-  return sorted_vertex_node_numbers;
-}
-
-void Element::make_sorted_vertex_node_numbers(std::vector<int>& sorted_vertex_node_numbers) const
-{
-  const auto vnode_numbers = this->vertex_node_numbers();
-  sorted_vertex_node_numbers.resize(vnode_numbers.size());
-  std::copy(vnode_numbers.begin(), vnode_numbers.end(), sorted_vertex_node_numbers.begin());
-  std::sort(sorted_vertex_node_numbers.begin(), sorted_vertex_node_numbers.end());
-}
-
-Element_Type Element::type(void) const
-{
-  return this->_type;
-}
-
-std::span<const int> Element::vertex_node_numbers(void) const
-{
-  const auto num_vertices = this->_geometry.num_vertices();
-  const auto result       = std::span<const int>(this->_node_numbers.begin(), num_vertices); // convention
-  return result;
-}
-
-int Element::find_face_index(const Element& face_element) const
-{
-  const auto face_vnode_numbers = face_element.vertex_node_numbers();
-
-  int face_index = -1;
-  for (int i = 0; i < this->_face_vertex_node_numbers_s.size(); ++i)
+  Element Element::make_face_element( const int face_index ) const
   {
-    const auto& this_face_vnode_numbers = _face_vertex_node_numbers_s[i];
-    if (!std::is_permutation(this_face_vnode_numbers.begin(), this_face_vnode_numbers.end(), face_vnode_numbers.begin())) continue;
+    const auto face_figure       = this->_geometry.face_figure( face_index );
+    const auto face_node_indexes = this->_geometry.face_node_indexes( face_index );
+    const auto num_face_nodes    = face_node_indexes.size();
 
-    face_index = i;
-    break;
+    std::vector<ms::geo::Node_View> face_nodes( num_face_nodes );
+    std::vector<int>                face_node_numbers( num_face_nodes );
+
+    for ( int i = 0; i < num_face_nodes; ++i )
+    {
+      const auto index     = face_node_indexes[i];
+      face_nodes[i]        = this->_geometry.node_view( index );
+      face_node_numbers[i] = this->_node_numbers[index];
+    }
+
+    auto face_geometry = ms::geo::Geometry( face_figure, std::move( face_nodes ) );
+    return Element( Element_Type::FACE, std::move( face_node_numbers ), std::move( face_geometry ) );
   }
 
-  REQUIRE(face_index != -1, "This is not my face!");
-  return face_index;
-}
+  std::vector<int> Element::make_sorted_face_vertex_node_numbers( const int face_index ) const
+  {
+    const auto vnode_numbers = this->face_vertex_node_numbers( face_index );
+
+    std::vector<int> sorted_vertex_node_numbers( vnode_numbers.size() );
+    std::copy( vnode_numbers.begin(), vnode_numbers.end(), sorted_vertex_node_numbers.begin() );
+    std::sort( sorted_vertex_node_numbers.begin(), sorted_vertex_node_numbers.end() );
+
+    return sorted_vertex_node_numbers;
+  }
+
+  void Element::make_sorted_face_vertex_node_numbers( const int face_index, std::vector<int>& sorted_vertex_node_numbers ) const
+  {
+    const auto vnode_numbers = this->face_vertex_node_numbers( face_index );
+    sorted_vertex_node_numbers.resize( vnode_numbers.size() );
+    std::copy( vnode_numbers.begin(), vnode_numbers.end(), sorted_vertex_node_numbers.begin() );
+    std::sort( sorted_vertex_node_numbers.begin(), sorted_vertex_node_numbers.end() );
+  }
+
+  std::vector<int> Element::make_sorted_vertex_node_numbers( void ) const
+  {
+    const auto vnode_numbers = this->vertex_node_numbers();
+
+    std::vector<int> sorted_vertex_node_numbers( vnode_numbers.size() );
+    std::copy( vnode_numbers.begin(), vnode_numbers.end(), sorted_vertex_node_numbers.begin() );
+    std::sort( sorted_vertex_node_numbers.begin(), sorted_vertex_node_numbers.end() );
+
+    return sorted_vertex_node_numbers;
+  }
+
+  void Element::make_sorted_vertex_node_numbers( std::vector<int>& sorted_vertex_node_numbers ) const
+  {
+    const auto vnode_numbers = this->vertex_node_numbers();
+    sorted_vertex_node_numbers.resize( vnode_numbers.size() );
+    std::copy( vnode_numbers.begin(), vnode_numbers.end(), sorted_vertex_node_numbers.begin() );
+    std::sort( sorted_vertex_node_numbers.begin(), sorted_vertex_node_numbers.end() );
+  }
+
+  Element_Type Element::type( void ) const
+  {
+    return this->_type;
+  }
+
+  std::span<const int> Element::vertex_node_numbers( void ) const
+  {
+    const auto num_vertices = this->_geometry.num_vertices();
+    const auto result       = std::span<const int>( this->_node_numbers.begin(), num_vertices ); // convention
+    return result;
+  }
+
+  int Element::find_face_index( const Element& face_element ) const
+  {
+    const auto face_vnode_numbers = face_element.vertex_node_numbers();
+
+    int face_index = -1;
+    for ( int i = 0; i < this->_face_vertex_node_numbers_s.size(); ++i )
+    {
+      const auto& this_face_vnode_numbers = _face_vertex_node_numbers_s[i];
+      if ( !std::is_permutation( this_face_vnode_numbers.begin(), this_face_vnode_numbers.end(), face_vnode_numbers.begin() ) ) continue;
+
+      face_index = i;
+      break;
+    }
+
+    REQUIRE( face_index != -1, "This is not my face!" );
+    return face_index;
+  }
 
 } // namespace ms::grid
 
@@ -480,5 +480,3 @@ int Element::find_face_index(const Element& face_element) const
 //
 //   connectivities.insert(connectivities.end(), connectivities_of_pg.begin(), connectivities_of_pg.end());
 // }
-
-

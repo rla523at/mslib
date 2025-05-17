@@ -14,12 +14,12 @@
 #include <string_view>
 #include <vector>
 
-#if !defined(BLOCK)
-#define BLOCK(Description)
+#if !defined( BLOCK )
+#define BLOCK( Description )
 #endif
 
 namespace mslib
 {
-using uint64 = unsigned long long;
-using utf8   = char;
+  using uint64 = unsigned long long;
+  using utf8   = char;
 } // namespace mslib

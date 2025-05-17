@@ -5,21 +5,18 @@
 namespace ms::geo
 {
 
-const Reference_Geometry& Reference_Geometry_Container::get(const Figure fig)
-{
-  switch (fig)
+  const Reference_Geometry& Reference_Geometry_Container::get( const Figure fig )
   {
-  case Figure::POINT:
-    return _ref_point;
-  case Figure::LINE:
-    return _ref_line;
-  default:
-    EXCEPTION("unsupported figure");
-    return _ref_point;
+    switch ( fig )
+    {
+    case Figure::POINT:
+      return _ref_point;
+    case Figure::LINE:
+      return _ref_line;
+    default:
+      EXCEPTION( "unsupported figure" );
+      return _ref_point;
+    }
   }
-}
 
 } // namespace ms::geo
-
-
-

@@ -15,10 +15,10 @@
     std::cout << std::format( "{:10}: {}", "File", function_call_file_name ) << "\n";                   \
     std::cout << std::format( "{:10}: {}", "Function", __FUNCTION__ ) << "\n";                          \
     std::cout << std::format( "{:10}: {}", "Line", __LINE__ ) << "\n";                                  \
-    mslib::exception::print_message( format_string __VA_OPT__(, __VA_ARGS__ ) );                           \
+    mslib::exception::print_message( format_string __VA_OPT__(, __VA_ARGS__ ) );                        \
     std::cout << "==============================EXCEPTION========================================\n\n"; \
-    auto message = mslib::exception::make_message( format_string __VA_OPT__(, __VA_ARGS__ ) ).data();      \
-    assert( false && message );                                                                         \
+    auto message = mslib::exception::make_message( format_string __VA_OPT__(, __VA_ARGS__ ) );          \
+    assert( false && message.data() );                                                                  \
   }
 
 #define EXCEPTION( format_string, ... ) REQUIRE( false, format_string, __VA_ARGS__ )
@@ -54,4 +54,4 @@ namespace mslib::exception
     return std::format( L"{:10}: {}", L"Message", std::vformat( format_string, std::make_wformat_args( args... ) ) ) + L"\n";
   }
 
-} // namespace ms::exception
+} // namespace mslib::exception

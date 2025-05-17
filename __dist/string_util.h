@@ -3,7 +3,7 @@
 
 namespace mslib::string
 {
-  inline constexpr int fail_to_find = -19940523;
+  inline constexpr int    fail_to_find     = -19940523;
   inline constexpr uint64 invalid_position = static_cast<uint64>( -1 );
 
   bool compare_icase( const int c1, const int c2 );
@@ -20,14 +20,14 @@ namespace mslib::string
   bool contain_icase( std::string_view str, const std::string& target );
 
   // When fail to find target in str, return mslib::sel::failt_to_find
-  int find_nth_position( std::string_view str, const char target, const int n );
-  int find_nth_position( std::string_view str, const int target, const int n ) = delete;
-  int find_nth_position( std::string_view str, std::string_view target, const int n );
-  int find_nth_position_icase( std::string_view str, const char target, const int n );
-  int find_nth_position_icase( std::string_view str, const int target, const int n ) = delete;
-  int find_nth_position_icase( std::string_view str, std::string_view target, const int n );
-  int find_r_nth_position( std::wstring_view str, std::wstring_view target, const int n );
-  int find_r_nth_position( std::string_view str, std::string_view target, const int n );
+  int    find_nth_position( std::string_view str, const char target, const int n );
+  int    find_nth_position( std::string_view str, const int target, const int n ) = delete;
+  int    find_nth_position( std::string_view str, std::string_view target, const int n );
+  int    find_nth_position_icase( std::string_view str, const char target, const int n );
+  int    find_nth_position_icase( std::string_view str, const int target, const int n ) = delete;
+  int    find_nth_position_icase( std::string_view str, std::string_view target, const int n );
+  int    find_r_nth_position( std::wstring_view str, std::wstring_view target, const int n );
+  int    find_r_nth_position( std::string_view str, std::string_view target, const int n );
   uint64 find_position_saerching_backwards( _In_ const std::string_view str, _In_ const utf8 target, _In_ const uint64 start_position );
 
   bool is_natural_number( std::string_view str );

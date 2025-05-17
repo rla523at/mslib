@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="mslib.h">
-      <Filter>소스 파일</Filter>
-    </ClInclude>
     <ClInclude Include="..\_src\stdafx.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
@@ -37,6 +34,9 @@
       <Filter>소스 파일</Filter>
     </ClInclude>
     <ClInclude Include="..\_src\time_util.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\_src\mslib.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
   </ItemGroup>

@@ -7,382 +7,382 @@
 namespace ms::geo
 {
 
-Geometry::Geometry(const Figure figure, const std::vector<Node_View>& consisting_nodes)
-    : _reference_geometry(Reference_Geometry_Container::get(figure)),
-      _nodes(consisting_nodes)
-{
-  this->_parametric_functions = this->_reference_geometry.cal_parametric_functions(this->_nodes);
-}
-
-Geometry::Geometry(const Figure figure, std::vector<Node_View>&& consisting_nodes)
-    : _reference_geometry(Reference_Geometry_Container::get(figure)),
-      _nodes(std::move(consisting_nodes))
-{
-  this->_parametric_functions = this->_reference_geometry.cal_parametric_functions(this->_nodes);
-}
-
-void Geometry::change_nodes(std::vector<Node_View>&& new_nodes)
-{
-  REQUIRE(this->_reference_geometry.is_valid_num_points(static_cast<int>(new_nodes.size())), "The number of nodes is not valid for the current reference geometry.");
-
-  this->_nodes                = std::move(new_nodes);
-  this->_parametric_functions = this->_reference_geometry.cal_parametric_functions(this->_nodes);
-
-  if (this->_is_scale_function_initialized)
+  Geometry::Geometry( const Figure figure, const std::vector<Node_View>& consisting_nodes )
+    : _reference_geometry( Reference_Geometry_Container::get( figure ) ),
+      _nodes( consisting_nodes )
   {
-    this->_scale_function = this->_reference_geometry.cal_scale_function(this->_parametric_functions);
-  }
-  if (this->_is_normal_functions_initialized)
-  {
-    this->_normal_functions = this->_reference_geometry.cal_normal_functions(this->_parametric_functions);
-  }
-}
-
-void Geometry::reordering_nodes(const std::vector<int>& new_orders)
-{
-  const auto num_nodes = this->_nodes.size();
-  REQUIRE(num_nodes == new_orders.size(), "The number of nodes is not valid for the current reference geometry.");
-
-  std::vector<Node_View> new_nodes(num_nodes);
-  for (int i = 0; i < num_nodes; ++i)
-  {
-    new_nodes[new_orders[i]] = this->_nodes[i];
+    this->_parametric_functions = this->_reference_geometry.cal_parametric_functions( this->_nodes );
   }
 
-  this->change_nodes(std::move(new_nodes));
-}
-
-void Geometry::cal_normal(double* normal, const Node_View node) const
-{
-  if (!this->_is_normal_functions_initialized)
+  Geometry::Geometry( const Figure figure, std::vector<Node_View>&& consisting_nodes )
+    : _reference_geometry( Reference_Geometry_Container::get( figure ) ),
+      _nodes( std::move( consisting_nodes ) )
   {
-    this->_normal_functions                = this->_reference_geometry.cal_normal_functions(this->_parametric_functions);
-    this->_is_normal_functions_initialized = true;
+    this->_parametric_functions = this->_reference_geometry.cal_parametric_functions( this->_nodes );
   }
 
-  const auto dimension = this->dimension();
-  for (int i = 0; i < dimension; ++i)
+  void Geometry::change_nodes( std::vector<Node_View>&& new_nodes )
   {
-    normal[i] = this->_normal_functions[i](node.to_vector_view());
-  }
-}
+    REQUIRE( this->_reference_geometry.is_valid_num_points( static_cast<int>( new_nodes.size() ) ), "The number of nodes is not valid for the current reference geometry." );
 
-void Geometry::cal_projected_volumes(double* projected_volumes) const
-{
-  // calculating approximately
+    this->_nodes                = std::move( new_nodes );
+    this->_parametric_functions = this->_reference_geometry.cal_parametric_functions( this->_nodes );
 
-  const auto ref_geo_dim = this->_reference_geometry.dimension();
-  if (ref_geo_dim <= 2)
-  {
-    const auto dimension = this->dimension();
-    const auto num_nodes = this->_nodes.size();
-
-    std::vector<double> coordinate_mins(dimension, std::numeric_limits<double>::max());
-    std::vector<double> coordinate_maxs(dimension, std::numeric_limits<double>::min());
-
-    for (int i = 0; i < num_nodes; ++i)
+    if ( this->_is_scale_function_initialized )
     {
-      const auto& node = this->_nodes[i];
-      for (int j = 0; j < dimension; ++j)
+      this->_scale_function = this->_reference_geometry.cal_scale_function( this->_parametric_functions );
+    }
+    if ( this->_is_normal_functions_initialized )
+    {
+      this->_normal_functions = this->_reference_geometry.cal_normal_functions( this->_parametric_functions );
+    }
+  }
+
+  void Geometry::reordering_nodes( const std::vector<int>& new_orders )
+  {
+    const auto num_nodes = this->_nodes.size();
+    REQUIRE( num_nodes == new_orders.size(), "The number of nodes is not valid for the current reference geometry." );
+
+    std::vector<Node_View> new_nodes( num_nodes );
+    for ( int i = 0; i < num_nodes; ++i )
+    {
+      new_nodes[new_orders[i]] = this->_nodes[i];
+    }
+
+    this->change_nodes( std::move( new_nodes ) );
+  }
+
+  void Geometry::cal_normal( double* normal, const Node_View node ) const
+  {
+    if ( !this->_is_normal_functions_initialized )
+    {
+      this->_normal_functions                = this->_reference_geometry.cal_normal_functions( this->_parametric_functions );
+      this->_is_normal_functions_initialized = true;
+    }
+
+    const auto dimension = this->dimension();
+    for ( int i = 0; i < dimension; ++i )
+    {
+      normal[i] = this->_normal_functions[i]( node.to_vector_view() );
+    }
+  }
+
+  void Geometry::cal_projected_volumes( double* projected_volumes ) const
+  {
+    // calculating approximately
+
+    const auto ref_geo_dim = this->_reference_geometry.dimension();
+    if ( ref_geo_dim <= 2 )
+    {
+      const auto dimension = this->dimension();
+      const auto num_nodes = this->_nodes.size();
+
+      std::vector<double> coordinate_mins( dimension, std::numeric_limits<double>::max() );
+      std::vector<double> coordinate_maxs( dimension, std::numeric_limits<double>::min() );
+
+      for ( int i = 0; i < num_nodes; ++i )
       {
-        const auto coordinate = node[j];
+        const auto& node = this->_nodes[i];
+        for ( int j = 0; j < dimension; ++j )
+        {
+          const auto coordinate = node[j];
 
-        if (coordinate < coordinate_mins[j]) coordinate_mins[j] = coordinate;
+          if ( coordinate < coordinate_mins[j] ) coordinate_mins[j] = coordinate;
 
-        if (coordinate_maxs[j] < coordinate) coordinate_maxs[j] = coordinate;
+          if ( coordinate_maxs[j] < coordinate ) coordinate_maxs[j] = coordinate;
+        }
+      }
+
+      for ( int i = 0; i < dimension; ++i )
+      {
+        projected_volumes[i] = coordinate_maxs[i] - coordinate_mins[i];
       }
     }
-
-    for (int i = 0; i < dimension; ++i)
+    else if ( ref_geo_dim == 3 )
     {
-      projected_volumes[i] = coordinate_maxs[i] - coordinate_mins[i];
+      EXCEPTION( "not supproted space dimension" );
+      // double yz_projected_volume = 0.0;
+      // double xz_projected_volume = 0.0;
+      // double xy_projected_volume = 0.0;
+
+      // const auto face_geometries = this->face_geometries();
+      // for (const auto& geometry : face_geometries)
+      //{
+      //   const auto normal_v = geometry.normalized_normal_vector(geometry.center_point());
+
+      //  Euclidean_Vector yz_plane_normalized_normal_vector = {1, 0, 0};
+      //  Euclidean_Vector xz_plane_normalized_normal_vector = {0, 1, 0};
+      //  Euclidean_Vector xy_plane_normalized_normal_vector = {0, 0, 1};
+
+      //  const auto volume = geometry.volume();
+
+      //  yz_projected_volume += volume * std::abs(normal_v.inner_product(yz_plane_normalized_normal_vector));
+      //  xz_projected_volume += volume * std::abs(normal_v.inner_product(xz_plane_normalized_normal_vector));
+      //  xy_projected_volume += volume * std::abs(normal_v.inner_product(xy_plane_normalized_normal_vector));
+      //}
+
+      // return {0.5 * yz_projected_volume, 0.5 * xz_projected_volume, 0.5 * xy_projected_volume};
+    }
+    else
+    {
+      EXCEPTION( "not supproted space dimension" );
     }
   }
-  else if (ref_geo_dim == 3)
+
+  double Geometry::cal_volume( const int expected_scale_function_order ) const
   {
-    EXCEPTION("not supproted space dimension");
-    // double yz_projected_volume = 0.0;
-    // double xz_projected_volume = 0.0;
-    // double xy_projected_volume = 0.0;
+    const auto& quadrature_rule = this->get_quadrature_rule( expected_scale_function_order );
 
-    // const auto face_geometries = this->face_geometries();
-    // for (const auto& geometry : face_geometries)
+    auto volume = 0.0;
+    for ( const auto weight : quadrature_rule.weights )
+    {
+      volume += weight;
+    }
+
+    return volume;
+  }
+
+  Node Geometry::center( void ) const
+  {
+    const auto ref_center = this->_reference_geometry.center_point();
+
+    const auto          dimension = this->dimension();
+    std::vector<double> coordinates( dimension );
+
+    for ( int i = 0; i < dimension; ++i )
+    {
+      coordinates[i] = this->_parametric_functions[i]( ref_center.to_vector_view() );
+    }
+
+    return coordinates;
+  }
+
+  void Geometry::center( double* coordinates ) const
+  {
+    const auto ref_center = this->_reference_geometry.center_point();
+
+    const auto dimension = this->dimension();
+    for ( int i = 0; i < dimension; ++i )
+    {
+      coordinates[i] = this->_parametric_functions[i]( ref_center.to_vector_view() );
+    }
+  }
+
+  int Geometry::dimension( void ) const
+  {
+    return static_cast<int>( this->_parametric_functions.size() );
+  }
+
+  Figure Geometry::face_figure( const int face_index ) const
+  {
+    return this->_reference_geometry.face_figure( face_index );
+  }
+
+  const std::vector<std::vector<int>>& Geometry::get_face_vnode_indexes_s( void ) const
+  {
+    return this->_reference_geometry.get_face_vnode_indexes_s();
+  }
+
+  std::vector<int> Geometry::face_node_indexes( const int face_index ) const
+  {
+    const auto num_nodes       = static_cast<int>( this->_nodes.size() );
+    const auto parameter_order = this->_reference_geometry.cal_parameter_order( num_nodes );
+
+    const auto  face_figure  = this->_reference_geometry.face_figure( face_index );
+    const auto& face_ref_geo = Reference_Geometry_Container::get( face_figure );
+
+    return face_ref_geo.node_indexes( parameter_order );
+  }
+
+  const Quadrature_Rule& Geometry::get_quadrature_rule( const int integrand_degree ) const
+  {
+    REQUIRE( 0 <= integrand_degree, "integrand degree should be positive" );
+
+    if ( !this->_degree_to_quadrature_rule.contains( integrand_degree ) )
+    {
+      this->create_and_store_quadrature_rule( integrand_degree );
+    }
+
+    return this->_degree_to_quadrature_rule.at( integrand_degree );
+  }
+
+  bool Geometry::is_point( void ) const
+  {
+    return this->_reference_geometry.is_point();
+  }
+
+  bool Geometry::is_line( void ) const
+  {
+    return this->_reference_geometry.is_line();
+  }
+
+  Geometry_Consisting_Nodes_Info Geometry::make_partitioned_geometry_node_info( const int partition_order ) const
+  {
+    REQUIRE( 0 <= partition_order, "partition order should not be negative" );
+
+    const auto& ref_pg_nodes_info = this->_reference_geometry.get_partition_geometry_nodes_info( partition_order );
+    const auto& ref_nodes         = ref_pg_nodes_info.nodes;
+
+    auto  pg_nodes_info = ref_pg_nodes_info;
+    auto& nodes         = pg_nodes_info.nodes;
+
+    const auto num_nodes = ref_nodes.num_nodes();
+
+    for ( int i = 0; i < num_nodes; ++i )
+    {
+      auto       node_wrap            = nodes[i];
+      const auto ref_node_view        = ref_nodes[i];
+      auto       node_vector_wrap     = node_wrap.to_vector_wrap();
+      const auto ref_node_vector_view = ref_node_view.to_vector_view();
+
+      this->_parametric_functions.calculate( node_vector_wrap, ref_node_vector_view );
+    }
+
+    // const auto& ref_numbered_nodes = ref_pg_nodes_info.numbered_nodes;
+
+    // const auto num_new_nodes = ref_numbered_nodes.size();
+
+    // auto partition_geometry_nodes_info = ref_pg_nodes_info;
+
+    // for (int i = 0; i < num_new_nodes; ++i)
     //{
-    //   const auto normal_v = geometry.normalized_normal_vector(geometry.center_point());
+    //   auto&       node          = partition_geometry_nodes_info.numbered_nodes[i].node;
+    //   const auto& ref_node      = ref_numbered_nodes[i].node;
+    //   auto        new_node_wrap = node.to_vector_wrap();
+    //   const auto  ref_node_view = ref_node.to_vector_view();
 
-    //  Euclidean_Vector yz_plane_normalized_normal_vector = {1, 0, 0};
-    //  Euclidean_Vector xz_plane_normalized_normal_vector = {0, 1, 0};
-    //  Euclidean_Vector xy_plane_normalized_normal_vector = {0, 0, 1};
-
-    //  const auto volume = geometry.volume();
-
-    //  yz_projected_volume += volume * std::abs(normal_v.inner_product(yz_plane_normalized_normal_vector));
-    //  xz_projected_volume += volume * std::abs(normal_v.inner_product(xz_plane_normalized_normal_vector));
-    //  xy_projected_volume += volume * std::abs(normal_v.inner_product(xy_plane_normalized_normal_vector));
+    //  this->_parametric_functions.calculate(new_node_wrap, ref_node_view);
     //}
 
-    // return {0.5 * yz_projected_volume, 0.5 * xz_projected_volume, 0.5 * xy_projected_volume};
+    return pg_nodes_info;
   }
-  else
+
+  int Geometry::num_faces( void ) const
   {
-    EXCEPTION("not supproted space dimension");
+    return this->_reference_geometry.num_faces();
   }
-}
 
-double Geometry::cal_volume(const int expected_scale_function_order) const
-{
-  const auto& quadrature_rule = this->get_quadrature_rule(expected_scale_function_order);
-
-  auto volume = 0.0;
-  for (const auto weight : quadrature_rule.weights)
+  int Geometry::num_nodes( void ) const
   {
-    volume += weight;
+    return static_cast<int>( this->_nodes.size() );
   }
 
-  return volume;
-}
-
-Node Geometry::center(void) const
-{
-  const auto ref_center = this->_reference_geometry.center_point();
-
-  const auto          dimension = this->dimension();
-  std::vector<double> coordinates(dimension);
-
-  for (int i = 0; i < dimension; ++i)
+  int Geometry::num_vertices( void ) const
   {
-    coordinates[i] = this->_parametric_functions[i](ref_center.to_vector_view());
+    return this->_reference_geometry.num_vertices();
   }
 
-  return coordinates;
-}
-
-void Geometry::center(double* coordinates) const
-{
-  const auto ref_center = this->_reference_geometry.center_point();
-
-  const auto dimension = this->dimension();
-  for (int i = 0; i < dimension; ++i)
+  Node_View Geometry::node_view( const int node_index ) const
   {
-    coordinates[i] = this->_parametric_functions[i](ref_center.to_vector_view());
-  }
-}
-
-int Geometry::dimension(void) const
-{
-  return static_cast<int>(this->_parametric_functions.size());
-}
-
-Figure Geometry::face_figure(const int face_index) const
-{
-  return this->_reference_geometry.face_figure(face_index);
-}
-
-const std::vector<std::vector<int>>& Geometry::get_face_vnode_indexes_s(void) const
-{
-  return this->_reference_geometry.get_face_vnode_indexes_s();
-}
-
-std::vector<int> Geometry::face_node_indexes(const int face_index) const
-{
-  const auto num_nodes       = static_cast<int>(this->_nodes.size());
-  const auto parameter_order = this->_reference_geometry.cal_parameter_order(num_nodes);
-
-  const auto  face_figure  = this->_reference_geometry.face_figure(face_index);
-  const auto& face_ref_geo = Reference_Geometry_Container::get(face_figure);
-
-  return face_ref_geo.node_indexes(parameter_order);
-}
-
-const Quadrature_Rule& Geometry::get_quadrature_rule(const int integrand_degree) const
-{
-  REQUIRE(0 <= integrand_degree, "integrand degree should be positive");
-
-  if (!this->_degree_to_quadrature_rule.contains(integrand_degree))
-  {
-    this->create_and_store_quadrature_rule(integrand_degree);
+    REQUIRE( node_index < _nodes.size(), "node index is out of range" );
+    return this->_nodes[node_index];
   }
 
-  return this->_degree_to_quadrature_rule.at(integrand_degree);
-}
-
-bool Geometry::is_point(void) const
-{
-  return this->_reference_geometry.is_point();
-}
-
-bool Geometry::is_line(void) const
-{
-  return this->_reference_geometry.is_line();
-}
-
-Geometry_Consisting_Nodes_Info Geometry::make_partitioned_geometry_node_info(const int partition_order) const
-{
-  REQUIRE(0 <= partition_order, "partition order should not be negative");
-
-  const auto& ref_pg_nodes_info = this->_reference_geometry.get_partition_geometry_nodes_info(partition_order);
-  const auto& ref_nodes         = ref_pg_nodes_info.nodes;
-
-  auto  pg_nodes_info = ref_pg_nodes_info;
-  auto& nodes         = pg_nodes_info.nodes;
-
-  const auto num_nodes = ref_nodes.num_nodes();
-
-  for (int i = 0; i < num_nodes; ++i)
-  {
-    auto       node_wrap            = nodes[i];
-    const auto ref_node_view        = ref_nodes[i];
-    auto       node_vector_wrap     = node_wrap.to_vector_wrap();
-    const auto ref_node_vector_view = ref_node_view.to_vector_view();
-
-    this->_parametric_functions.calculate(node_vector_wrap, ref_node_vector_view);
-  }
-
-  // const auto& ref_numbered_nodes = ref_pg_nodes_info.numbered_nodes;
-
-  // const auto num_new_nodes = ref_numbered_nodes.size();
-
-  // auto partition_geometry_nodes_info = ref_pg_nodes_info;
-
-  // for (int i = 0; i < num_new_nodes; ++i)
+  // std::vector<Euclidean_Vector> Geometry::post_points(const ushort post_order) const
   //{
-  //   auto&       node          = partition_geometry_nodes_info.numbered_nodes[i].node;
-  //   const auto& ref_node      = ref_numbered_nodes[i].node;
-  //   auto        new_node_wrap = node.to_vector_wrap();
-  //   const auto  ref_node_view = ref_node.to_vector_view();
+  //   const auto& ref_post_points = this->reference_geometry_->get_post_points(post_order);
+  //   const auto  num_post_points = ref_post_points.size();
+  //
+  //   std::vector<Euclidean_Vector> post_points;
+  //   post_points.reserve(num_post_points);
+  //
+  //   for (const auto& point : ref_post_points)
+  //   {
+  //     post_points.push_back(this->mapping_vf_(point));
+  //   }
+  //
+  //   return post_points;
+  // }
+  //
+  // std::vector<Euclidean_Vector> Geometry::post_element_centers(const ushort post_order) const
+  //{
+  //   const auto  post_points        = this->post_points(post_order);
+  //   const auto& ref_connectivities = this->reference_geometry_->get_connectivities(post_order);
+  //
+  //   const auto                    num_post_element = ref_connectivities.size();
+  //   std::vector<Euclidean_Vector> post_element_centers;
+  //   post_element_centers.reserve(num_post_element);
+  //
+  //   for (const auto& connectivity : ref_connectivities)
+  //   {
+  //     Euclidean_Vector center(this->space_dimension_);
+  //
+  //     for (const auto index : connectivity)
+  //     {
+  //       center += post_points[index];
+  //     }
+  //
+  //     center *= 1.0 / connectivity.size();
+  //
+  //     post_element_centers.push_back(center);
+  //   }
+  //
+  //   return post_element_centers;
+  // }
+  //
+  // std::vector<std::vector<int>> Geometry::post_connectivities(const ushort post_order, const size_t connectivity_start_index) const
+  //{
+  //   const auto& ref_connectivities = this->reference_geometry_->get_connectivities(post_order);
+  //
+  //   const auto                    num_connectivity = ref_connectivities.size();
+  //   std::vector<std::vector<int>> connectivities(num_connectivity);
+  //
+  //   for (ushort i = 0; i < num_connectivity; ++i)
+  //   {
+  //     auto&       connectivity      = connectivities[i];
+  //     const auto& ref_connecitivity = ref_connectivities[i];
+  //
+  //     const auto num_index = ref_connecitivity.size();
+  //     connectivity.resize(num_index);
+  //
+  //     for (ushort j = 0; j < num_index; ++j)
+  //     {
+  //       const auto new_index = static_cast<int>(ref_connecitivity[j] + connectivity_start_index);
+  //       connectivity[j]      = new_index;
+  //     }
+  //   }
+  //
+  //   return connectivities;
+  // }
 
-  //  this->_parametric_functions.calculate(new_node_wrap, ref_node_view);
-  //}
-
-  return pg_nodes_info;
-}
-
-int Geometry::num_faces(void) const
-{
-  return this->_reference_geometry.num_faces();
-}
-
-int Geometry::num_nodes(void) const
-{
-  return static_cast<int>(this->_nodes.size());
-}
-
-int Geometry::num_vertices(void) const
-{
-  return this->_reference_geometry.num_vertices();
-}
-
-Node_View Geometry::node_view(const int node_index) const
-{
-  REQUIRE(node_index < _nodes.size(), "node index is out of range");
-  return this->_nodes[node_index];
-}
-
-// std::vector<Euclidean_Vector> Geometry::post_points(const ushort post_order) const
-//{
-//   const auto& ref_post_points = this->reference_geometry_->get_post_points(post_order);
-//   const auto  num_post_points = ref_post_points.size();
-//
-//   std::vector<Euclidean_Vector> post_points;
-//   post_points.reserve(num_post_points);
-//
-//   for (const auto& point : ref_post_points)
-//   {
-//     post_points.push_back(this->mapping_vf_(point));
-//   }
-//
-//   return post_points;
-// }
-//
-// std::vector<Euclidean_Vector> Geometry::post_element_centers(const ushort post_order) const
-//{
-//   const auto  post_points        = this->post_points(post_order);
-//   const auto& ref_connectivities = this->reference_geometry_->get_connectivities(post_order);
-//
-//   const auto                    num_post_element = ref_connectivities.size();
-//   std::vector<Euclidean_Vector> post_element_centers;
-//   post_element_centers.reserve(num_post_element);
-//
-//   for (const auto& connectivity : ref_connectivities)
-//   {
-//     Euclidean_Vector center(this->space_dimension_);
-//
-//     for (const auto index : connectivity)
-//     {
-//       center += post_points[index];
-//     }
-//
-//     center *= 1.0 / connectivity.size();
-//
-//     post_element_centers.push_back(center);
-//   }
-//
-//   return post_element_centers;
-// }
-//
-// std::vector<std::vector<int>> Geometry::post_connectivities(const ushort post_order, const size_t connectivity_start_index) const
-//{
-//   const auto& ref_connectivities = this->reference_geometry_->get_connectivities(post_order);
-//
-//   const auto                    num_connectivity = ref_connectivities.size();
-//   std::vector<std::vector<int>> connectivities(num_connectivity);
-//
-//   for (ushort i = 0; i < num_connectivity; ++i)
-//   {
-//     auto&       connectivity      = connectivities[i];
-//     const auto& ref_connecitivity = ref_connectivities[i];
-//
-//     const auto num_index = ref_connecitivity.size();
-//     connectivity.resize(num_index);
-//
-//     for (ushort j = 0; j < num_index; ++j)
-//     {
-//       const auto new_index = static_cast<int>(ref_connecitivity[j] + connectivity_start_index);
-//       connectivity[j]      = new_index;
-//     }
-//   }
-//
-//   return connectivities;
-// }
-
-void Geometry::create_and_store_quadrature_rule(const int integrand_degree) const
-{
-  if (!this->_is_scale_function_initialized)
+  void Geometry::create_and_store_quadrature_rule( const int integrand_degree ) const
   {
-    this->_scale_function                = this->_reference_geometry.cal_scale_function(this->_parametric_functions);
-    this->_is_scale_function_initialized = true;
-  }
-
-  REQUIRE(0 <= integrand_degree, "integrand degree should be positive");
-
-  const auto  ref_quadrature_points  = this->_reference_geometry.quadrature_points(integrand_degree);
-  const auto& ref_quadrature_weights = this->_reference_geometry.get_quadrature_weights(integrand_degree);
-
-  const auto num_QP    = ref_quadrature_points.num_nodes();
-  const auto dimension = this->dimension();
-
-  std::vector<double> transformed_coordiantes(num_QP * dimension);
-  std::vector<double> transformed_QW(num_QP);
-
-  auto ptr = transformed_coordiantes.data();
-  for (int i = 0; i < num_QP; ++i)
-  {
-    const auto ref_QP     = ref_quadrature_points[i];
-    const auto ref_weight = ref_quadrature_weights[i];
-
-    for (int j = 0; j < dimension; ++j)
+    if ( !this->_is_scale_function_initialized )
     {
-      ptr[j] = this->_parametric_functions[j](ref_QP.to_vector_view());
+      this->_scale_function                = this->_reference_geometry.cal_scale_function( this->_parametric_functions );
+      this->_is_scale_function_initialized = true;
     }
-    ptr += dimension;
 
-    transformed_QW[i] = this->_scale_function(ref_QP.to_vector_view()) * ref_weight;
+    REQUIRE( 0 <= integrand_degree, "integrand degree should be positive" );
+
+    const auto  ref_quadrature_points  = this->_reference_geometry.quadrature_points( integrand_degree );
+    const auto& ref_quadrature_weights = this->_reference_geometry.get_quadrature_weights( integrand_degree );
+
+    const auto num_QP    = ref_quadrature_points.num_nodes();
+    const auto dimension = this->dimension();
+
+    std::vector<double> transformed_coordiantes( num_QP * dimension );
+    std::vector<double> transformed_QW( num_QP );
+
+    auto ptr = transformed_coordiantes.data();
+    for ( int i = 0; i < num_QP; ++i )
+    {
+      const auto ref_QP     = ref_quadrature_points[i];
+      const auto ref_weight = ref_quadrature_weights[i];
+
+      for ( int j = 0; j < dimension; ++j )
+      {
+        ptr[j] = this->_parametric_functions[j]( ref_QP.to_vector_view() );
+      }
+      ptr += dimension;
+
+      transformed_QW[i] = this->_scale_function( ref_QP.to_vector_view() ) * ref_weight;
+    }
+
+    auto points          = Nodes( num_QP, dimension, std::move( transformed_coordiantes ) );
+    auto quadrature_rule = Quadrature_Rule( std::move( points ), std::move( transformed_QW ) );
+    this->_degree_to_quadrature_rule.emplace( integrand_degree, std::move( quadrature_rule ) );
   }
-
-  auto points          = Nodes(num_QP, dimension, std::move(transformed_coordiantes));
-  auto quadrature_rule = Quadrature_Rule(std::move(points), std::move(transformed_QW));
-  this->_degree_to_quadrature_rule.emplace(integrand_degree, std::move(quadrature_rule));
-}
 
 } // namespace ms::geo
 
@@ -816,5 +816,3 @@ void Geometry::create_and_store_quadrature_rule(const int integrand_degree) cons
 //        return normalized_functions;
 // }
 // };
-
-

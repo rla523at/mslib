@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
-#include "file_system.h"
 #include "exception.h"
+#include "file_system.h"
 #include "string_util.h"
 
 #include <windows.h>

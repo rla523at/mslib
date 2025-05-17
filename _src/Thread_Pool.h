@@ -33,12 +33,12 @@ namespace mslib
     void wait( void );
 
   protected:
-    std::vector<std::unique_ptr<Thread_Pool_Worker>>  _worker_thread_arr;
-    std::counting_semaphore<MAX_NUM_WORKER_THREAD>    _semaphore;
-    std::queue<std::function<void()>>                 _job_queue;
-    std::mutex                                        _job_queue_mutex;
-    std::condition_variable                           _empty_job_state;
-    std::atomic<uint64>                               _num_pending_job = 0;
-    bool                                              _quit            = false;
+    std::vector<std::unique_ptr<Thread_Pool_Worker>> _worker_thread_arr;
+    std::counting_semaphore<MAX_NUM_WORKER_THREAD>   _semaphore;
+    std::queue<std::function<void()>>                _job_queue;
+    std::mutex                                       _job_queue_mutex;
+    std::condition_variable                          _empty_job_state;
+    std::atomic<uint64>                              _num_pending_job = 0;
+    bool                                             _quit            = false;
   };
-} // namespace ms
+} // namespace mslib

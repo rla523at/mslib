@@ -136,14 +136,12 @@
   <ItemGroup>
     <ClInclude Include="..\_src\exception.h" />
     <ClInclude Include="..\_src\file_system.h" />
+    <ClInclude Include="..\_src\mslib.h" />
     <ClInclude Include="..\_src\string_util.h" />
     <ClInclude Include="..\_src\stdafx.h" />
     <ClInclude Include="..\_src\file_reader.h" />
     <ClInclude Include="..\_src\Thread_Pool.h" />
     <ClInclude Include="..\_src\time_util.h" />
-    <ClInclude Include="mslib.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\_src\file_reader.cpp" />
