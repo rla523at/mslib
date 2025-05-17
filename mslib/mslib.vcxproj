@@ -140,6 +140,7 @@
     <ClInclude Include="..\_src\stdafx.h" />
     <ClInclude Include="..\_src\file_reader.h" />
     <ClInclude Include="..\_src\Thread_Pool.h" />
+    <ClInclude Include="..\_src\time_util.h" />
     <ClInclude Include="mslib.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
@@ -153,6 +154,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\_src\Thread_Pool.cpp" />
+    <ClCompile Include="..\_src\time_util.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
