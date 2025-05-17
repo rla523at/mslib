@@ -8,13 +8,11 @@ using MillSecond = std::chrono::duration<double, std::milli>;
 
 constexpr Time_Point Invalid_Time_Point = Time_Point();
 
-class Time_Recorder
+struct Time_Recorder
 {
-public:
   void set_start_time_point(void);
   void record(void);
 
-private:
   uint64     _count            = 0;
   double     _total_time       = 0;
   double     _max_time         = 0;
