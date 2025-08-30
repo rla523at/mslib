@@ -56,8 +56,5 @@
     <ClCompile Include="..\_src\Thread_Pool.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="..\_src\time_util.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>
